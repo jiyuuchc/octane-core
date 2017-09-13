@@ -31,7 +31,7 @@ public class SimpleDeflation {
 		this.threshold = threshold;
 	}
 	
-	public void processFrames(RectangularImage data, SimpleDeflation.CallBackFunctions callback) {
+	public void processFrames(RectangularImage data, CallBackFunctions callback) {
 		
 		while (true) {
 			double max = Double.MIN_VALUE;
