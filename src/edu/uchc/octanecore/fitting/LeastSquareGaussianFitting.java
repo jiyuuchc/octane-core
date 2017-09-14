@@ -24,17 +24,17 @@ public class LeastSquareGaussianFitting {
     public boolean useWeighting;
 
     protected int maxIter;    // after `maxIter` iterations the algorithm converges
-    
+
     public double[] fittedParameters;
     public boolean fixSigma, fixOffset;
 
-    static class Params {
-    	static final int X = 0;
-    	static final int Y = 1;
-    	static final int INTENSITY = 2;
-    	static final int SIGMA = 3;
-    	static final int OFFSET = 4;
-    	static final int PARAMS_LENGTH = 5;
+    public static class Params {
+    	public static final int X = 0;
+    	public static final int Y = 1;
+    	public static final int INTENSITY = 2;
+    	public static final int SIGMA = 3;
+    	public static final int OFFSET = 4;
+    	public static final int PARAMS_LENGTH = 5;
     }
 
     public LeastSquareGaussianFitting() {
@@ -51,15 +51,15 @@ public class LeastSquareGaussianFitting {
     }
 
     public double [] fit(ImageData data, double [] start) {
-    	
+
     	this.data = data;
 
     	LeastSquaresProblem lsp = LeastSquaresFactory.create(
     			LeastSquaresFactory.model(getValueFunction(), getJacobian()),
-    			new ArrayRealVector(data.getValueVector()), 
+    			new ArrayRealVector(data.getValueVector()),
     			new ArrayRealVector(parametersToPoint(start)),
     			LeastSquaresFactory.evaluationChecker(new SimpleVectorValueChecker(CONVERGENCE_DELTA, CONVERGENCE_DELTA)),
-    			maxIter, 
+    			maxIter,
     			maxIter);
 
     	if ( useWeighting ) {
@@ -67,7 +67,7 @@ public class LeastSquareGaussianFitting {
     	}
 
     	LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
-        
+
     	optimum = optimizer.optimize(lsp);
     	fittedParameters = pointToParameters(optimum.getPoint().toArray());
 
@@ -76,10 +76,10 @@ public class LeastSquareGaussianFitting {
 //    	for (int i = 0; i < data.getLength(); i++) {
 //    		v[i] = optimum.getResiduals().getEntry(i) + fittedParameters[Params.OFFSET];
 //    	}
-    	
+
     	return fittedParameters;
     }
-    
+
     protected double[] calcWeights() {
 
     	double[] weights = new double[data.getLength()];
@@ -89,31 +89,31 @@ public class LeastSquareGaussianFitting {
     		Arrays.fill(weights, 1);
 
     	} else {
-            
+
     		double minWeight = 1e6;
-    		
+
             for (int i = 0; i < data.getLength(); i++) {
 
             	weights[i] = 1 / data.getValue(i);
-            	
+
             	if (weights[i] < minWeight) {
             		minWeight = weights[i];
             	}
-            
+
             }
-            
+
             for (int i = 0; i < data.getLength(); i++) {
-            	
+
             	if (Double.isInfinite(weights[i]) || Double.isNaN(weights[i]) || weights[i] > 1000 * minWeight) {
-                    
+
             		weights[i] = 1000 * minWeight;
-                
+
             	}
-            
+
             }
-        
+
     	}
-        
+
     	return weights;
     }
 
@@ -128,7 +128,7 @@ public class LeastSquareGaussianFitting {
 
         		double[] params = pointToParameters(point);
                 double twoSigmaSquared = params[Params.SIGMA] * params[Params.SIGMA] * 2;
-                
+
                 for(int i = 0; i < data.getLength(); i++) {
 
                     retVal[i] = params[Params.OFFSET] + params[Params.INTENSITY] / (twoSigmaSquared * FastMath.PI)
@@ -183,14 +183,14 @@ public class LeastSquareGaussianFitting {
                     	retVal[i][Params.OFFSET] = 2 * point[Params.OFFSET];
                     }
                 }
-                
+
                 return retVal;
 
         	}
         };
 
     }
-    
+
     protected double[] pointToParameters(double[] point) {
 
     	double [] transformed = point.clone();

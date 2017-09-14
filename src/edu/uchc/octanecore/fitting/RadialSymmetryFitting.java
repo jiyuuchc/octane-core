@@ -13,14 +13,14 @@ public class RadialSymmetryFitting {
 
 	public RectangularImage data;
 
-	static class Params {
-		static final int X = 0;
-		static final int Y = 1;
-		static final int PARAMS_LENGTH = 2;
+	public static class Params {
+		public static final int X = 0;
+		public static final int Y = 1;
+		public static final int PARAMS_LENGTH = 2;
 	}
 
 	public RadialSymmetryFitting() {
-		
+
 	}
 
 	public double [] fit(RectangularImage data) {
@@ -43,10 +43,10 @@ public class RadialSymmetryFitting {
 		float[] weights = calculateWeights(dIdu, dIdv, xMesh, yMesh);
 
 		double [] result = lsRadialCenterFit(m, yInterceptB, weights);
-		
-		result[Params.X] += data.getXCordinate(0) + (double)size[0] / 2.0 - 0.5;
-		result[Params.Y] += data.getYCordinate(0) + (double)size[1] / 2.0 - 0.5;
-		
+
+		result[Params.X] += data.getXCordinate(0) + size[0] / 2.0 - 0.5;
+		result[Params.Y] += data.getYCordinate(0) + size[1] / 2.0 - 0.5;
+
 		return result;
 	}
 
@@ -83,9 +83,9 @@ public class RadialSymmetryFitting {
 	 * smoothing by 3*3 box filter
 	 */
 	private void smooth(float[] dIdu, int size) {
-		
+
 		float [] tmp = new float[(size + 2) * (size + 2)];
-		
+
 		//copy into padded array
 		for (int i = 0; i < size ; i ++ ) {
 			System.arraycopy(dIdu, i * size, tmp, size + 3 + i * (size + 2), size);
@@ -95,13 +95,13 @@ public class RadialSymmetryFitting {
 		int idx2 = size + 3;
 		for (int i = 0; i < size ; i ++ ) {
 			for (int j = 0; j < size; j ++) {
-				dIdu[idx ++ ] 
+				dIdu[idx ++ ]
 						= tmp[idx2] + tmp[idx2-1] + tmp[idx2+1]
 						+ tmp[idx2 - size - 2] + tmp[idx2 - size - 1] + tmp[idx2 - size - 3]
 						+ tmp[idx2 + size + 2] + tmp[idx2 + size + 1] + tmp[idx2 + size + 3];
 				idx2 ++;
 			}
-			
+
 			idx2 += 2;
 		}
 	}
