@@ -26,6 +26,9 @@ import org.apache.commons.math3.util.FastMath;
 
 import edu.uchc.octanecore.datasource.RectangularImage;
 
+// looking for local maxima that are spatially separated from other maxmima by a valley.
+// The valley is defined as pixels whose intensities are lower than the peak by more than the (tolerance).
+
 public class LocalMaximumProcessor{
 
 	public int ROISize;
@@ -61,7 +64,7 @@ public class LocalMaximumProcessor{
 	}
 
 	public LocalMaximumProcessor(double noise) {
-		this(noise, 0, 11);
+		this(noise, 0, 7);
 	}
 
 	public LocalMaximumProcessor(double noise, int threshold, int ROISize) {
