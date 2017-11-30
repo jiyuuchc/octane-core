@@ -16,7 +16,7 @@
 //               INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES./**
 //
 
-package edu.uchc.octanecore.datasource;
+package edu.uchc.octane.core.datasource;
 
 import org.apache.commons.math3.util.FastMath;
 

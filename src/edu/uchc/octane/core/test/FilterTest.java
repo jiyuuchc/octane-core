@@ -1,10 +1,10 @@
-package edu.uchc.octanecore.test;
+package edu.uchc.octane.core.test;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import edu.uchc.octanecore.utils.ImageFilters;
+import edu.uchc.octane.core.utils.ImageFilters;
 
 public class FilterTest {
 

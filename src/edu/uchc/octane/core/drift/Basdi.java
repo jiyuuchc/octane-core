@@ -1,12 +1,13 @@
-package edu.uchc.octanecore.drift;
+package edu.uchc.octane.core.drift;
 
 import java.util.Arrays;
 
 import org.apache.commons.math3.util.FastMath;
-import static org.apache.commons.math3.stat.StatUtils.meanDifference;
 
-import edu.uchc.octanecore.datasource.Localization;
-import edu.uchc.octanecore.datasource.LocalizationDataset;
+import edu.uchc.octane.core.datasource.Localization;
+import edu.uchc.octane.core.datasource.LocalizationDataset;
+
+import static org.apache.commons.math3.stat.StatUtils.meanDifference;
 
 public class Basdi {
 

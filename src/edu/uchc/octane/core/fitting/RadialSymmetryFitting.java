@@ -1,6 +1,6 @@
-package edu.uchc.octanecore.fitting;
+package edu.uchc.octane.core.fitting;
 
-import edu.uchc.octanecore.datasource.RectangularImage;
+import edu.uchc.octane.core.datasource.RectangularImage;
 
 /**
  * Ref:

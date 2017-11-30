@@ -1,4 +1,4 @@
-package edu.uchc.octanecore.threshold;
+package edu.uchc.octane.core.threshold;
 
 public class Otsu2DThresholder {
 

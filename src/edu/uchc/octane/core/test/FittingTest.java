@@ -1,15 +1,15 @@
-package edu.uchc.octanecore.test;
+package edu.uchc.octane.core.test;
 
 import static org.junit.Assert.assertArrayEquals;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.uchc.octanecore.datasource.RectangularImage;
-import edu.uchc.octanecore.fitting.IterativeShrinkageAndThreshold;
-import edu.uchc.octanecore.fitting.LeastSquareGaussianFitting;
-import edu.uchc.octanecore.fitting.LeastSquareIntegratedGaussianFitting;
-import edu.uchc.octanecore.fitting.RadialSymmetryFitting;
+import edu.uchc.octane.core.datasource.RectangularImage;
+import edu.uchc.octane.core.fitting.IterativeShrinkageAndThreshold;
+import edu.uchc.octane.core.fitting.LeastSquareGaussianFitting;
+import edu.uchc.octane.core.fitting.LeastSquareIntegratedGaussianFitting;
+import edu.uchc.octane.core.fitting.RadialSymmetryFitting;
 
 public class FittingTest {
 

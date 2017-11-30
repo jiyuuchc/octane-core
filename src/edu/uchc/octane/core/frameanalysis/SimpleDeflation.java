@@ -1,6 +1,6 @@
-package edu.uchc.octanecore.frameanalysis;
+package edu.uchc.octane.core.frameanalysis;
 
-import edu.uchc.octanecore.datasource.RectangularImage;
+import edu.uchc.octane.core.datasource.RectangularImage;
 
 /* 
  * Simple deflation based analysis:

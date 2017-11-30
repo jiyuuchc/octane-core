@@ -1,4 +1,4 @@
-package edu.uchc.octanecore.datasource;
+package edu.uchc.octane.core.datasource;
 
 public class RectangularImage extends ImageData {
 

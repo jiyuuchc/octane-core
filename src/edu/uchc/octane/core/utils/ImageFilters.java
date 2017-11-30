@@ -1,4 +1,4 @@
-package edu.uchc.octanecore.utils;
+package edu.uchc.octane.core.utils;
 
 import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;

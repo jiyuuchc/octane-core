@@ -16,7 +16,7 @@
 //	               INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES./**
 //
 
-package edu.uchc.octanecore.frameanalysis;
+package edu.uchc.octane.core.frameanalysis;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import java.util.Collections;
 
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octanecore.datasource.RectangularImage;
+import edu.uchc.octane.core.datasource.RectangularImage;
 
 // looking for local maxima that are spatially separated from other maxmima by a valley.
 // The valley is defined as pixels whose intensities are lower than the peak by more than the (tolerance).

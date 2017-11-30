@@ -1,4 +1,4 @@
-package edu.uchc.octanecore.fitting;
+package edu.uchc.octane.core.fitting;
 
 import java.util.Arrays;
 
@@ -12,7 +12,7 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.optim.SimpleVectorValueChecker;
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octanecore.datasource.ImageData;
+import edu.uchc.octane.core.datasource.ImageData;
 
 public class LeastSquareGaussianFitting {
 

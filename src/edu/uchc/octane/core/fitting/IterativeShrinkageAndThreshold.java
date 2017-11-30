@@ -1,10 +1,10 @@
-package edu.uchc.octanecore.fitting;
+package edu.uchc.octane.core.fitting;
 
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octanecore.datasource.ImageData;
-import edu.uchc.octanecore.datasource.RectangularImage;
-import edu.uchc.octanecore.utils.ImageFilters;
+import edu.uchc.octane.core.datasource.ImageData;
+import edu.uchc.octane.core.datasource.RectangularImage;
+import edu.uchc.octane.core.utils.ImageFilters;
 
 public class IterativeShrinkageAndThreshold {
 

@@ -1,4 +1,4 @@
-package edu.uchc.octanecore.tracking;
+package edu.uchc.octane.core.tracking;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -8,8 +8,8 @@ import java.util.ListIterator;
 import java.util.Stack;
 import java.util.Vector;
 
-import edu.uchc.octanecore.datasource.Localization;
-import edu.uchc.octanecore.datasource.LocalizationDataset;
+import edu.uchc.octane.core.datasource.Localization;
+import edu.uchc.octane.core.datasource.LocalizationDataset;
 
 /**
  * Tracking module to generate trajectories
@@ -17,9 +17,9 @@ import edu.uchc.octanecore.datasource.LocalizationDataset;
  *
  */
 public class SinglePassTracking {
-	
+
 	public class Trajectory extends Vector<Localization> {
-		private static final long serialVersionUID = -948641768704241620L;	
+		private static final long serialVersionUID = 1L;
 	};
 
 	// TrajDataset dataset_;
@@ -28,8 +28,8 @@ public class SinglePassTracking {
 
 	private Integer [][] backwardBonds;
 	private Bond [][] forwardBonds;
-	private boolean [] isTrackedParticle; 
-	private LinkedList<Trajectory> activeTracks;	
+	private boolean [] isTrackedParticle;
+	private LinkedList<Trajectory> activeTracks;
 	// private Trajectory wasted_;
 
 	private double maxDisplacement;
@@ -43,7 +43,7 @@ public class SinglePassTracking {
 		double bondLength;
 		@Override
 		public int compareTo(Bond o) {
-			return (int) Math.signum(bondLength - o.bondLength); 
+			return (int) Math.signum(bondLength - o.bondLength);
 		}
 	}
 
@@ -54,21 +54,21 @@ public class SinglePassTracking {
 //	public TrackingModule(LocalizationDataset dataset) {
 //
 //		this.nodes_  = dataset.toArrays();
-//	
+//
 //	}
-	
+
 	public SinglePassTracking(double maxDisplacement, int maxBlinking) {
 
 		this(maxDisplacement, maxBlinking, 0);
 
 	}
-	
+
 	public SinglePassTracking(double maxDisplacement, int maxBlinking, double lowerBound) {
 
 		this.maxDisplacement = maxDisplacement;
 		this.maxBlinking = maxBlinking;
 		this.lowerBound = lowerBound;
-	
+
 	}
 
 	protected void clusterAndOptimize(int seed) {
@@ -90,7 +90,7 @@ public class SinglePassTracking {
 					}
 				}
 			}
-			//lastHeadListEnd = headList.size();	
+			//lastHeadListEnd = headList.size();
 
 			while (itTail.hasPrevious()) {
 				int posIdx = itTail.previous();
@@ -117,7 +117,7 @@ public class SinglePassTracking {
 		Stack<HashSet<Integer>> tailStack = new Stack<HashSet<Integer>>();
 		Stack<Double> distanceStack = new Stack<Double>();
 		Stack<Integer> stack_c = null;
-		int trackIdx; 
+		int trackIdx;
 		int tail;
 		double nextBondLength;
 		double [] minExtraLength = new double[headList.size()];
@@ -125,7 +125,7 @@ public class SinglePassTracking {
 //		if (headList.size() + tailList.size() > 400) {
 //			IJ.log("Optimizing a very large network: " + headList.size() + "," + tailList.size() + ". This might take for ever.");
 //		}
-		
+
 		double m = 0;
 		for (int i = headList.size()-1 ; i >=0; i--) {
 			minExtraLength[i] = m;
@@ -135,8 +135,8 @@ public class SinglePassTracking {
 		while (true) {
 			trackIdx = headList.get(stack.size());
 
-			// try next possible bond		
-			while (curBondIdx  < forwardBonds[trackIdx].length) { 
+			// try next possible bond
+			while (curBondIdx  < forwardBonds[trackIdx].length) {
 				curBondIdx ++ ;
 
 				// test if this is a good bond
@@ -190,7 +190,7 @@ public class SinglePassTracking {
 		} //while
 
 		// got best route. creating new bonds
-		for (int i = 0; i < stack_c.size(); i ++) {			
+		for (int i = 0; i < stack_c.size(); i ++) {
 			trackIdx = headList.get(i);
 			int bondIdx = stack_c.get(i);
 			if (bondIdx < forwardBonds[trackIdx].length) {
@@ -211,7 +211,7 @@ public class SinglePassTracking {
 		//bondLengths_ = new double[activeTracks_.size()][];
 		backwardBonds = new Integer[localizations[curFrame].length][];
 		isTrackedParticle = new boolean[localizations[curFrame].length];
-		
+
 		Vector<Integer> [] backBonds = new Vector[localizations[curFrame].length];
 
 //		for ( int i = 0; i < activeTracks_.size(); i ++) {
@@ -231,7 +231,7 @@ public class SinglePassTracking {
 		while( it.hasNext() ) {
 			int id = it.nextIndex();
 			Localization trackHead = it.next().lastElement();
-			
+
 			nBonds = 0;
 
 			for (int j = 0; j < localizations[curFrame].length; j ++) {
@@ -246,23 +246,23 @@ public class SinglePassTracking {
 					//						forwardBonds_[id].add(j);
 					//						bondLengths_[id].add(d);
 					//						backwardBonds_[j].add(id);
-				} 
+				}
 				//				}
 			}
-			
+
 			forwardBonds[id] = Arrays.copyOf(bonds, nBonds);
 			if (nBonds > 1) {
 				Arrays.sort(forwardBonds[id]);
-				
+
 				// we won't do network search if the shortest link is small enough
 				if (forwardBonds[id][0].bondLength <= lowerBound) {
 					forwardBonds[id] = Arrays.copyOf(forwardBonds[id], 1);
 				}
 			}
 //			bondLengths_[id] = Arrays.copyOf(bondLengths, nBonds);
-			
+
 		}
-		
+
 		// create backward bons
 		for (int i = 0; i < backBonds.length; i ++) {
 			backwardBonds[i] = new Integer[backBonds[i].size()];
@@ -285,13 +285,13 @@ public class SinglePassTracking {
 					isTrackedParticle[bondTo] = true;
 					continue;
 				}
-			} 
+			}
 
 			for (int j = 0; j < forwardBonds[i].length; j++) {
 				forwardBonds[i][j].bondLength = Math.sqrt(forwardBonds[i][j].bondLength);
 //				bondLengths_[i][j]=Math.sqrt(bondLengths_[i][j]);
 			}
-		
+
 		}
 	} // TrivialBonds()
 
@@ -310,7 +310,7 @@ public class SinglePassTracking {
 		trajectories = new Vector<Trajectory>();
 		// wasted_ = new Trajectory();
 
-		//initial track # = first frame particle #  
+		//initial track # = first frame particle #
 		for (int i = 0; i < localizations[0].length; i ++ ) {
 			Trajectory t;
 			t = new Trajectory();
@@ -320,10 +320,10 @@ public class SinglePassTracking {
 
 		curFrame = 1;
 		while (curFrame < localizations.length) {
-			
+
 //			if (curFrame_ % 50 == 0 ) {
 //				IJ.log("Frame " + curFrame_ + ", "
-//						+ activeTracks_.size() + " active tracks, " 
+//						+ activeTracks_.size() + " active tracks, "
 //						+ trajectories_.size() + " stopped tracks."
 //						+ nodes_[curFrame_].length + "new nodes");
 //			}
@@ -340,14 +340,14 @@ public class SinglePassTracking {
 
 			//remove all tracks that has been lost for too long
 			//int firstPos = xytData_.getFirstOfFrame(curFrame_);
-			Iterator<Trajectory> it = activeTracks.iterator(); 
+			Iterator<Trajectory> it = activeTracks.iterator();
 			while ( it.hasNext() ) {
 				Trajectory track = it.next();
 				int frame = track.lastElement().frame;
 				if (curFrame - frame >= maxBlinking) {
 					it.remove();
 					trajectories.add(track);
-				} 
+				}
 			}
 
 			//add new particles into the track list
@@ -365,7 +365,7 @@ public class SinglePassTracking {
 		} //while
 
 		// add all tracks to stoppedTracks list
-		Iterator<Trajectory> it = activeTracks.iterator(); 
+		Iterator<Trajectory> it = activeTracks.iterator();
 		while (it.hasNext()) {
 			Trajectory track = it.next();
 			trajectories.add(track);
@@ -380,7 +380,7 @@ public class SinglePassTracking {
 		activeTracks = null;
 		localizations = null;
 		//wasted_ = null;
-		
+
 		return trajectories;
 
 	} //doTracking
