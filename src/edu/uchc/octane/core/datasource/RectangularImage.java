@@ -3,26 +3,26 @@ package edu.uchc.octane.core.datasource;
 public class RectangularImage extends ImageData {
 
 	private double [] data;
-	// x0, y0 is the top-left coordinate of the data 
+	// x0, y0 is the top-left coordinate of the data
 	public int x0, y0,width, height;
 
 	public RectangularImage(double [] data, int imageWidth ) {
 		this.data = data.clone();
 		width = imageWidth;
 		height = data.length / width;
-		
+
 		if (width <= 0 || height * width != data.length) {
 			throw new IllegalArgumentException("Image data length is not multiple of imagewidth.");
 		}
 	}
 
-	// this construct creates a subimage from a larger image 
+	// this construct creates a subimage from a larger image
 	public RectangularImage(RectangularImage origData, int x0, int y0, int width, int height, boolean fixBounding ) {
 
 		if (width <= 0 || height <=0 || width > origData.width || height > origData.height) {
 			throw new IllegalArgumentException("Invalid image size.");
 		}
-		
+
 		if ( ! origData.isCoordinateValid(x0, y0) || ! origData.isCoordinateValid(x0 + width - 1 , y0 + height - 1) ) {
 			if (! fixBounding) {
 				throw new IllegalArgumentException("subimage region out of bound.");
@@ -42,12 +42,12 @@ public class RectangularImage extends ImageData {
 				};
 			}
 		}
-		
+
 		this.x0 = x0;
 		this.y0 = y0;
 		this.width = width;
 		this.height = height;
-		
+
 		this.data = new double[width * height];
 		int origIdx = (y0 - origData.y0) * origData.width + x0 - origData.x0;
 		for (int i = 0; i < height; i ++) {
@@ -55,7 +55,7 @@ public class RectangularImage extends ImageData {
 			origIdx += origData.width;
 		}
 	}
-	
+
 	public RectangularImage(RectangularImage origData, int x0, int y0, int width, int height) {
 		this(origData, x0, y0, width, height, false);
 	}
@@ -88,5 +88,13 @@ public class RectangularImage extends ImageData {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public void setValueVector(double[] values) {
+		if (values.length != data.length) {
+			throw(new IllegalArgumentException("Incorrect input array length: " + values.length));
+		}
+		data = values;
 	}
 }
