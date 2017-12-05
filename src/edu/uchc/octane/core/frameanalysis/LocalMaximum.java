@@ -42,7 +42,6 @@ public class LocalMaximum{
 
 	protected final static int PROCESSED = 1;
 	protected final static int COLLECTED = 2;
-//	protected final static int MASKED = 4;
 
 	protected RectangularImage data;
 	protected char [] pixelStates;
