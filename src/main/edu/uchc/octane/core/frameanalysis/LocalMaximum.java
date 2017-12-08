@@ -25,6 +25,7 @@ import java.util.Collections;
 import org.apache.commons.math3.util.FastMath;
 
 import edu.uchc.octane.core.datasource.RectangularImage;
+import edu.uchc.octane.core.utils.ImageFilters;
 
 // looking for local maxima that are spatially separated from other maxmima by a valley.
 // The valley is defined as pixels whose intensities are lower than the peak by more than the (tolerance).
@@ -40,30 +41,25 @@ public class LocalMaximum{
 
 	}
 
-	protected final static int PROCESSED = 1;
-	protected final static int COLLECTED = 2;
+	private final static int PROCESSED = 1;
+	private final static int COLLECTED = 2;
 
-	protected RectangularImage data;
-	protected char [] pixelStates;
+	RectangularImage data, filteredData;
+	char [] pixelStates;
 
 	class Pixel implements Comparable<Pixel> {
-
 		public int idx;
-
 		public Pixel(int idx) {
 			this.idx = idx;
 		}
-
 		@Override
 		public int compareTo(Pixel o) {
-
-			return (int) FastMath.signum(- data.getValue(idx) + data.getValue(o.idx));
-
+			return (int) FastMath.signum(- filteredData.getValue(idx) + filteredData.getValue(o.idx));
 		}
 	}
 
 	public LocalMaximum(double noise) {
-		this(noise, 0, 7);
+		this(noise, 0, 3);
 	}
 
 	public LocalMaximum(double noise, int threshold, int ROISize) {
@@ -100,13 +96,18 @@ public class LocalMaximum{
 	public void processFrame(RectangularImage data, CallBackFunctions callback) {
 
 		this.data = data;
+		double[] filtered = ImageFilters.symmetricFilter(
+				ImageFilters.makeGaussianFilter(1.0,7),
+				data.getValueVector(),
+				data.width );
+		filteredData = new RectangularImage(filtered, data.width);
 		pixelStates = new char[data.getLength()];
 
 		ArrayList<Pixel> pixels = new ArrayList<Pixel>();
 
-		for (int i = 0; i < data.getLength(); i ++) {
+		for (int i = 0; i < filteredData.getLength(); i ++) {
 
-			if (data.getValue(i) > threshold) {
+			if (filteredData.getValue(i) > threshold) {
 				pixels.add(new Pixel(i));
 			} else {
 //				mask(i);
@@ -119,39 +120,31 @@ public class LocalMaximum{
 
 		for (Pixel pixel : pixels) {
 
-			if ( isProcessed(pixel.idx) ){
-				continue;
-			}
+			if ( isProcessed(pixel.idx) ){ continue; }
 
-			double peakValue = data.getValue(pixel.idx);
+			double peakValue = filteredData.getValue(pixel.idx);
 			boolean isMax = true;
-
 			queue.clear();
 			pool.clear();
-
 			queue.offer(pixel.idx);
-
 			collect(pixel.idx);
 
 			while (! queue.isEmpty()) {
-
 				int index = queue.poll();
 				pool.add(index);
-				int [] neighbours = data.getNeighboursIndices(index);
+				int [] neighbours = filteredData.getNeighboursIndices(index);
 
-				for (int i = 0; i < neighbours.length; i++) { // analyze all neighbors (in 8 directions) at the same level
-
-					if ( isProcessed(neighbours[i]) ) { //conflict
+				for (int p : neighbours) { // analyze all neighbors (in 8 directions) at the same level
+					if ( isProcessed(p) ) { //conflict
 						isMax = false;
 						for (Integer idx : queue) {
 							process(idx);
 						}
 						break;
 					}
-
-					if ( ! isCollected(neighbours[i]) && /*! isMasked(neighbours[i]) && */ data.getValue(neighbours[i]) > peakValue - tolerance) {
-						queue.add(neighbours[i]);
-						collect(neighbours[i]);
+					if ( ! isCollected(p) && /*! isMasked(neighbours[i]) && */ filteredData.getValue(p) > peakValue - tolerance) {
+						queue.add(p);
+						collect(p);
 					}
 				}
 			}
@@ -161,10 +154,9 @@ public class LocalMaximum{
 			}
 
 			if (isMax) {
-
 				int x = data.getXCordinate(pixel.idx);
 				int y = data.getYCordinate(pixel.idx);
-				RectangularImage subImage = new RectangularImage(data, x - ROISize / 2, y - ROISize / 2, ROISize, ROISize, true);
+				RectangularImage subImage = new RectangularImage(data, x - ROISize, y - ROISize, ROISize * 2 + 1, ROISize * 2 + 1, true);
 				if (callback.fit(subImage, x, y) == false) {
 					break;
 				}

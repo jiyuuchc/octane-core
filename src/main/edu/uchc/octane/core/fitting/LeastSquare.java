@@ -2,6 +2,7 @@ package edu.uchc.octane.core.fitting;
 
 import java.util.Arrays;
 
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresFactory;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
@@ -14,7 +15,7 @@ import edu.uchc.octane.core.datasource.ImageData;
 public class LeastSquare{
 
     public final static int MAX_ITERATIONS = 1000;
-    public final static double CONVERGENCE_DELTA = 1e-6;
+    public final static double CONVERGENCE_DELTA = 1e-4;
 
     public boolean useWeighting;
     public PSFFittingFunction psf;
@@ -72,9 +73,12 @@ public class LeastSquare{
     		lsp = LeastSquaresFactory.weightDiagonal(lsp, new ArrayRealVector(calcWeights(data)));
     	}
 
-    	LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
-
-    	optimum = optimizer.optimize(lsp);
+    	try {
+    		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+    		optimum = optimizer.optimize(lsp);
+    	} catch (TooManyEvaluationsException e) {
+    		return null;
+    	}
 
     	return getResult();
     }

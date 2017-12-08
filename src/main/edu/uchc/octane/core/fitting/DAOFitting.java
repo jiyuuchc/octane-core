@@ -1,7 +1,5 @@
 package edu.uchc.octane.core.fitting;
 
-import java.util.Arrays;
-
 import org.apache.commons.math3.distribution.FDistribution;
 
 import edu.uchc.octane.core.datasource.ImageData;
@@ -30,7 +28,9 @@ public class DAOFitting {
 		MultiPSF multiPsf = new MultiPSF(1, psf);
 		LeastSquare multiLsq = new LeastSquare(multiPsf);
 		LeastSquare lsq = new LeastSquare(psf);
-		multiLsq.fit(data, curStart);
+		if (multiLsq.fit(data, curStart) == null) {
+			return null;
+		}
 		MultiPSF bestPsf = multiPsf;
 		LeastSquare bestLsq = multiLsq;
 
@@ -47,28 +47,40 @@ public class DAOFitting {
     		double [] oldStart = curStart;
     		curStart = new double[n * start.length];
     		System.arraycopy(oldStart, 0, curStart, 0, oldStart.length);
-    		System.arraycopy(lastPeak, 0, curStart, oldStart.length, lastPeak.length);
-    		multiLsq.fit(data, curStart);
+    		if (lastPeak != null ) {
+    			System.arraycopy(lastPeak, 0, curStart, oldStart.length, lastPeak.length);
+    		} else {
+    			System.arraycopy(start, 0, curStart, oldStart.length, start.length);
+    		}
 
-    		double pValue = 1.0 - new FDistribution(
-    				multiPsf.getDoF() - bestPsf.getDoF(),
-    				data.getLength() - multiPsf.getDoF())
-    				.cumulativeProbability(
-    					( (bestLsq.optimum.getCost() - multiLsq.optimum.getCost()) / (multiPsf.getDoF() - bestPsf.getDoF()))
-    					/ (multiLsq.optimum.getCost() / (data.getLength() - multiPsf.getDoF()) )
-    					);
+    		if (multiLsq.fit(data, curStart) != null) {
 
-    		if(!Double.isNaN(pValue) && (pValue < this.pValue) ) {
-    			bestPsf = multiPsf;
-    			bestLsq = multiLsq;
+    			double pValue = 1.0 - new FDistribution(
+    					multiPsf.getDoF() - bestPsf.getDoF(),
+    					data.getLength() - multiPsf.getDoF())
+    					.cumulativeProbability(
+    							( (bestLsq.optimum.getCost() - multiLsq.optimum.getCost()) / (multiPsf.getDoF() - bestPsf.getDoF()))
+    							/ (multiLsq.optimum.getCost() / (data.getLength() - multiPsf.getDoF()) )
+    							);
+
+    			if(!Double.isNaN(pValue) && (pValue < this.pValue) ) {
+    				bestPsf = multiPsf;
+    				bestLsq = multiLsq;
+    			}
+    		} else {
+    			break;
     		}
     	}
 
+
     	double [] tmpResult = bestLsq.getResult();
-    	double [][] results = new double[bestPsf.numOfPSFs][];
     	int subParaLen = tmpResult.length / bestPsf.numOfPSFs;
+    	double [][] results = new double[bestPsf.numOfPSFs][subParaLen];
+
     	for (int i = 0; i < results.length; i++) {
-    		results[i] = Arrays.copyOfRange(tmpResult, i * subParaLen, (i+1) * subParaLen);
+    		System.arraycopy(tmpResult, i * subParaLen, results[i], 0, subParaLen);
+    		//FIXME hack
+    		//RealVector s = bestLsq.optimum.getSigma(0);
     	}
 
     	return results;
