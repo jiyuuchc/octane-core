@@ -3,7 +3,6 @@ package edu.uchc.octane.core.image;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.function.IntUnaryOperator;
 
 /* fast KDTree implementation desgined for very large number of points */
@@ -45,48 +44,48 @@ public class FastKDTree {
 		root = generate(0, 0, data.size() - 1);
 	}
 
-	private void buildUnbalancedTree() {
-		Arrays.setAll(pointers, IntUnaryOperator.identity());
-		Arrays.fill(left, -1);
-		Arrays.fill(right, -1);
-		//shuffle
-		Random rnd = new Random();
-		for (int i = pointers.length - 1; i > 0; i--  ) {
-			int index = rnd.nextInt(i + 1);
-			swap(i, index);
-		}
+//	private void buildUnbalancedTree() {
+//		Arrays.setAll(pointers, IntUnaryOperator.identity());
+//		Arrays.fill(left, -1);
+//		Arrays.fill(right, -1);
+//		//shuffle
+//		Random rnd = new Random();
+//		for (int i = pointers.length - 1; i > 0; i--  ) {
+//			int index = rnd.nextInt(i + 1);
+//			swap(i, index);
+//		}
+//
+//
+//		for (int i = 1; i < pointers.length; i ++) {
+//			refIdx = i;
+//			insert(0, 0);
+//		}
+//
+//		root = 0;
+//	}
 
-
-		for (int i = 1; i < pointers.length; i ++) {
-			refIdx = i;
-			insert(0, 0);
-		}
-
-		root = 0;
-	}
-
-	private void insert(int treeIdx, int d) {
-
-		data.selectDimension(d);
-
-		if (++d >= data.getDimension()) {d = 0;}
-
-		if (getData(treeIdx) < getData(refIdx)) {
-			if (getRight(treeIdx) != -1) {
-				insert(getRight(treeIdx), d);
-			} else {
-				right[treeIdx] = refIdx;
-				return;
-			}
-        } else {
-        	if (getLeft(treeIdx) != -1 ) {
-        		insert(getLeft(treeIdx), d);
-        	} else {
-        		left[treeIdx] = refIdx;
-        		return;
-        	}
-        }
-	}
+//	private void insert(int treeIdx, int d) {
+//
+//		data.selectDimension(d);
+//
+//		if (++d >= data.getDimension()) {d = 0;}
+//
+//		if (getData(treeIdx) < getData(refIdx)) {
+//			if (getRight(treeIdx) != -1) {
+//				insert(getRight(treeIdx), d);
+//			} else {
+//				right[treeIdx] = refIdx;
+//				return;
+//			}
+//        } else {
+//        	if (getLeft(treeIdx) != -1 ) {
+//        		insert(getLeft(treeIdx), d);
+//        	} else {
+//        		left[treeIdx] = refIdx;
+//        		return;
+//        	}
+//        }
+//	}
 
 	private int generate (int d, int left, int right) {
 
