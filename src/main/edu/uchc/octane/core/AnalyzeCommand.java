@@ -20,6 +20,7 @@ import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
 
 import edu.uchc.octane.core.datasource.RawLocalizationData;
 import edu.uchc.octane.core.datasource.RectangularImage;
+import edu.uchc.octane.core.fitting.DAOFitting;
 import edu.uchc.octane.core.fitting.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.LeastSquare;
 import edu.uchc.octane.core.frameanalysis.LocalMaximum;
@@ -36,12 +37,13 @@ public class AnalyzeCommand {
 	static long startingFrame = 0;
 	static long endingFrame = -1;
 	static double pixelSize = 160;
+	static boolean multiPeak = false;
 
 	static int [] cnt;
 	static List<double[]> positions;
 
 	public static Options setupOptions() {
-		options = PatternOptionBuilder.parsePattern("hw%t%b%s%e%p%");
+		options = PatternOptionBuilder.parsePattern("hw%t%b%s%e%p%m");
 
 		options.getOption("h").setDescription("print this message");
 		options.getOption("w").setDescription("fitting window size");
@@ -50,6 +52,7 @@ public class AnalyzeCommand {
 		options.getOption("s").setDescription("starting frame");
 		options.getOption("e").setDescription("ending frame");
 		options.getOption("p").setDescription("pixel size");
+		options.getOption("m").setDescription("perform multi-peak fitting");
 
 		return options;
 	}
@@ -66,6 +69,7 @@ public class AnalyzeCommand {
 		System.out.println("Threshold intensity = " + thresholdIntensity);
 		System.out.println("Fitting window size = " + windowSize);
 		System.out.println("Pixels size = " + pixelSize);
+		System.out.println("Multi-peak fitting: " + (multiPeak?"yes":"no"));
 	}
 
 	public static void run(String [] args) throws JSONException, IOException {
@@ -84,6 +88,7 @@ public class AnalyzeCommand {
 			startingFrame = CommandUtils.getParsedLong(cmd, "s", startingFrame);
 			endingFrame = CommandUtils.getParsedLong(cmd, "e", endingFrame);;
 			pixelSize = CommandUtils.getParsedDouble(cmd, "p", pixelSize);
+			multiPeak = cmd.hasOption("m");
 
 			List<String> remainings = cmd.getArgList();
 			if (remainings.size() == 1) {
@@ -104,9 +109,11 @@ public class AnalyzeCommand {
 		}
 	}
 
-	static void processFrame(TaggedImage img, int frame, LocalMaximum finder, LeastSquare fitter) throws JSONException {
+	static void processFrame(TaggedImage img, int frame) throws JSONException {
 		short [] iPixels = (short[]) img.pix;
 		double [] pixels = new double[iPixels.length];
+		LeastSquare fitter = new LeastSquare(new IntegratedGaussianPSF(false, false));
+		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
 		for (int i = 0; i < pixels.length; i ++) {
 			pixels[i] = iPixels[i] - backgroundIntensity ;
 		}
@@ -134,6 +141,40 @@ public class AnalyzeCommand {
 		});
 	}
 
+	static void processFrameWithDAO(TaggedImage img, int frame) throws JSONException {
+		short [] iPixels = (short[]) img.pix;
+		double [] pixels = new double[iPixels.length];
+		DAOFitting fitter = new DAOFitting(new IntegratedGaussianPSF(false, false));
+		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
+		for (int i = 0; i < pixels.length; i ++) {
+			pixels[i] = iPixels[i] - backgroundIntensity ;
+		}
+		RectangularImage data = new RectangularImage(pixels, img.tags.getInt("Width"));
+		cnt[frame] = 0;
+
+		finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
+			double [] start = {0, 0, 0, 1.5, 1};
+
+			@Override
+			public boolean fit(RectangularImage img, int x, int y) {
+
+				// System.out.println("Location " + (c++) +" : " + x + " - " + y + " - " + img.getValueAtCoordinate(x, y));
+				start[0] = x; start[1] = y;  start[2] = img.getValueAtCoordinate(x, y) * 10;
+
+				double [][] results = fitter.fit(img, start);
+				if (results != null ) {
+					cnt[frame] += results.length;
+					synchronized(positions) {
+						for (int i = 0; i < results.length; i++) {
+							positions.add(convertParameters(results[i], frame));
+						}
+					}
+				}
+				return true;
+			}
+		});
+	}
+
 	public static void process(List<String> args) throws JSONException, IOException {
 		System.out.println("Analyze data: " + args.get(0));
 
@@ -152,8 +193,6 @@ public class AnalyzeCommand {
 		cnt = new int[frames];
 		printParameters();
 		IntStream.range((int)startingFrame, (int)endingFrame).parallel().forEach( f -> {
-			LeastSquare lsq = new LeastSquare(new IntegratedGaussianPSF(false, false));
-			LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
 			TaggedImage img;
 			synchronized (stackReader) {
 				img= stackReader.getImage(0 /*channel*/, 0 /*slice*/, f /*frame*/, 0 /*position*/);
@@ -161,7 +200,7 @@ public class AnalyzeCommand {
 
 			if (img != null ) {
 				try {
-					processFrame(img, f, finder, lsq);
+					processFrame(img, f);
 				} catch (JSONException e) {
 					assert(false); //shouldn't happen
 				}
