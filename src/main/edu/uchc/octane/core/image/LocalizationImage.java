@@ -16,8 +16,6 @@ public class LocalizationImage extends Localizations {
 	private boolean isDirty = true, isDone = false;
 	private Runnable renderingCallback = null;
 
-	FastKDTree tree;
-
 	private int [] cachedDataIdx = null;
 	private int [] cachedPixelIdx = null;
 
@@ -28,45 +26,6 @@ public class LocalizationImage extends Localizations {
 
 
 	private RenderingThread renderingThread = null;
-
-	class HDataImp implements HData {
-
-		private double[][] data_;
-		private int d = 0;
-
-		public HDataImp() {
-			data_ = new double[2][];
-			data_[0] = xCol;
-			data_[1] = yCol;
-		}
-
-		@Override
-		public int getDimension() {
-			return 2;
-		}
-
-		@Override
-		public int size() {
-			return getNumLocalizations();
-		}
-
-		@Override
-		public double get(int idx, int d) {
-			return data_[d][idx];
-		}
-
-		@Override
-		public void selectDimension(int d) {
-			this.d = d;
-
-		}
-
-		@Override
-		public double get(int idx) {
-			return get(idx, d);
-		}
-
-	}
 
 	class RenderingThread extends Thread {
 
@@ -119,9 +78,7 @@ public class LocalizationImage extends Localizations {
 
 	public LocalizationImage(RawLocalizationData locData) {
 		super(locData);
-		//this.locData = locData;
 		pixelSize = 16.0;
-		//data = locData.data;
 		dimx = 5120;
 		dimy = 5120;
 
@@ -280,9 +237,5 @@ public class LocalizationImage extends Localizations {
 
 	public void onRenderingDone(Runnable callback) {
 		renderingCallback = callback;
-	}
-
-	public void constructKDtree() {
-		tree = new FastKDTree(new HDataImp());
 	}
 }

@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 
+import edu.uchc.octane.core.utils.FastKDTree;
+import edu.uchc.octane.core.utils.HData;
+
 public class Localizations {
 
 	final RawLocalizationData locData;
@@ -11,11 +14,53 @@ public class Localizations {
 	HashMap<String, Integer> headersMap;
 
 	public final double [][]data;
-	public double [] xCol, yCol, zCol, frameCol, errCol, intensityCol;
+	public int xCol = 1, yCol = 2, zCol = -1, frameCol = 0, errCol = -1, intensityCol = -1, sigmaCol = -1, densityCol = -1;
+
+	FastKDTree tree;
+
+	class HDataImp implements HData {
+
+		private double[][] data_;
+		private int d = 0;
+
+		public HDataImp() {
+			data_ = new double[2][];
+			data_[0] = data[xCol];
+			data_[1] = data[yCol];
+		}
+
+		@Override
+		public int getDimension() {
+			return 2;
+		}
+
+		@Override
+		public int size() {
+			return getNumLocalizations();
+		}
+
+		@Override
+		public double get(int idx, int d) {
+			return data_[d][idx];
+		}
+
+		@Override
+		public void selectDimension(int d) {
+			this.d = d;
+
+		}
+
+		@Override
+		public double get(int idx) {
+			return get(idx, d);
+		}
+
+	}
 
 	public Localizations(RawLocalizationData raw) {
 		locData = raw;
-		this.data = locData.data;
+		data = new double[raw.data.length + 1][]; // last column is for storing local density
+		System.arraycopy(raw.data, 0, data, 0, raw.data.length);
 
 		stats = new DoubleSummaryStatistics[data.length];
 
@@ -23,6 +68,7 @@ public class Localizations {
 		for (int i = 0; i < locData.headers.length; i++) {
 			headersMap.put(locData.headers[i], i);
 		}
+		headersMap.put("LocalDensity", data.length - 1);
 
 		guessHeaders();
 	}
@@ -32,31 +78,24 @@ public class Localizations {
 			key = key.toLowerCase();
 			int col = headersMap.get(key);
 			if (key.startsWith("x ") || key.equals("x")) {
-				xCol = data[col];
+				xCol = col;
 			} else if (key.startsWith("y ") || key.equals("y")) {
-				yCol = data[col];
+				yCol = col;
 			} else if (key.startsWith("z ") || key.equals("z")) {
-				zCol = data[col];
+				zCol = col;
 			} else if (key.startsWith("uncertain") || key.startsWith("err")) {
-				errCol = data[col];
+				errCol = col;
 			} else if (key.startsWith("int")) {
-				intensityCol = data[col];
+				intensityCol = col;
 			} else if (key.startsWith("frame")) {
-				frameCol = data[col];
+				frameCol = col;
+			} else if (key.startsWith("sigma")) {
+				sigmaCol = col;
 			}
 		}
 
-		if (frameCol == null) {
-			frameCol = data[0];
-		}
-		if (xCol == null) {
-			xCol = data[1];
-		}
-		if (yCol == null) {
-			yCol = data[2];
-		}
-		if (errCol == null) {
-			errCol = data[data.length -1 ];
+		if (errCol == -1) {
+			errCol = data.length -1;
 		}
 	}
 
@@ -67,7 +106,6 @@ public class Localizations {
 		}
 		return stats[col];
 	}
-
 
 	public DoubleSummaryStatistics getSummaryStatitics(String header) {
 		if (headersMap.get(header) != null ) {
@@ -90,14 +128,31 @@ public class Localizations {
 	}
 
 	public int getNumLocalizations() {
-		return frameCol.length;
+		return data[frameCol].length;
 	}
 
 	public double getXAt(int idx) {
-		return xCol[idx];
+		return data[xCol][idx];
 	}
 
 	public double getYAt(int idx) {
-		return yCol[idx];
+		return data[yCol][idx];
+	}
+
+	public double getZAt(int idx) {
+		return data[zCol][idx];
+	}
+
+	public void constructKDtree() {
+		tree = new FastKDTree(new HDataImp());
+	}
+
+	public void measureLocalDensity(double distance) {
+		assert(tree != null);
+		int localDensityCol = data.length -1 ;
+		for (int i = 0; i < getNumLocalizations(); i++) {
+			data[localDensityCol][i] = tree.radiusSearch(i, distance).size();
+		}
+		densityCol = localDensityCol;
 	}
 }

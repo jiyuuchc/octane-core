@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.image;
+package edu.uchc.octane.core.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
