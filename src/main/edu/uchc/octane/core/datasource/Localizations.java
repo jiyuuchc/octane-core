@@ -5,7 +5,7 @@ import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 
 import edu.uchc.octane.core.utils.FastKDTree;
-import edu.uchc.octane.core.utils.HData;
+import edu.uchc.octane.core.utils.HDataCollection;
 
 public class Localizations {
 
@@ -18,7 +18,7 @@ public class Localizations {
 
 	FastKDTree tree;
 
-	class HDataImp implements HData {
+	class HDataImp implements HDataCollection {
 
 		private double[][] data_;
 		private int d = 0;

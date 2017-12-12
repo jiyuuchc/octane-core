@@ -9,6 +9,7 @@ public class Main {
 		System.out.println("\tanalyze\t analyze raw image data for localizations");
 		System.out.println("\tdrift\t correct drift in the localzation data");
 		System.out.println("\timport\t import localization data from Thunderstorm output");
+		System.out.println("\tmerge\t track trajectories and merge coordinantes" );
 		System.out.println();
 		System.out.println("octane cmd -h for further help");
 	}
@@ -16,6 +17,7 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 
 		String cmd = args[0];
+		args = Arrays.copyOfRange(args, 1, args.length);
 
 		if (cmd.equals("about") ){
 			System.out.println("octane 0.1");
@@ -25,7 +27,9 @@ public class Main {
 		}  else if (cmd.equals("drift")) {
 			DriftCommand.run(args);
 		} else if (cmd.equals("analyze")) {
-			AnalyzeCommand.run(Arrays.copyOfRange(args, 1, args.length));
+			AnalyzeCommand.run(args);
+		} else if (cmd.equals("merge")) {
+			TrackingCommand.run(args);
 		} else {
 			printHelp();
 		}

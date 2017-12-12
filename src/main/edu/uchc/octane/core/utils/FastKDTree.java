@@ -12,14 +12,14 @@ public class FastKDTree {
 	int [] pointers;
 	int [] left;
 	int [] right;
-	HData data;
+	HDataCollection data;
 	int root;
 
 	//search
 	int refIdx;
 	ArrayList<Integer> results;
 
-	public FastKDTree(HData data) {
+	public FastKDTree(HDataCollection data) {
 		pointers = new int[data.size()];
 		left = new int[data.size()];
 		right = new int[data.size()];

@@ -1,13 +1,15 @@
 package edu.uchc.octane.core.utils;
 
-/* interface for an immutable collection of high-dimensional real data */
-
 public interface HData {
 
 	int getDimension();
-	int size();
-	double get(int idx, int d);
-	void selectDimension(int d);
-	double get(int idx);
+	double get(int d);
 
+	default double sqDistance(HData p) {
+		double d = 0;
+		for (int i = 0; i < getDimension(); i ++) {
+			d+= (get(i) - p.get(i)) * (get(i) - p.get(i));
+		}
+		return d;
+	}
 }
