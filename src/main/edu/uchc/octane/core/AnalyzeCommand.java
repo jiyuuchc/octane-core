@@ -19,6 +19,7 @@ import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
 
 import edu.uchc.octane.core.datasource.RectangularImage;
 import edu.uchc.octane.core.datasource.octaneDataFile;
+import edu.uchc.octane.core.fitting.AsymmetricGaussianPSF;
 import edu.uchc.octane.core.fitting.DAOFitting;
 import edu.uchc.octane.core.fitting.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.LeastSquare;
@@ -35,12 +36,13 @@ public class AnalyzeCommand {
 	static long endingFrame = -1;
 	static double pixelSize = 160;
 	static boolean multiPeak = false;
+	static boolean asymmetric = false;
 
 	static int [] cnt;
 	static List<double[]> positions;
 
 	public static Options setupOptions() {
-		options = PatternOptionBuilder.parsePattern("hw%t%b%s%e%p%m");
+		options = PatternOptionBuilder.parsePattern("hw%t%b%s%e%p%ma");
 
 		options.getOption("h").setDescription("print this message");
 		options.getOption("w").setDescription("fitting window size");
@@ -50,6 +52,7 @@ public class AnalyzeCommand {
 		options.getOption("e").setDescription("ending frame");
 		options.getOption("p").setDescription("pixel size");
 		options.getOption("m").setDescription("perform multi-peak fitting");
+		options.getOption("a").setDescription("asymmetric psf fitting (for 3D)");
 
 		return options;
 	}
@@ -67,6 +70,7 @@ public class AnalyzeCommand {
 		System.out.println("Fitting window size = " + windowSize);
 		System.out.println("Pixels size = " + pixelSize);
 		System.out.println("Multi-peak fitting: " + (multiPeak?"yes":"no"));
+		System.out.println("3D fitting: " + (asymmetric?"yes":"no"));
 	}
 
 	public static void run(String [] args) throws JSONException, IOException {
@@ -86,6 +90,7 @@ public class AnalyzeCommand {
 			endingFrame = CommandUtils.getParsedLong(cmd, "e", endingFrame);;
 			pixelSize = CommandUtils.getParsedDouble(cmd, "p", pixelSize);
 			multiPeak = cmd.hasOption("m");
+			asymmetric = cmd.hasOption("a");
 
 			List<String> remainings = cmd.getArgList();
 			if (remainings.size() == 1) {
@@ -109,7 +114,12 @@ public class AnalyzeCommand {
 	static void processFrame(TaggedImage img, int frame) throws JSONException {
 		short [] iPixels = (short[]) img.pix;
 		double [] pixels = new double[iPixels.length];
-		LeastSquare fitter = new LeastSquare(new IntegratedGaussianPSF(false, false));
+		LeastSquare fitter;
+		if (asymmetric) {
+			fitter = new LeastSquare(new AsymmetricGaussianPSF());
+		}else {
+			fitter = new LeastSquare(new IntegratedGaussianPSF());
+		}
 		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
 		for (int i = 0; i < pixels.length; i ++) {
 			pixels[i] = iPixels[i] - backgroundIntensity ;
@@ -208,6 +218,9 @@ public class AnalyzeCommand {
 		stackReader.close();
 
 		String [] headers = {"frame","x", "y", "intensity", "sigma", "offset"};
+		if (asymmetric && !multiPeak) {
+			headers = new String [] {"frame","x", "y", "intensity", "sigmaX", "sigmaY", "offset"};
+		}
 		double [][] data = new double[headers.length][positions.size()];
 		for (int i = 0; i < headers.length; i ++) {
 			for (int j = 0; j < positions.size(); j++) {
@@ -229,9 +242,14 @@ public class AnalyzeCommand {
 		r[1] = param[0] * pixelSize ; //x
 		r[2] = param[1] * pixelSize ; //y
 		r[3] = param[2];
-		r[4] = param[3] * pixelSize;
-		r[5] = param[4];
+		if (asymmetric && !multiPeak) {
+			r[4] = param[3] * pixelSize;
+			r[5] = param[4] * pixelSize;
+			r[6] = param[5];
+		} else {
+			r[4] = param[3] * pixelSize;
+			r[5] = param[4];
+		}
 		return r;
-
 	}
 }
