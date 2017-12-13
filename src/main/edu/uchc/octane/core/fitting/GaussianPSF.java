@@ -105,26 +105,26 @@ public class GaussianPSF implements PSFFittingFunction {
 	@Override
 	public double[] pointToParameters(double[] point) {
 
-    	double [] transformed = point.clone();
+    	double [] params = point.clone();
 
-    	transformed[Params.INTENSITY] = point[Params.INTENSITY] * point[Params.INTENSITY];
-        transformed[Params.SIGMA] = point[Params.SIGMA] * point[Params.SIGMA];
-        transformed[Params.OFFSET] = point[Params.OFFSET] * point[Params.OFFSET];
+    	params[Params.INTENSITY] = point[Params.INTENSITY] * point[Params.INTENSITY];
+        params[Params.SIGMA] = point[Params.SIGMA] * point[Params.SIGMA];
+        params[Params.OFFSET] = point[Params.OFFSET] * point[Params.OFFSET];
 
-        return transformed;
+        return params;
     }
 
 
     @Override
 	public double[] parametersToPoint(double[] parameters) {
 
-    	double [] transformed = parameters.clone();
+    	double [] point = parameters.clone();
 
-    	transformed[Params.INTENSITY] = FastMath.sqrt(parameters[Params.INTENSITY]);
-        transformed[Params.SIGMA] = FastMath.sqrt(parameters[Params.SIGMA]);
-        transformed[Params.OFFSET] = FastMath.sqrt(parameters[Params.OFFSET]);
+    	point[Params.INTENSITY] = FastMath.sqrt(parameters[Params.INTENSITY]);
+        point[Params.SIGMA] = FastMath.sqrt(parameters[Params.SIGMA]);
+        point[Params.OFFSET] = FastMath.sqrt(parameters[Params.OFFSET]);
 
-        return transformed;
+        return point;
     }
 
 	@Override
