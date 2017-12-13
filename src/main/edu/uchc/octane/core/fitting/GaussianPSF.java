@@ -30,31 +30,24 @@ public class GaussianPSF implements PSFFittingFunction {
 		this.fixSigma = fixSigma;
 	}
 
+	double sq(double d) {return d*d;}
+
+	//internerally p(4)^2 + p(2)^2 * exp(-(dx/p(3))^2-(dy/p(3))^2)
 	@Override
 	public MultivariateVectorFunction getValueFunction() {
-
 		return new MultivariateVectorFunction() {
-
 			@Override
 			public double[] value(double[] point) throws IllegalArgumentException {
-
 				double[] retVal = new double[data.getLength()];
-
-				double[] params = pointToParameters(point);
-				double twoSigmaSquared = params[Params.SIGMA] * params[Params.SIGMA] * 2;
-
 				for(int i = 0; i < data.getLength(); i++) {
-
-					retVal[i] = params[Params.OFFSET] + params[Params.INTENSITY] / (twoSigmaSquared * FastMath.PI)
-							* FastMath.exp(-((data.getXCordinate(i) - params[Params.X]) * (data.getXCordinate(i) - params[Params.X]) + (data.getYCordinate(i) - params[Params.Y]) * (data.getYCordinate(i) - params[Params.Y])) / twoSigmaSquared);
-
+					double dx = data.getXCordinate(i) - point[Params.X];
+					double dy = data.getYCordinate(i) - point[Params.Y];
+					retVal[i] = sq(point[Params.OFFSET]) + sq(point[Params.INTENSITY])* FastMath.exp(-(sq(dx)+sq(dy))/sq(point[Params.SIGMA]));
 				}
-
 				return retVal;
 
 			}
 		};
-
 	}
 
 	@Override
@@ -63,54 +56,37 @@ public class GaussianPSF implements PSFFittingFunction {
 
         	@Override
             public double[][] value(double[] point) throws IllegalArgumentException {
-
-        		double[] params = pointToParameters(point);
-                double sigma = params[Params.SIGMA];
-                double sigmaSquared = sigma * sigma;
+                double sigma3 = point[Params.SIGMA] * point[Params.SIGMA] * point[Params.SIGMA];
                 double[][] retVal = new double[data.getLength()][Params.PARAMS_LENGTH];
-
                 for (int i = 0; i < data.getLength(); i++) {
-                    //d()/dIntensity
-                    double xd = (data.getXCordinate(i) - params[Params.X]);
-                    double yd = (data.getYCordinate(i) - params[Params.Y]);
-                    double upper = -(xd * xd + yd * yd) / (2 * sigmaSquared);
-                    double expVal = FastMath.exp(upper);
-                    double expValDivPISigmaSquared = expVal / (sigmaSquared * FastMath.PI);
-                    double expValDivPISigmaPowEight = expValDivPISigmaSquared / sigmaSquared;
-                    retVal[i][Params.INTENSITY] = point[Params.INTENSITY] * expValDivPISigmaSquared;
-                    //d()/dx
-                    retVal[i][Params.X] = params[Params.INTENSITY] * xd * expValDivPISigmaPowEight * 0.5;
-                    //d()/dy
-                    retVal[i][Params.Y] = params[Params.INTENSITY] * yd * expValDivPISigmaPowEight * 0.5;
-                    //d()/dsigma
-                    if (fixSigma) {
-                    	retVal[i][Params.SIGMA] = 0;
-                    } else {
-                    	retVal[i][Params.SIGMA] = params[Params.INTENSITY] * expValDivPISigmaPowEight / point[Params.SIGMA] * (xd * xd + yd * yd - 2 * sigmaSquared);
-                    }
-                    //d()/dbkg
+					double dx = data.getXCordinate(i) - point[Params.X];
+					double dy = data.getYCordinate(i) - point[Params.Y];
+					double expterm = FastMath.exp(-(sq(dx) + sq(dy))/sq(point[Params.SIGMA]));
+					retVal[i][Params.X] = 2 * sq(point[Params.INTENSITY]) * expterm * dx / sq(point[Params.SIGMA]);
+					retVal[i][Params.Y] = 2 * sq(point[Params.INTENSITY]) * expterm * dy / sq(point[Params.SIGMA]);
+					retVal[i][Params.INTENSITY] = 2 * point[Params.INTENSITY] * expterm;
+					if (fixSigma) {
+						retVal[i][Params.SIGMA] = 0;
+					} else {
+						retVal[i][Params.SIGMA] = 2 * sq(point[Params.INTENSITY]) * expterm * (sq(dx) + sq(dy)) / sigma3;
+					}
                     if (fixOffset) {
                     	retVal[i][Params.OFFSET] = 0;
                     } else {
                     	retVal[i][Params.OFFSET] = 2 * point[Params.OFFSET];
                     }
                 }
-
                 return retVal;
-
         	}
         };
 	}
 
 	@Override
 	public double[] pointToParameters(double[] point) {
-
     	double [] params = point.clone();
-
-    	params[Params.INTENSITY] = point[Params.INTENSITY] * point[Params.INTENSITY];
-        params[Params.SIGMA] = point[Params.SIGMA] * point[Params.SIGMA];
+        params[Params.SIGMA] = FastMath.abs(point[Params.SIGMA] / FastMath.sqrt(2));
         params[Params.OFFSET] = point[Params.OFFSET] * point[Params.OFFSET];
-
+    	params[Params.INTENSITY] = sq(point[Params.INTENSITY]) * FastMath.PI * sq(point[Params.SIGMA]);
         return params;
     }
 
@@ -120,9 +96,10 @@ public class GaussianPSF implements PSFFittingFunction {
 
     	double [] point = parameters.clone();
 
-    	point[Params.INTENSITY] = FastMath.sqrt(parameters[Params.INTENSITY]);
-        point[Params.SIGMA] = FastMath.sqrt(parameters[Params.SIGMA]);
+        point[Params.SIGMA] = parameters[Params.SIGMA] * FastMath.sqrt(2);
         point[Params.OFFSET] = FastMath.sqrt(parameters[Params.OFFSET]);
+    	point[Params.INTENSITY] =
+    			FastMath.sqrt(parameters[Params.INTENSITY] / FastMath.PI / sq(point[Params.SIGMA]));
 
         return point;
     }

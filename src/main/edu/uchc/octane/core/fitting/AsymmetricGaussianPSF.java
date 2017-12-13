@@ -85,14 +85,11 @@ public class AsymmetricGaussianPSF implements PSFFittingFunction {
 
 	@Override
 	public double[] pointToParameters(double[] point) {
-
     	double [] params = point.clone();
-
         params[Params.SIGMAX] = FastMath.abs(point[Params.SIGMAX] / FastMath.sqrt(2));
         params[Params.SIGMAY] = FastMath.abs(point[Params.SIGMAY] / FastMath.sqrt(2));
         params[Params.OFFSET] = point[Params.OFFSET] * point[Params.OFFSET];
     	params[Params.INTENSITY] = sq(point[Params.INTENSITY]) * FastMath.PI * point[Params.SIGMAX] * point[Params.SIGMAY];
-
         return params;
     }
 
@@ -122,3 +119,4 @@ public class AsymmetricGaussianPSF implements PSFFittingFunction {
 		return dof;
 	}
 }
+
