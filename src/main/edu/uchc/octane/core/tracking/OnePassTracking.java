@@ -12,7 +12,7 @@ import edu.uchc.octane.core.utils.HData;
  * @author Ji-Yu
  *
  */
-public class SimpleTracking {
+public class OnePassTracking {
 
 	public class Trajectory extends ArrayList<HData> {
 		int lastFrame;
@@ -39,7 +39,7 @@ public class SimpleTracking {
 //		}
 //	}
 
-	public SimpleTracking(double maxDisplacement, int maxBlinking) {
+	public OnePassTracking(double maxDisplacement, int maxBlinking) {
 		this.maxBlinking = maxBlinking;
 		maxDisplacement2 = maxDisplacement * maxDisplacement;
 	}

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.uchc.octane.core.datasource.Localizations;
-import edu.uchc.octane.core.datasource.RawLocalizationData;
+import edu.uchc.octane.core.datasource.octaneDataFile;
 
 public class LocalizationImage extends Localizations {
 
@@ -76,7 +76,7 @@ public class LocalizationImage extends Localizations {
 		}
 	}
 
-	public LocalizationImage(RawLocalizationData locData) {
+	public LocalizationImage(octaneDataFile locData) {
 		super(locData);
 		pixelSize = 16.0;
 		dimx = 5120;
@@ -96,7 +96,7 @@ public class LocalizationImage extends Localizations {
 	}
 
 	public LocalizationImage(ObjectInputStream s) throws ClassNotFoundException, IOException {
-		this((RawLocalizationData) s.readObject());
+		this((octaneDataFile) s.readObject());
 	}
 
 	public HashMap<Integer, double[] > getViewFilters() {

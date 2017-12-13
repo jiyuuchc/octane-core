@@ -14,12 +14,11 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
-import org.apache.commons.math3.util.FastMath;
 import org.json.JSONException;
 import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
 
-import edu.uchc.octane.core.datasource.RawLocalizationData;
 import edu.uchc.octane.core.datasource.RectangularImage;
+import edu.uchc.octane.core.datasource.octaneDataFile;
 import edu.uchc.octane.core.fitting.DAOFitting;
 import edu.uchc.octane.core.fitting.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.LeastSquare;
@@ -27,8 +26,6 @@ import edu.uchc.octane.core.frameanalysis.LocalMaximum;
 import mmcorej.TaggedImage;
 
 public class AnalyzeCommand {
-
-	final static double sqrt2pi = FastMath.sqrt(2 * FastMath.PI);
 
 	static Options options;
 	static long windowSize = 3;
@@ -217,7 +214,7 @@ public class AnalyzeCommand {
 				data[i][j] = positions.get(j)[i];
 			}
 		}
-		RawLocalizationData raw = new RawLocalizationData(data, headers);
+		octaneDataFile raw = new octaneDataFile(data, headers);
 
 		System.out.println("Saving to file: " + args.get(1));
 		ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(args.get(1)));
@@ -231,7 +228,7 @@ public class AnalyzeCommand {
 		r[0] = f + 1;
 		r[1] = param[0] * pixelSize ; //x
 		r[2] = param[1] * pixelSize ; //y
-		r[3] = param[2] * sqrt2pi * param[3];
+		r[3] = param[2];
 		r[4] = param[3] * pixelSize;
 		r[5] = param[4];
 		return r;

@@ -9,7 +9,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.jtransforms.fft.FloatFFT_2D;
 
-import edu.uchc.octane.core.datasource.RawLocalizationData;
+import edu.uchc.octane.core.datasource.octaneDataFile;
 import edu.uchc.octane.core.image.LocalizationImage;
 
 public class CorrelationEstimator {
@@ -30,7 +30,7 @@ public class CorrelationEstimator {
 		this.pixelSize = pixelSize;
 	}
 
-	public void correct(RawLocalizationData data) {
+	public void correct(octaneDataFile data) {
 
 		double [][] raw = data.data;
 		for (int i = 0; i < raw[0].length; i++) {
@@ -39,7 +39,7 @@ public class CorrelationEstimator {
 		}
 	}
 
-	public void estimate(RawLocalizationData data, Rectangle roi, int numOfKeyFrames) {
+	public void estimate(octaneDataFile data, Rectangle roi, int numOfKeyFrames) {
 		LocalizationImage img = new LocalizationImage(data);
 		img.setRoi(roi);
 		LocalizationImage newImg;

@@ -5,47 +5,53 @@ import java.util.ArrayList;
 import org.apache.commons.math3.util.FastMath;
 
 import edu.uchc.octane.core.datasource.Localizations;
-import edu.uchc.octane.core.datasource.RawLocalizationData;
+import edu.uchc.octane.core.datasource.octaneDataFile;
 import edu.uchc.octane.core.utils.HData;
 
-public class SimpleTracking2D extends SimpleTracking {
+public class TrackingDataFile extends OnePassTracking {
 
-	public SimpleTracking2D(double maxDisplacement, int maxBlinking) {
-		super(maxDisplacement, maxBlinking);
-	}
-
+	int dimension;
 	Localizations locData;
 	double [][] data;
+	int [] cols;
+
+	public TrackingDataFile(double maxDisplacement, int maxBlinking) {
+		this(maxDisplacement, maxBlinking, false);
+	}
+
+	public TrackingDataFile(double maxDisplacement, int maxBlinking, boolean is3D) {
+		super(maxDisplacement, maxBlinking);
+		dimension = is3D?3:2;
+	}
 
 	class TrackingHData implements HData {
 		int idx;
 
 		public TrackingHData(int idx) {
 			this.idx = idx;
+
 		}
 
 		@Override
 		public int getDimension() {
-			return 2;
+			return dimension;
 		}
 
 		@Override
 		public double get(int d) {
-			if (d==0) {
-				return data[locData.xCol][idx];
-			} else {
-				return data[locData.yCol][idx];
-			}
+			return data[cols[d]][idx];
 		}
 	}
 
-	public RawLocalizationData processLocalizations(Localizations loc) {
+	public octaneDataFile processLocalizations(Localizations loc) {
 		locData = loc;
 		data = loc.data;
+		cols = new int[] {loc.xCol, loc.yCol, loc.zCol};
+		double [][] data = locData.data;
 
 		int maxFrame = (int) locData.getSummaryStatitics(locData.frameCol).getMax();
 		ArrayList<TrackingHData> [] dataset = new ArrayList[maxFrame];
-		double [][] data = locData.data;
+
 		for (int i = 0; i < maxFrame; i ++) {
 			dataset[i] = new ArrayList<TrackingHData>();
 		}
@@ -62,7 +68,11 @@ public class SimpleTracking2D extends SimpleTracking {
 		for (int i = 0 ; i < results.size(); i ++) {
 			mergeTrack(results.get(i), newData, i);
 		}
-		return new RawLocalizationData(newData, locData.getHeaders());
+		return new octaneDataFile(newData, locData.getHeaders());
+	}
+
+	public octaneDataFile processLocalizations(octaneDataFile data) {
+		return processLocalizations(new Localizations(data));
 	}
 
 	void mergeTrack(Trajectory track, double[][] target, int idx) {

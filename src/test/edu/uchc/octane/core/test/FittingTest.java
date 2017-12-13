@@ -6,6 +6,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.uchc.octane.core.datasource.RectangularImage;
+import edu.uchc.octane.core.fitting.AsymmetricGaussianPSF;
 import edu.uchc.octane.core.fitting.DAOFitting;
 import edu.uchc.octane.core.fitting.GaussianPSF;
 import edu.uchc.octane.core.fitting.IntegratedGaussianPSF;
@@ -39,6 +40,16 @@ public class FittingTest {
 		for (int i = 0; i < TEST_VALUES_WITH_BACKGROUND.length; i ++) {
 			TEST_VALUES_WITH_BACKGROUND[i] = TEST_VALUES[i] + 1.0;
 		}
+	}
+
+	@Test
+	public void testAsymmetricGaussian() {
+		System.out.println("Least Square Asymmetric Guassian");
+		LeastSquare lsq = new LeastSquare(new AsymmetricGaussianPSF());
+		final double [] start = {5.5, 5.5, 1, 1.5, 1.5, 0.8};
+		double[] result = lsq.fit(new RectangularImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE), start);
+		double [] expected = {6, 5, 1, 1.53, 1.53, 1};
+		assertArrayEquals(expected, result, 0.01);
 	}
 
 	@Test
