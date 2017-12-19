@@ -75,8 +75,8 @@ public class Localizations {
 
 	private void guessHeaders() {
 		for (String key:headersMap.keySet()) {
-			key = key.toLowerCase();
 			int col = headersMap.get(key);
+			key = key.toLowerCase();
 			if (key.startsWith("x ") || key.equals("x")) {
 				xCol = col;
 			} else if (key.startsWith("y ") || key.equals("y")) {
