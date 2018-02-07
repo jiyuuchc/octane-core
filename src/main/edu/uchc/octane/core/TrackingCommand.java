@@ -16,7 +16,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
 
 import edu.uchc.octane.core.datasource.Localizations;
-import edu.uchc.octane.core.datasource.octaneDataFile;
+import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.tracking.TrackingDataFile;
 
 public class TrackingCommand {
@@ -56,10 +56,10 @@ public class TrackingCommand {
 		System.out.println("Tracking ...");
 		printParameters();
 
-		locData = new Localizations((octaneDataFile) s.readObject());
+		locData = new Localizations((OctaneDataFile) s.readObject());
 		TrackingDataFile tracker = new TrackingDataFile(trackingDistance, (int) blinkings);
 
-		octaneDataFile mergedData = tracker.processLocalizations(locData);
+		OctaneDataFile mergedData = tracker.processLocalizations(locData);
 
         ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(args.get(1)));
         System.out.println("Output file: " + args.get(1));

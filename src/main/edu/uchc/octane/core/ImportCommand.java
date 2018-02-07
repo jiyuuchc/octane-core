@@ -15,7 +15,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
 import org.json.JSONException;
 
-import edu.uchc.octane.core.datasource.octaneDataFile;
+import edu.uchc.octane.core.datasource.OctaneDataFile;
 
 public class ImportCommand {
 
@@ -46,7 +46,7 @@ public class ImportCommand {
         // long startTime = System.currentTimeMillis();
         System.out.println("Reading CSV file: " + csvFilepath);
 
-        octaneDataFile dataset = octaneDataFile.importFromThunderstorm(csvFile);
+        OctaneDataFile dataset = OctaneDataFile.importFromThunderstorm(csvFile);
         ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(args.get(1)));
 
         System.out.println("Output file: " + args.get(1));

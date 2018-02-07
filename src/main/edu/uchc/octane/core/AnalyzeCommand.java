@@ -18,7 +18,7 @@ import org.json.JSONException;
 import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
 
 import edu.uchc.octane.core.datasource.RectangularImage;
-import edu.uchc.octane.core.datasource.octaneDataFile;
+import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.fitting.AsymmetricGaussianPSF;
 import edu.uchc.octane.core.fitting.DAOFitting;
 import edu.uchc.octane.core.fitting.IntegratedGaussianPSF;
@@ -227,7 +227,7 @@ public class AnalyzeCommand {
 				data[i][j] = positions.get(j)[i];
 			}
 		}
-		octaneDataFile raw = new octaneDataFile(data, headers);
+		OctaneDataFile raw = new OctaneDataFile(data, headers);
 
 		System.out.println("Saving to file: " + args.get(1));
 		ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(args.get(1)));

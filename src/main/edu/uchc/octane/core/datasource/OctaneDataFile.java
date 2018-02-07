@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import org.simpleflatmapper.csv.CsvParser;
 import org.simpleflatmapper.util.CloseableIterator;
 
-public class octaneDataFile implements Serializable  {
+public class OctaneDataFile implements Serializable  {
 
 	/**
 	 *
@@ -18,12 +18,12 @@ public class octaneDataFile implements Serializable  {
 	public String [] headers;
 	public double [][] data;
 
-	public octaneDataFile(double[][] data, String []headers) {
+	public OctaneDataFile(double[][] data, String []headers) {
 		this.data = data;
 		this.headers = headers;
 	}
 
-	public static octaneDataFile importFromThunderstorm(File csvFile) throws IOException {
+	public static OctaneDataFile importFromThunderstorm(File csvFile) throws IOException {
 
 		ArrayList<double[]> locations = new ArrayList<double[]>();
         try (CloseableIterator<String[]> it = CsvParser.iterator(csvFile)) {
@@ -53,7 +53,7 @@ public class octaneDataFile implements Serializable  {
             	}
             }
 
-            octaneDataFile dataset = new octaneDataFile(data, headers);
+            OctaneDataFile dataset = new OctaneDataFile(data, headers);
             return dataset;
         }
 	}

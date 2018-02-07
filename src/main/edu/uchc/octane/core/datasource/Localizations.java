@@ -9,7 +9,7 @@ import edu.uchc.octane.core.utils.HDataCollection;
 
 public class Localizations {
 
-	final octaneDataFile locData;
+	final OctaneDataFile locData;
 	DoubleSummaryStatistics [] stats;
 	HashMap<String, Integer> headersMap;
 
@@ -57,7 +57,7 @@ public class Localizations {
 
 	}
 
-	public Localizations(octaneDataFile raw) {
+	public Localizations(OctaneDataFile raw) {
 		locData = raw;
 		data = new double[raw.data.length + 1][]; // last column is for storing local density
 		System.arraycopy(raw.data, 0, data, 0, raw.data.length);

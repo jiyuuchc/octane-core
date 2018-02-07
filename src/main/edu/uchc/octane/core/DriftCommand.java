@@ -15,7 +15,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
 
-import edu.uchc.octane.core.datasource.octaneDataFile;
+import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.drift.CorrelationEstimator;
 
 public class DriftCommand {
@@ -82,7 +82,7 @@ public class DriftCommand {
 		CorrelationEstimator corrector = new CorrelationEstimator();
 		System.out.println("Loading File : " + args.get(0));
 		ObjectInputStream s = new ObjectInputStream(new FileInputStream(args.get(0)));
-		octaneDataFile data = (octaneDataFile) s.readObject();
+		OctaneDataFile data = (OctaneDataFile) s.readObject();
 		s.close();
 		System.out.println("Load File: done");
 
