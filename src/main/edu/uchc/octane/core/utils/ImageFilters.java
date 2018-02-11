@@ -3,6 +3,8 @@ package edu.uchc.octane.core.utils;
 import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 
+import edu.uchc.octane.core.datasource.RectangularImage;
+
 public class ImageFilters {
 
 	public static double [] makeGaussianFilter(double sigma, int size) {
@@ -123,4 +125,8 @@ public class ImageFilters {
 		return result2;
 	}
 
+	public static RectangularImage symmetricFilter(double[] h, RectangularImage a) {
+		double [] newImg = symmetricFilter(h, a.getValueVector(), a.width);
+		return new RectangularImage(newImg, a.width, a.x0, a.y0);
+	}
 }
