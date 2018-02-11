@@ -2,12 +2,18 @@ package edu.uchc.octane.core.datasource;
 
 public class RectangularImage extends ImageData {
 
-	private double [] data;
+	double [] data;
 	// x0, y0 is the top-left coordinate of the data
 	public int x0, y0,width, height;
 
-	public RectangularImage(double [] data, int imageWidth ) {
-		this.data = data.clone();
+	public RectangularImage(double [] data, int imageWidth) {
+		this(data, imageWidth, 0, 0);
+	}
+
+	public RectangularImage(double [] data, int imageWidth, int x0, int y0) {
+		this.data = data;
+		this.x0 = x0;
+		this.y0 = y0;
 		width = imageWidth;
 		height = data.length / width;
 
@@ -60,6 +66,9 @@ public class RectangularImage extends ImageData {
 		this(origData, x0, y0, width, height, false);
 	}
 
+	public RectangularImage clone() {
+		return new RectangularImage(getValueVector().clone(), width, x0, y0);
+	}
 
 	@Override
 	public int getXCordinate(int idx) {
@@ -83,11 +92,7 @@ public class RectangularImage extends ImageData {
 
 	@Override
 	public boolean isCoordinateValid(int x, int y) {
-		if (x >= x0 && x < x0 + width && y >= y0 && y < y0 + height ) {
-			return true;
-		} else {
-			return false;
-		}
+		return (x >= x0 && x < x0 + width && y >= y0 && y < y0 + height );
 	}
 
 	@Override
