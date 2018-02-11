@@ -115,11 +115,11 @@ public class Localizations {
 		}
 	}
 
-	double [] getData(int col) {
+	public double [] getData(int col) {
 		return data[col];
 	}
 
-	double [] getData(String colHeader) {
+	public double [] getData(String colHeader) {
 		return data[headersMap.get(colHeader)];
 	}
 
