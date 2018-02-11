@@ -9,8 +9,11 @@ public abstract class ImageData {
 	public abstract int getYCordinate(int idx);
 
 	public double getValue(int idx) {
-
 		return getValueVector()[idx];
+	}
+
+	public void setValue(int idx, double v) {
+		getValueVector()[idx] = v;;
 	}
 
 	public abstract int getIndexOfCoordinate(int x, int y);
