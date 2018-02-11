@@ -6,6 +6,7 @@ import java.util.stream.IntStream;
 import org.apache.commons.math3.util.FastMath;
 
 import edu.uchc.octane.core.datasource.Localizations;
+import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.datasource.RectangularImage;
 import edu.uchc.octane.core.utils.ImageFilters;
 
@@ -39,58 +40,74 @@ public class Basdi {
 	public RectangularImage theta;
 	public RectangularImage [] marginals;
 	public double [][] drifts;
-	
+
 	public Basdi() {
 		this(	DEFAULT_MAX_DRIFT,
-				DEFAULT_LOCALIZATION_SIGMA,
-				DEFAULT_DRIFT_SIGMA,
 				DEFAULT_DRIFT_RESOLUTION,
+				// DEFAULT_LOCALIZATION_SIGMA,
+				DEFAULT_DRIFT_SIGMA,				
 				DEFAULT_CREEP_PROBABILITY,
 				DEFAULT_MAX_ITERATIONS);
 	}
 
-	public Basdi(double maxShift, double localizationSigma, double driftSigma, double driftResolution, double creepProbability, int maxIterations) {
+	public Basdi(double maxDistance, double pixelSize) {
+		this(maxDistance, pixelSize, DEFAULT_DRIFT_SIGMA, DEFAULT_CREEP_PROBABILITY, DEFAULT_MAX_ITERATIONS);
+	}
+
+	public Basdi(double maxDistance, double pixelSize, double driftSigma, double creepProbability, int maxIterations) {
 
 		this.maxIterations = maxIterations;
-		this.driftResolution = driftResolution;
-		this.maxShift = (int) FastMath.round(maxShift / driftResolution);
-		this.localizationSigma = localizationSigma/ driftResolution;
-		this.driftSigma = driftSigma / driftResolution;
+		this.driftResolution = pixelSize;
+		this.maxShift = (int) FastMath.round(maxDistance / pixelSize);
+		// this.localizationSigma = localizationSigma/ pixelSize;
+		this.driftSigma = driftSigma / pixelSize;
 
-		if ( this.maxShift <= 0 || this.localizationSigma <= 0 || this.maxIterations <= 0 || this.driftResolution <=0 || this.maxIterations <=0) {
+		if ( this.maxShift <= 0 || this.maxIterations <= 0 || this.driftResolution <=0 || this.maxIterations <=0) {
 			throw new IllegalArgumentException("Illegal negative parameters");
 		}
 
 		this.creepProbability = creepProbability;
 	}
 
+	public void estimate(OctaneDataFile data, int numOfKeyFrames) {
+		Localizations locs = new Localizations(data);
+		prepareData(locs, numOfKeyFrames);
+		guessInitialTheta(locs);
+		driftFilter = ImageFilters.makeGaussianFilter(driftSigma, driftSigma < 0.3 ? 3 : 5, true);
+		optimizeWithAnnealing();
+	}
 
-//	public void analyze(LocalizationDataset locData, double[] imgSize, int nTimePoints) {
-//
-//		imgWidth = (int) FastMath.ceil(imgSize[1] / driftResolution);
-//		imgHeight = (int) FastMath.ceil(imgSize[0] / driftResolution);
-//
-//		theta = null;
-//
-//		doAnalysis(locData, nTimePoints);
-//	}
-//
-//	public void analyze(LocalizationDataset locData, double [][] startingTheta, int nTimePoints) {
-//
-//		theta = startingTheta;
-//
-//		imgWidth = theta.length;
-//		imgHeight = theta[0].length;
-//
-//		doAnalysis(locData, nTimePoints);
-//	}
+	//should be called after prepareData(), changes this.theta
+	protected void guessInitialTheta(Localizations locs) {
+
+		double maxX = FastMath.floor(locs.getSummaryStatitics(locs.xCol).getMax() / driftResolution);
+		double minX = FastMath.floor(locs.getSummaryStatitics(locs.xCol).getMin() / driftResolution);		
+		double maxY = FastMath.floor(locs.getSummaryStatitics(locs.yCol).getMax() / driftResolution);
+		double minY = FastMath.floor(locs.getSummaryStatitics(locs.yCol).getMin() / driftResolution);
+
+		int width = (int) (maxX - minX + 1);
+		int height = (int) (maxY - minY + 1);
+		if (width * height > 5e7) {
+			System.out.println("Warning: very large image. May take forever.");
+		}
+		theta = new RectangularImage(new double[width * height], width, (int) minX, (int) minY);
+		double [] values = theta.getValueVector();
+		for (int k = 0; k < data.length; k++) {
+			int [] xv = data[k][0];
+			int [] yv = data[k][1];
+			for (int i = 0; i < xv.length; i++) {
+				int idx = theta.getIndexOfCoordinate(xv[i], yv[i]);
+				values[idx] ++;
+			}
+		}
+	}
 
 	protected void prepareData(Localizations locs, int numOfKeyFrames) {
 		// data_ = new double [2][];
 		double [] rawFrames = locs.getData(locs.frameCol);
 		intFrames = new int[locs.getNumLocalizations()];
 		int [] cnts = new int[numOfKeyFrames];
-		
+
 		//precounting;
 		int maxFrame = (int) locs.getSummaryStatitics(locs.frameCol).getMax();
 		int minFrame = (int) locs.getSummaryStatitics(locs.frameCol).getMin();
@@ -104,14 +121,14 @@ public class Basdi {
 			intFrames[i] = k;
 			cnts[k] ++;
 		}
-		
+
 		// longest dimension should always be the last index
 		data = new int[numOfKeyFrames][][];
 		for (int i = 0; i < numOfKeyFrames; i++) {
 			data[i] = new int[2][cnts[i]];
 		}
 		Arrays.fill(cnts, 0);
-		
+
 		double [] xcol = locs.getData(locs.xCol);
 		double [] ycol = locs.getData(locs.yCol);
 		for (int i = 0; i < locs.getNumLocalizations(); i++) {
@@ -123,10 +140,11 @@ public class Basdi {
 	}
 
 	// needs this.intFrame, this.drift
-	protected void correctDrift(Localizations locs) {
+	protected void correct(OctaneDataFile data) {
+		Localizations locs = new Localizations(data);
 		double [] xcol = locs.getData(locs.xCol);
 		double [] ycol = locs.getData(locs.yCol);
-		
+
 		for (int i = 0; i < locs.getNumLocalizations(); i++) {
 			int k = intFrames[i];
 			xcol[i] += driftResolution * drifts[0][k];
@@ -148,7 +166,7 @@ public class Basdi {
 			scale -= ANNEAL_SCALE_STEP;
 		}
 	}
-	
+
 	// needs this.theta, this.data; modified this.theta, this.marginals, this.drifts
 	protected void optimizeWithEM() {
 		boolean converged = false;
@@ -156,22 +174,22 @@ public class Basdi {
 
 		do {
 			iter ++;
-			
+
 			System.out.println("E Step - " + iter);
 			theta = ImageFilters.symmetricFilter(annealingFilter, theta);
 			RectangularImage[] probs = exy(theta, data);
 			marginals = forBack(probs);
-			
+
 			System.out.println("M Step - " + iter);
 			updateTheta(theta, marginals, data);
-			
+
 			double [][] oldDrifts = drifts;
 			drifts = calculateAvgDrift(marginals);
 			converged = testConvergence(oldDrifts, drifts);
 
 		} while (! converged && iter ++ < maxIterations);
 	}		
-	
+
 	protected boolean testConvergence(double [][] oldDrifts, double [][] newDrifts) {
 		double cvge2 = DEFAULT_CONVERGENCE_EPS * DEFAULT_CONVERGENCE_EPS;
 		for (int d = 0; d < oldDrifts.length; d ++) {
@@ -275,7 +293,7 @@ public class Basdi {
 		IntStream.range(0, data.length).parallel().forEach( f -> {
 			localProb[f] = exyf2(logTheta, data[f]);
 		});
-		
+
 		return localProb;
 	}
 
@@ -289,7 +307,7 @@ public class Basdi {
 				new double[matrixSize * matrixSize], matrixSize, -maxShift, -maxShift);
 
 		if (o != null && o[0] != null && o[0].length != 0) {
-		
+
 			// e = theta cov image(o)
 			double maxLog = Double.MIN_VALUE;
 			int dataLen = o[0].length;
@@ -404,9 +422,9 @@ public class Basdi {
 
 	// result = Filter(H + eps, a)	
 	protected RectangularImage ofsFilter2(double [] h, RectangularImage a, double eps) {
-		
+
 		RectangularImage result = ImageFilters.symmetricFilter(h, a);
-		
+
 		if (eps != 0) { 
 			for (int idx = 0; idx < result.getLength(); idx ++) {
 				result.getValueVector()[idx] += eps;
@@ -414,26 +432,4 @@ public class Basdi {
 		}
 		return result;
 	}
-
-//	protected double [] makeGaussianFilter(double sigma, int size) {
-//
-//		double [] filter = new double[size];
-//
-//		double s = 0;
-//		for (int i = 0; i < size; i ++) {
-//
-//			double x = -(double)(size - 1)/2.0 + i;
-//			filter[i] = FastMath.exp((- x * x) / (2 * sigma * sigma));
-//			s += filter[i];
-//
-//		}
-//
-//		for (int i = 0; i < size; i ++) {
-//
-//			filter[i] /= s;
-//
-//		}
-//
-//		return filter;
-//	}
- }
+}
