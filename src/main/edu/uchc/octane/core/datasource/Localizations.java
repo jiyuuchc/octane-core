@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 
+import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,5 +165,19 @@ public class Localizations {
 			data[localDensityCol][i] = tree.radiusSearch(i, distance).size();
 		}
 		densityCol = localDensityCol;
+	}
+	
+	//in default axis convention:
+	// rotation around top left corner (0,0)
+	// positive theta values rotate counter-clock-wise
+	public void rotate(double theta) {
+		double [] xData = getData(xCol);
+		double [] yData = getData(yCol);
+		double cosTheta = FastMath.cos(theta);
+		double sinTheta = FastMath.sin(theta);
+		for (int i = 0; i < getNumLocalizations(); i ++) {
+			xData[i] = cosTheta * xData[i] - sinTheta * yData[i];
+			yData[i] = sinTheta * xData[i] + cosTheta * yData[i];
+		}
 	}
 }
