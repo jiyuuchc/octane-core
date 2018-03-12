@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.simpleflatmapper.csv.CsvParser;
 import org.simpleflatmapper.util.CloseableIterator;
@@ -25,6 +26,14 @@ public class OctaneDataFile implements Serializable  {
 		this.headers = headers;
 	}
 
+	public OctaneDataFile(OctaneDataFile odf) {
+		headers = headers.clone();
+		data = new double[odf.data.length][];
+		for (int i = 0; i < data.length; i ++) {
+			data[i] = odf.data[i].clone();
+		}
+	}
+	
 	public static OctaneDataFile importFromThunderstorm(File csvFile) throws IOException {
 
 		ArrayList<double[]> locations = new ArrayList<double[]>();

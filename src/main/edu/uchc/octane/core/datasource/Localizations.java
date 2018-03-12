@@ -4,10 +4,16 @@ import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import edu.uchc.octane.core.drift.Basdi;
 import edu.uchc.octane.core.utils.FastKDTree;
 import edu.uchc.octane.core.utils.HDataCollection;
 
 public class Localizations {
+
+	final Logger logger = LoggerFactory.getLogger(Basdi.class);
 
 	final OctaneDataFile locData;
 	DoubleSummaryStatistics [] stats;
@@ -72,8 +78,12 @@ public class Localizations {
 
 		guessHeaders();
 	}
+	
+	public Localizations(Localizations loc) {
+		this(new OctaneDataFile(loc.locData));
+	}
 
-	private void guessHeaders() {
+	void guessHeaders() {
 		for (String key:headersMap.keySet()) {
 			int col = headersMap.get(key);
 			key = key.toLowerCase();
@@ -98,7 +108,7 @@ public class Localizations {
 			errCol = data.length -1;
 		}
 	}
-
+	
 	public DoubleSummaryStatistics getSummaryStatitics(int col) {
 
 		if ( stats[col] == null) {

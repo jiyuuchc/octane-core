@@ -77,22 +77,16 @@ public class LocalizationImage extends Localizations {
 	}
 
 	public LocalizationImage(OctaneDataFile locData) {
+		this(locData, 16.0, 5120, 5120);
+	}
+
+	public LocalizationImage(OctaneDataFile locData, double pixelSize, int size_x, int size_y) {
 		super(locData);
-		pixelSize = 16.0;
-		dimx = 5120;
-		dimy = 5120;
-
-		//stats = new DoubleSummaryStatistics[data.length];
-//		for (int i= 0; i < data.length; i++) {
-//			stats[i]=  Arrays.stream(data[i]).summaryStatistics();
-//		}
-
+		this.pixelSize = pixelSize;
+		dimx = size_x;
+		dimy = size_y;
 		setRoi(null);
-		//renderingThread = new RenderingThread();
-		//renderingThread.start();
-
 		filters = new HashMap<Integer, double[]>();
-
 	}
 
 	public LocalizationImage(ObjectInputStream s) throws ClassNotFoundException, IOException {
