@@ -80,11 +80,11 @@ public class LocalizationImage extends Localizations {
 		this(locData, 16.0, 5120, 5120);
 	}
 
-	public LocalizationImage(OctaneDataFile locData, double pixelSize, int size_x, int size_y) {
+	public LocalizationImage(OctaneDataFile locData, double pixelSize, int dimX, int dimY) {
 		super(locData);
 		this.pixelSize = pixelSize;
-		dimx = size_x;
-		dimy = size_y;
+		this.dimx = dimX;
+		this.dimy = dimY;
 		setRoi(null);
 		filters = new HashMap<Integer, double[]>();
 	}
@@ -107,25 +107,17 @@ public class LocalizationImage extends Localizations {
 		// restartRendering();
 	}
 
-	public void setDim(int x, int y) {
-		dimx = x;
-		dimy = y;
-	}
+//	public void setDim(int x, int y) {
+//		dimx = x;
+//		dimy = y;
+//	}
 
 	public int getDimX() {
-		if (roi != null) {
-			return roi.width;
-		} else {
-			return dimx;
-		}
+		return dimx;
 	}
 
 	public int getDimY() {
-		if (roi != null) {
-			return roi.height;
-		} else {
-			return dimy;
-		}
+		return dimy;
 	}
 
 //	public void setPixelSize(double s) {
