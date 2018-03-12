@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import org.simpleflatmapper.csv.CsvParser;
 import org.simpleflatmapper.util.CloseableIterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class OctaneDataFile implements Serializable  {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
+	
+	static final Logger logger = LoggerFactory.getLogger(OctaneDataFile.class);
 
 	public String [] headers;
 	public double [][] data;
@@ -42,7 +44,7 @@ public class OctaneDataFile implements Serializable  {
         		}
         	}
 
-        	System.out.println("Convering...");
+        	logger.info("Converting from thunderstorm format.");
             double [][] data = new double[headers.length][];
             for (int i = 0; i < headers.length; i ++) {
             	data[i] = new double[locations.size()];

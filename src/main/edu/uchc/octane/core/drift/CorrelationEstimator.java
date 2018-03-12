@@ -8,6 +8,8 @@ import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.jtransforms.fft.FloatFFT_2D;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.image.LocalizationImage;
@@ -15,6 +17,7 @@ import edu.uchc.octane.core.image.LocalizationImage;
 public class CorrelationEstimator {
 
 	static final double smoothingBandWidth = 0.25;
+	final Logger logger = LoggerFactory.getLogger(CorrelationEstimator.class);
 	double maxDistance;
 	double pixelSize;
 
@@ -55,7 +58,7 @@ public class CorrelationEstimator {
 		img.addViewFilter(0, new double[] {1, framegroupSize });
 		keyFrames[0] = (1 + framegroupSize) / 2.0;
 		for (int i = 1; i < numOfKeyFrames; i++) {
-			System.out.println("Processing key frame: " + i);
+			logger.info("Processing key frame: " + i);
 			double min = i * framegroupSize + 1;
 			double max =  min + framegroupSize - 1;
 
@@ -71,7 +74,7 @@ public class CorrelationEstimator {
 			// img = newImg;
 		}
 
-		System.out.println("Interpolating... ");
+		logger.info("Interpolating... ");
         if(numOfKeyFrames < 4) {
             LinearInterpolator interpolator = new LinearInterpolator();
             xFunction = addLinearExtrapolationToBorders(interpolator.interpolate(keyFrames, driftX), 1 , maxFrameNum);
@@ -81,7 +84,7 @@ public class CorrelationEstimator {
             xFunction = addLinearExtrapolationToBorders(interpolator.interpolate(keyFrames, driftX), 1, maxFrameNum);
             yFunction = addLinearExtrapolationToBorders(interpolator.interpolate(keyFrames, driftY), 1, maxFrameNum);
         }
-        System.out.println("Interpolating: done ");
+        logger.info("Interpolating: done ");
 	}
 
 	protected int [] estimateDrift(LocalizationImage img1, LocalizationImage img2) {

@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.util.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.uchc.octane.core.datasource.Localizations;
 import edu.uchc.octane.core.datasource.OctaneDataFile;
@@ -12,6 +14,8 @@ import edu.uchc.octane.core.utils.ImageFilters;
 
 public class Basdi {
 
+	final Logger logger = LoggerFactory.getLogger(Basdi.class);
+	
 	static final double DEFAULT_DRIFT_RESOLUTION = 32; // nm
 	static final double DEFAULT_MAX_DRIFT = 1500; // nm
 	static final double DEFAULT_LOCALIZATION_SIGMA = 50/2.35; //nm
@@ -88,7 +92,7 @@ public class Basdi {
 		int width = (int) (maxX - minX + 1);
 		int height = (int) (maxY - minY + 1);
 		if (width * height > 5e7) {
-			System.out.println("Warning: very large image. May take forever.");
+			logger.warn("very large image. May take forever.");
 		}
 		theta = new RectangularImage(new double[width * height], width, (int) minX, (int) minY);
 		double [] values = theta.getValueVector();
@@ -161,7 +165,7 @@ public class Basdi {
 			int fs = (int) FastMath.round(FastMath.exp(scale));
 			annealingFilter = new double[fs];
 			Arrays.fill(annealingFilter, 1.0);
-			System.out.println("Round - " + round);
+			logger.info("Round - " + round);
 			optimizeWithEM();
 			scale -= ANNEAL_SCALE_STEP;
 		}
@@ -175,12 +179,12 @@ public class Basdi {
 		do {
 			iter ++;
 
-			System.out.println("E Step - " + iter);
+			logger.info("E Step - " + iter);
 			theta = ImageFilters.symmetricFilter(annealingFilter, theta);
 			RectangularImage[] probs = exy(theta, data);
 			marginals = forBack(probs);
 
-			System.out.println("M Step - " + iter);
+			logger.info("M Step - " + iter);
 			updateTheta(theta, marginals, data);
 
 			double [][] oldDrifts = drifts;
