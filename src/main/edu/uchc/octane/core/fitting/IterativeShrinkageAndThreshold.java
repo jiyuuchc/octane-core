@@ -2,8 +2,8 @@ package edu.uchc.octane.core.fitting;
 
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octane.core.datasource.ImageData;
-import edu.uchc.octane.core.datasource.RectangularImage;
+import edu.uchc.octane.core.pixelimage.AbstractDoubleImage;
+import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import edu.uchc.octane.core.utils.ImageFilters;
 
 public class IterativeShrinkageAndThreshold {
@@ -12,7 +12,7 @@ public class IterativeShrinkageAndThreshold {
     public final static double CONVERGENCE_DELTA = 1e-6;
 
     public int maxIters;
-    public ImageData data;
+    public AbstractDoubleImage data;
     public double psfSigma;
     public int scaleFactor;
     public double ts, lambda;
@@ -42,7 +42,7 @@ public class IterativeShrinkageAndThreshold {
     	this.maxIters = maxIters;
     }
 
-    public double[] fit(RectangularImage image, int scale, double sigma) {
+    public double[] fit(RectangularDoubleImage image, int scale, double sigma) {
 
     	this.data = image;
     	imgWidth = image.width * scale;

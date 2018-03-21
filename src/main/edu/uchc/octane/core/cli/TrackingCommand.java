@@ -1,4 +1,4 @@
-package edu.uchc.octane.core;
+package edu.uchc.octane.core.cli;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,15 +15,15 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
 
-import edu.uchc.octane.core.datasource.Localizations;
 import edu.uchc.octane.core.datasource.OctaneDataFile;
+import edu.uchc.octane.core.localizationimage.LocalizationImage;
 import edu.uchc.octane.core.tracking.TrackingDataFile;
 
 public class TrackingCommand {
 	static Options options;
 	static double trackingDistance;
 	static long blinkings;
-	static Localizations locData;
+	static LocalizationImage locData;
 
 	public static Options setupOptions() {
 		options = PatternOptionBuilder.parsePattern("ht%b%");
@@ -56,7 +56,7 @@ public class TrackingCommand {
 		System.out.println("Tracking ...");
 		printParameters();
 
-		locData = new Localizations((OctaneDataFile) s.readObject());
+		locData = new LocalizationImage((OctaneDataFile) s.readObject());
 		TrackingDataFile tracker = new TrackingDataFile(trackingDistance, (int) blinkings);
 
 		OctaneDataFile mergedData = tracker.processLocalizations(locData);

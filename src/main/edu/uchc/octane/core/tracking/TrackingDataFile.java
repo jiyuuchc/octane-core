@@ -4,14 +4,14 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octane.core.datasource.Localizations;
 import edu.uchc.octane.core.datasource.OctaneDataFile;
+import edu.uchc.octane.core.localizationimage.LocalizationImage;
 import edu.uchc.octane.core.utils.HData;
 
 public class TrackingDataFile extends OnePassTracking {
 
 	int dimension;
-	Localizations locData;
+	LocalizationImage locData;
 	double [][] data;
 	int [] cols;
 
@@ -43,7 +43,7 @@ public class TrackingDataFile extends OnePassTracking {
 		}
 	}
 
-	public OctaneDataFile processLocalizations(Localizations loc) {
+	public OctaneDataFile processLocalizations(LocalizationImage loc) {
 		locData = loc;
 		data = loc.data;
 		cols = new int[] {loc.xCol, loc.yCol, loc.zCol};
@@ -72,7 +72,7 @@ public class TrackingDataFile extends OnePassTracking {
 	}
 
 	public OctaneDataFile processLocalizations(OctaneDataFile data) {
-		return processLocalizations(new Localizations(data));
+		return processLocalizations(new LocalizationImage(data));
 	}
 
 	void mergeTrack(Trajectory track, double[][] target, int idx) {

@@ -1,6 +1,6 @@
 package edu.uchc.octane.core.fitting;
 
-import edu.uchc.octane.core.datasource.RectangularImage;
+import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 
 /**
  * Ref:
@@ -11,7 +11,7 @@ import edu.uchc.octane.core.datasource.RectangularImage;
 
 public class RadialSymmetryFitting {
 
-	public RectangularImage data;
+	public RectangularDoubleImage data;
 
 	public static class Params {
 		public static final int X = 0;
@@ -23,7 +23,7 @@ public class RadialSymmetryFitting {
 
 	}
 
-	public double [] fit(RectangularImage data) {
+	public double [] fit(RectangularDoubleImage data) {
 
 		this.data = data;
 		int [] size = {data.width, data.height};

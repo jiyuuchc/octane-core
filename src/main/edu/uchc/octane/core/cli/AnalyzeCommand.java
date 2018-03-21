@@ -1,4 +1,4 @@
-package edu.uchc.octane.core;
+package edu.uchc.octane.core.cli;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,13 +17,13 @@ import org.apache.commons.cli.PatternOptionBuilder;
 import org.json.JSONException;
 import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
 
-import edu.uchc.octane.core.datasource.RectangularImage;
 import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.fitting.AsymmetricGaussianPSF;
 import edu.uchc.octane.core.fitting.DAOFitting;
 import edu.uchc.octane.core.fitting.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.LeastSquare;
 import edu.uchc.octane.core.frameanalysis.LocalMaximum;
+import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import mmcorej.TaggedImage;
 
 public class AnalyzeCommand {
@@ -124,14 +124,14 @@ public class AnalyzeCommand {
 		for (int i = 0; i < pixels.length; i ++) {
 			pixels[i] = iPixels[i] - backgroundIntensity ;
 		}
-		RectangularImage data = new RectangularImage(pixels, img.tags.getInt("Width"));
+		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
 		cnt[frame] = 0;
 
 		finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
 			double [] start = {0, 0, 0, 1.5, 1};
 
 			@Override
-			public boolean fit(RectangularImage img, int x, int y) {
+			public boolean fit(RectangularDoubleImage img, int x, int y) {
 
 				// System.out.println("Location " + (c++) +" : " + x + " - " + y + " - " + img.getValueAtCoordinate(x, y));
 				start[0] = x; start[1] = y;  start[2] = img.getValueAtCoordinate(x, y) * 10;
@@ -156,14 +156,14 @@ public class AnalyzeCommand {
 		for (int i = 0; i < pixels.length; i ++) {
 			pixels[i] = iPixels[i] - backgroundIntensity ;
 		}
-		RectangularImage data = new RectangularImage(pixels, img.tags.getInt("Width"));
+		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
 		cnt[frame] = 0;
 
 		finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
 			double [] start = {0, 0, 0, 1.5, 1};
 
 			@Override
-			public boolean fit(RectangularImage img, int x, int y) {
+			public boolean fit(RectangularDoubleImage img, int x, int y) {
 
 				// System.out.println("Location " + (c++) +" : " + x + " - " + y + " - " + img.getValueAtCoordinate(x, y));
 				start[0] = x; start[1] = y;  start[2] = img.getValueAtCoordinate(x, y) * 10;

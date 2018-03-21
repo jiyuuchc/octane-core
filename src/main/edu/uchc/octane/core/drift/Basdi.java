@@ -7,9 +7,9 @@ import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uchc.octane.core.datasource.Localizations;
 import edu.uchc.octane.core.datasource.OctaneDataFile;
-import edu.uchc.octane.core.datasource.RectangularImage;
+import edu.uchc.octane.core.localizationimage.LocalizationImage;
+import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import edu.uchc.octane.core.utils.ImageFilters;
 
 public class Basdi {
@@ -41,8 +41,8 @@ public class Basdi {
 	double[] driftFilter; // for drift probability
 
 	// all results
-	public RectangularImage theta;
-	public RectangularImage [] marginals;
+	public RectangularDoubleImage theta;
+	public RectangularDoubleImage [] marginals;
 	public double [][] drifts;
 
 	public Basdi() {
@@ -74,7 +74,7 @@ public class Basdi {
 	}
 
 	public void estimate(OctaneDataFile data, int numOfKeyFrames) {
-		Localizations locs = new Localizations(data);
+		LocalizationImage locs = new LocalizationImage(data);
 		prepareData(locs, numOfKeyFrames);
 		guessInitialTheta(locs);
 		driftFilter = ImageFilters.makeGaussianFilter(driftSigma, driftSigma < 0.3 ? 3 : 5, true);
@@ -82,7 +82,7 @@ public class Basdi {
 	}
 
 	//should be called after prepareData(), changes this.theta
-	protected void guessInitialTheta(Localizations locs) {
+	protected void guessInitialTheta(LocalizationImage locs) {
 
 		double maxX = FastMath.floor(locs.getSummaryStatitics(locs.xCol).getMax() / driftResolution);
 		double minX = FastMath.floor(locs.getSummaryStatitics(locs.xCol).getMin() / driftResolution);		
@@ -94,7 +94,7 @@ public class Basdi {
 		if (width * height > 5e7) {
 			logger.warn("very large image. May take forever.");
 		}
-		theta = new RectangularImage(new double[width * height], width, (int) minX, (int) minY);
+		theta = new RectangularDoubleImage(new double[width * height], width, (int) minX, (int) minY);
 		double [] values = theta.getValueVector();
 		for (int k = 0; k < data.length; k++) {
 			int [] xv = data[k][0];
@@ -106,7 +106,7 @@ public class Basdi {
 		}
 	}
 
-	protected void prepareData(Localizations locs, int numOfKeyFrames) {
+	protected void prepareData(LocalizationImage locs, int numOfKeyFrames) {
 		// data_ = new double [2][];
 		double [] rawFrames = locs.getData(locs.frameCol);
 		intFrames = new int[locs.getNumLocalizations()];
@@ -145,7 +145,7 @@ public class Basdi {
 
 	// needs this.intFrame, this.drift
 	protected void correct(OctaneDataFile data) {
-		Localizations locs = new Localizations(data);
+		LocalizationImage locs = new LocalizationImage(data);
 		double [] xcol = locs.getData(locs.xCol);
 		double [] ycol = locs.getData(locs.yCol);
 
@@ -181,7 +181,7 @@ public class Basdi {
 
 			logger.info("E Step - " + iter);
 			theta = ImageFilters.symmetricFilter(annealingFilter, theta);
-			RectangularImage[] probs = exy(theta, data);
+			RectangularDoubleImage[] probs = exy(theta, data);
 			marginals = forBack(probs);
 
 			logger.info("M Step - " + iter);
@@ -211,13 +211,13 @@ public class Basdi {
 		return true;
 	}
 
-	protected double [][] calculateAvgDrift(RectangularImage[] marginalProb) {
+	protected double [][] calculateAvgDrift(RectangularDoubleImage[] marginalProb) {
 
 		double [] avgDriftX = new double[marginalProb.length];
 		double [] avgDriftY = new double[marginalProb.length];
 		for (int k = 0; k < marginalProb.length; k++) {
 
-			RectangularImage gn = marginalProb[k];
+			RectangularDoubleImage gn = marginalProb[k];
 			double cx = 0, cy = 0;
 
 			for (int idx = 0; idx < gn.getLength(); idx ++) {
@@ -234,7 +234,7 @@ public class Basdi {
 		return avgDrifts;
 	}
 
-	protected void updateThetaOneFrame(RectangularImage theta, RectangularImage mpk, int [][] dk) {
+	protected void updateThetaOneFrame(RectangularDoubleImage theta, RectangularDoubleImage mpk, int [][] dk) {
 		double [] thetaValues = theta.getValueVector();
 		double[] mpkv = mpk.getValueVector();
 		int [] dkx = dk[0];
@@ -251,9 +251,9 @@ public class Basdi {
 		}
 	}
 
-	protected void updateTheta(RectangularImage theta, RectangularImage[] marginalProb, int [][][] data) {
+	protected void updateTheta(RectangularDoubleImage theta, RectangularDoubleImage[] marginalProb, int [][][] data) {
 
-		RectangularImage gn = marginalProb[0];
+		RectangularDoubleImage gn = marginalProb[0];
 
 		double cx = 0, cy = 0;
 		for (int idx = 0; idx < gn.getLength(); idx ++) {
@@ -265,9 +265,9 @@ public class Basdi {
 
 		// expand the image by 2 x maxShift, so that the convolution will not be out of bound
 		double [] values = new double[(theta.height + 2 * maxShift) * (theta.width + 2 * maxShift)];
-		RectangularImage theta0 = new RectangularImage(values, theta.width + 2 * maxShift, theta.x0 - maxShift, theta.y0 - maxShift);
+		RectangularDoubleImage theta0 = new RectangularDoubleImage(values, theta.width + 2 * maxShift, theta.x0 - maxShift, theta.y0 - maxShift);
 		IntStream.range(0,data.length).parallel().forEach(k -> {
-			RectangularImage img = new RectangularImage(new double[theta0.getLength()], theta0.width, theta0.x0, theta0.y0); 
+			RectangularDoubleImage img = new RectangularDoubleImage(new double[theta0.getLength()], theta0.width, theta0.x0, theta0.y0); 
 			updateThetaOneFrame(img, marginalProb[k], data[k]); 
 			synchronized(theta0) {
 				for (int idx = 0; idx < img.getLength(); idx ++) {
@@ -277,23 +277,23 @@ public class Basdi {
 		});
 
 		//crop the image back to original size
-		RectangularImage thetaNew = new RectangularImage(theta0, theta0.x0 + icx, theta0.y0 + icy, theta.width, theta.height);
+		RectangularDoubleImage thetaNew = new RectangularDoubleImage(theta0, theta0.x0 + icx, theta0.y0 + icy, theta.width, theta.height);
 		theta.setValueVector(thetaNew.getValueVector());
 	}
 
 	/*
 		compute P(dx,dy|theta,O) for each individual frame as a function of drift d
 	 */
-	protected RectangularImage [] exy(RectangularImage theta, int [][][] data) {
+	protected RectangularDoubleImage [] exy(RectangularDoubleImage theta, int [][][] data) {
 
 		// initialize
-		RectangularImage logTheta = theta.clone();
+		RectangularDoubleImage logTheta = theta.clone();
 		double [] values = logTheta.getValueVector();
 		for (int i = 0; i < values.length; i++) {
 			values[i] = FastMath.log(values[i] + DARK_NOISE);
 		}
 
-		RectangularImage [] localProb = new RectangularImage[data.length];
+		RectangularDoubleImage [] localProb = new RectangularDoubleImage[data.length];
 		IntStream.range(0, data.length).parallel().forEach( f -> {
 			localProb[f] = exyf2(logTheta, data[f]);
 		});
@@ -304,10 +304,10 @@ public class Basdi {
 	/*
 			compute e(dx, dy) = P(dx,dy|theta,o)
 	 */
-	protected RectangularImage exyf2(RectangularImage logTheta, int [][] o) {
+	protected RectangularDoubleImage exyf2(RectangularDoubleImage logTheta, int [][] o) {
 
 		int matrixSize = maxShift * 2 + 1;
-		RectangularImage e0 = new RectangularImage(
+		RectangularDoubleImage e0 = new RectangularDoubleImage(
 				new double[matrixSize * matrixSize], matrixSize, -maxShift, -maxShift);
 
 		if (o != null && o[0] != null && o[0].length != 0) {
@@ -358,10 +358,10 @@ public class Basdi {
 	% forward_backward alogorithm for computing marginal probability
 	% of Markovian process
 	 */
-	protected RectangularImage[] forBack(RectangularImage[] localProb) {
+	protected RectangularDoubleImage[] forBack(RectangularDoubleImage[] localProb) {
 		//forward
-		RectangularImage [] a = new RectangularImage[localProb.length];
-		RectangularImage [] b = new RectangularImage[localProb.length];
+		RectangularDoubleImage [] a = new RectangularDoubleImage[localProb.length];
+		RectangularDoubleImage [] b = new RectangularDoubleImage[localProb.length];
 		//double [] as = new double[localProb.length];
 		//double [] bs = new double[localProb.length];
 
@@ -387,7 +387,7 @@ public class Basdi {
 		//backward
 		double [] bv = new double[a[0].getLength()];
 		Arrays.fill(bv, 1.0);
-		b[b.length-1] = new RectangularImage(bv, a[0].width);
+		b[b.length-1] = new RectangularDoubleImage(bv, a[0].width);
 		for (int k = b.length - 2; k >=0; k--) {
 			b[k] = b[k+1].clone();
 			double [] bkv = b[k].getValueVector();
@@ -425,9 +425,9 @@ public class Basdi {
 	}
 
 	// result = Filter(H + eps, a)	
-	protected RectangularImage ofsFilter2(double [] h, RectangularImage a, double eps) {
+	protected RectangularDoubleImage ofsFilter2(double [] h, RectangularDoubleImage a, double eps) {
 
-		RectangularImage result = ImageFilters.symmetricFilter(h, a);
+		RectangularDoubleImage result = ImageFilters.symmetricFilter(h, a);
 
 		if (eps != 0) { 
 			for (int idx = 0; idx < result.getLength(); idx ++) {

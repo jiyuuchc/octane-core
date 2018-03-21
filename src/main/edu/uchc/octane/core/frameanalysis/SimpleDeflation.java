@@ -1,6 +1,6 @@
 package edu.uchc.octane.core.frameanalysis;
 
-import edu.uchc.octane.core.datasource.RectangularImage;
+import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 
 /* 
  * Simple deflation based analysis:
@@ -18,7 +18,7 @@ public class SimpleDeflation {
 	public interface CallBackFunctions {
 	
 		// provide an ROI for centroid fitting. Should return fitted value (without offset) for image deflation.
-		public boolean fitAndDeflate(RectangularImage ROI, int x, int y); 
+		public boolean fitAndDeflate(RectangularDoubleImage ROI, int x, int y); 
 	
 	}
 	
@@ -31,7 +31,7 @@ public class SimpleDeflation {
 		this.threshold = threshold;
 	}
 	
-	public void processFrames(RectangularImage data, CallBackFunctions callback) {
+	public void processFrames(RectangularDoubleImage data, CallBackFunctions callback) {
 		
 		while (true) {
 			double max = Double.MIN_VALUE;
@@ -51,7 +51,7 @@ public class SimpleDeflation {
 			int x = data.getXCordinate(ii);
 			int y = data.getYCordinate(ii);
 
-			RectangularImage subImage = new RectangularImage(data, x - ROISize / 2, y - ROISize / 2, ROISize, ROISize, true);
+			RectangularDoubleImage subImage = new RectangularDoubleImage(data, x - ROISize / 2, y - ROISize / 2, ROISize, ROISize, true);
 			if (callback.fitAndDeflate(subImage, x, y) == false) {
 				break;
 			}

@@ -13,7 +13,7 @@ import org.apache.commons.math3.optim.SimpleVectorValueChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uchc.octane.core.datasource.ImageData;
+import edu.uchc.octane.core.pixelimage.AbstractDoubleImage;
 
 public class LeastSquare{
 
@@ -41,7 +41,7 @@ public class LeastSquare{
         this.useWeighting = useWeighting;
     }
 
-    protected double[] calcWeights(ImageData data) {
+    protected double[] calcWeights(AbstractDoubleImage data) {
     	double[] weights = new double[data.getLength()];
     	if(!useWeighting){
     		Arrays.fill(weights, 1);
@@ -64,7 +64,7 @@ public class LeastSquare{
     	return weights;
     }
 
-    public double [] fit(ImageData data, double [] start) {
+    public double [] fit(AbstractDoubleImage data, double [] start) {
     	psf.setFittingData(data);
     	LeastSquaresProblem lsp = LeastSquaresFactory.create(
     			LeastSquaresFactory.model(psf.getValueFunction(), psf.getJacobian()),

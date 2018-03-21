@@ -1,6 +1,6 @@
-package edu.uchc.octane.core.datasource;
+package edu.uchc.octane.core.pixelimage;
 
-public abstract class ImageData {
+public abstract class AbstractDoubleImage {
 
 	public abstract double [] getValueVector();
 	public abstract void setValueVector(double [] values);
@@ -37,7 +37,7 @@ public abstract class ImageData {
 
 	}
 
-	public void copyFrom(ImageData data2) {
+	public void copyFrom(AbstractDoubleImage data2) {
 
 		for (int i = 0; i < data2.getLength(); i++) {
 			setValueAtCoordinate(data2.getXCordinate(i), data2.getYCordinate(i), data2.getValue(i));

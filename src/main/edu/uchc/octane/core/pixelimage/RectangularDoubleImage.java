@@ -1,16 +1,16 @@
-package edu.uchc.octane.core.datasource;
+package edu.uchc.octane.core.pixelimage;
 
-public class RectangularImage extends ImageData {
+public class RectangularDoubleImage extends AbstractDoubleImage {
 
 	double [] data;
 	// x0, y0 is the top-left coordinate of the data
 	public int x0, y0,width, height;
 
-	public RectangularImage(double [] data, int imageWidth) {
+	public RectangularDoubleImage(double [] data, int imageWidth) {
 		this(data, imageWidth, 0, 0);
 	}
 
-	public RectangularImage(double [] data, int imageWidth, int x0, int y0) {
+	public RectangularDoubleImage(double [] data, int imageWidth, int x0, int y0) {
 		this.data = data;
 		this.x0 = x0;
 		this.y0 = y0;
@@ -23,7 +23,7 @@ public class RectangularImage extends ImageData {
 	}
 
 	// this construct creates a subimage from a larger image
-	public RectangularImage(RectangularImage origData, int x0, int y0, int width, int height, boolean fixBounding ) {
+	public RectangularDoubleImage(RectangularDoubleImage origData, int x0, int y0, int width, int height, boolean fixBounding ) {
 
 		if (width <= 0 || height <=0 || width > origData.width || height > origData.height) {
 			throw new IllegalArgumentException("Invalid image size.");
@@ -62,12 +62,12 @@ public class RectangularImage extends ImageData {
 		}
 	}
 
-	public RectangularImage(RectangularImage origData, int x0, int y0, int width, int height) {
+	public RectangularDoubleImage(RectangularDoubleImage origData, int x0, int y0, int width, int height) {
 		this(origData, x0, y0, width, height, false);
 	}
 
-	public RectangularImage clone() {
-		return new RectangularImage(getValueVector().clone(), width, x0, y0);
+	public RectangularDoubleImage clone() {
+		return new RectangularDoubleImage(getValueVector().clone(), width, x0, y0);
 	}
 
 	@Override

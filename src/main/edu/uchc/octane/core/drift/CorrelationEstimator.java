@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.uchc.octane.core.datasource.OctaneDataFile;
-import edu.uchc.octane.core.image.LocalizationImage;
+import edu.uchc.octane.core.localizationimage.RasterizedLocalizationImage;
 
 public class CorrelationEstimator {
 
@@ -44,9 +44,9 @@ public class CorrelationEstimator {
 
 	//FIXME doesn't make sense that data and roi use different units
 	public void estimate(OctaneDataFile data, Rectangle roi, int numOfKeyFrames) {
-		LocalizationImage img = new LocalizationImage(data);
+		RasterizedLocalizationImage img = new RasterizedLocalizationImage(data);
 		img.setRoi(roi);
-		LocalizationImage newImg;
+		RasterizedLocalizationImage newImg;
 		double [] driftX = new double[numOfKeyFrames];
 		double [] driftY = new double[numOfKeyFrames];
 		double [] keyFrames = new double[numOfKeyFrames];
@@ -63,7 +63,7 @@ public class CorrelationEstimator {
 			double max =  min + framegroupSize - 1;
 
 			if ( i == numOfKeyFrames - 1 ) { max = maxFrameNum ;}
-			newImg = new LocalizationImage(data);
+			newImg = new RasterizedLocalizationImage(data);
 			newImg.setRoi(roi);
 			newImg.addViewFilter(0, new double[] {min, max});
 
@@ -87,7 +87,7 @@ public class CorrelationEstimator {
         logger.info("Interpolating: done ");
 	}
 
-	protected int [] estimateDrift(LocalizationImage img1, LocalizationImage img2) {
+	protected int [] estimateDrift(RasterizedLocalizationImage img1, RasterizedLocalizationImage img2) {
 		short [] pixels1 = img1.getRendered();
 		short [] pixels2 = img2.getRendered();
 		int [] drift = new int[2];

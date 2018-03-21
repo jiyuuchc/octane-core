@@ -24,7 +24,7 @@ import java.util.Collections;
 
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octane.core.datasource.RectangularImage;
+import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import edu.uchc.octane.core.utils.ImageFilters;
 
 // looking for local maxima that are spatially separated from other maxmima by a valley.
@@ -37,14 +37,14 @@ public class LocalMaximum{
 
 	public interface CallBackFunctions {
 
-		public boolean fit(RectangularImage ROI, int x, int y);
+		public boolean fit(RectangularDoubleImage ROI, int x, int y);
 
 	}
 
 	private final static int PROCESSED = 1;
 	private final static int COLLECTED = 2;
 
-	RectangularImage data, filteredData;
+	RectangularDoubleImage data, filteredData;
 	char [] pixelStates;
 
 	class Pixel implements Comparable<Pixel> {
@@ -93,14 +93,14 @@ public class LocalMaximum{
 //		pixelStates[index] |= MASKED;
 //	}
 
-	public void processFrame(RectangularImage data, CallBackFunctions callback) {
+	public void processFrame(RectangularDoubleImage data, CallBackFunctions callback) {
 
 		this.data = data;
 		double[] filtered = ImageFilters.symmetricFilter(
 				ImageFilters.makeGaussianFilter(1.0,7),
 				data.getValueVector(),
 				data.width );
-		filteredData = new RectangularImage(filtered, data.width);
+		filteredData = new RectangularDoubleImage(filtered, data.width);
 		pixelStates = new char[data.getLength()];
 
 		ArrayList<Pixel> pixels = new ArrayList<Pixel>();
@@ -156,7 +156,7 @@ public class LocalMaximum{
 			if (isMax) {
 				int x = data.getXCordinate(pixel.idx);
 				int y = data.getYCordinate(pixel.idx);
-				RectangularImage subImage = new RectangularImage(data, x - ROISize, y - ROISize, ROISize * 2 + 1, ROISize * 2 + 1, true);
+				RectangularDoubleImage subImage = new RectangularDoubleImage(data, x - ROISize, y - ROISize, ROISize * 2 + 1, ROISize * 2 + 1, true);
 				if (callback.fit(subImage, x, y) == false) {
 					break;
 				}

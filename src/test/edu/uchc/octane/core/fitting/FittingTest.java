@@ -5,7 +5,6 @@ import static org.junit.Assert.assertArrayEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.uchc.octane.core.datasource.RectangularImage;
 import edu.uchc.octane.core.fitting.AsymmetricGaussianPSF;
 import edu.uchc.octane.core.fitting.DAOFitting;
 import edu.uchc.octane.core.fitting.GaussianPSF;
@@ -14,6 +13,7 @@ import edu.uchc.octane.core.fitting.IterativeShrinkageAndThreshold;
 import edu.uchc.octane.core.fitting.LeastSquare;
 import edu.uchc.octane.core.fitting.MultiPSF;
 import edu.uchc.octane.core.fitting.RadialSymmetryFitting;
+import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 
 public class FittingTest {
 
@@ -47,7 +47,7 @@ public class FittingTest {
 		System.out.println("Least Square Asymmetric Guassian");
 		LeastSquare lsq = new LeastSquare(new AsymmetricGaussianPSF());
 		final double [] start = {5.5, 5.5, 1, 1.5, 1.5, 0.8};
-		double[] result = lsq.fit(new RectangularImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE), start);
+		double[] result = lsq.fit(new RectangularDoubleImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE), start);
 		double [] expected = {6, 5, 1, 1.53, 1.53, 1};
 		assertArrayEquals(expected, result, 0.01);
 	}
@@ -57,7 +57,7 @@ public class FittingTest {
 
 		System.out.println("Least Square Guassian");
 		LeastSquare lsq = new LeastSquare(new GaussianPSF());
-		double[] result = lsq.fit(new RectangularImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE), START_PARAMS);
+		double[] result = lsq.fit(new RectangularDoubleImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE), START_PARAMS);
 		double [] expected = {6, 5, 1, 1.53, 1};
 		assertArrayEquals(expected, result, 0.01);
 	}
@@ -67,7 +67,7 @@ public class FittingTest {
 
 		System.out.println("Least Square Guassian fixed sigma");
 		LeastSquare lsq = new LeastSquare(new GaussianPSF(true, false));
-		double[] result = lsq.fit(new RectangularImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE), START_PARAMS);
+		double[] result = lsq.fit(new RectangularDoubleImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE), START_PARAMS);
 		double [] expected = {6, 5, 0.976, 1.5, 1};
 		assertArrayEquals(expected, result, 0.01);
 	}
@@ -77,7 +77,7 @@ public class FittingTest {
 
 		System.out.println("Least Square integrated Guassian");
 		LeastSquare lsq = new LeastSquare(new IntegratedGaussianPSF());
-		double[] result = lsq.fit(new RectangularImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE), START_PARAMS);
+		double[] result = lsq.fit(new RectangularDoubleImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE), START_PARAMS);
 		double [] expected = {6, 5, 1, 1.5, 1};
 		assertArrayEquals(expected, result, 0.01);
 	}
@@ -87,7 +87,7 @@ public class FittingTest {
 
 		System.out.println("Radial symmetry fitting test");
 		RadialSymmetryFitting fitting = new RadialSymmetryFitting();
-		double [] result = fitting.fit(new RectangularImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE));
+		double [] result = fitting.fit(new RectangularDoubleImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE));
 		double [] expected = {6, 5};
 		assertArrayEquals(expected, result, 0.01);
 	}
@@ -97,7 +97,7 @@ public class FittingTest {
 		System.out.println("MultiPSF fitting on single peak");
 		MultiPSF multiPsf = new MultiPSF(1, new IntegratedGaussianPSF());
 		LeastSquare lsq = new LeastSquare(multiPsf);
-		double [] result = lsq.fit(new RectangularImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE), START_PARAMS);
+		double [] result = lsq.fit(new RectangularDoubleImage(TEST_VALUES_WITH_BACKGROUND, IMAGE_SIZE), START_PARAMS);
 		double [] expected = {6, 5, 1, 1.5, 1};
 		assertArrayEquals(expected, result, 0.01);
 	}
@@ -119,7 +119,7 @@ public class FittingTest {
 		double [] start = {5, 5, 1, 1.5, 0, 3, 2, 1, 1.5, 0};
 		MultiPSF multiPsf = new MultiPSF(2, new IntegratedGaussianPSF());
 		LeastSquare lsq = new LeastSquare(multiPsf);
-		double[] result = lsq.fit(new RectangularImage(newValue, IMAGE_SIZE), start);
+		double[] result = lsq.fit(new RectangularDoubleImage(newValue, IMAGE_SIZE), start);
 		double [] expected = {5, 5, 1, 1.47, 0, 3, 3, 1, 1.47, 0};
 		assertArrayEquals(expected, result, 0.01);
 	}
@@ -141,7 +141,7 @@ public class FittingTest {
 		double [] start = {5, 5, 1, 1.5, 0};
 		IntegratedGaussianPSF psf = new IntegratedGaussianPSF();
 		DAOFitting dao = new DAOFitting(psf, 4, 1e-6);
-		double[][] result = dao.fit(new RectangularImage(newValue, IMAGE_SIZE), start);
+		double[][] result = dao.fit(new RectangularDoubleImage(newValue, IMAGE_SIZE), start);
 		assert(result.length == 2);
 		double [][] expected = { {3, 3, 1, 1.47, 0}, {5, 5, 1, 1.47, 0}};
 		assertArrayEquals(expected[0], result[0], 0.01);
@@ -154,7 +154,7 @@ public class FittingTest {
 
 		int scale = 8;
 		IterativeShrinkageAndThreshold ista = new IterativeShrinkageAndThreshold(0.03, 0.15, 2000);
-		double[] x = ista.fit(new RectangularImage(TEST_VALUES, IMAGE_SIZE), scale, 1.50);
+		double[] x = ista.fit(new RectangularDoubleImage(TEST_VALUES, IMAGE_SIZE), scale, 1.50);
 
 		for (int i = 0; i < x.length; i++) {
 			if (i % (IMAGE_SIZE * scale) == 0) {

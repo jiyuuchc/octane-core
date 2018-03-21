@@ -2,7 +2,7 @@ package edu.uchc.octane.core.fitting;
 
 import org.apache.commons.math3.distribution.FDistribution;
 
-import edu.uchc.octane.core.datasource.ImageData;
+import edu.uchc.octane.core.pixelimage.AbstractDoubleImage;
 
 public class DAOFitting {
 
@@ -21,7 +21,7 @@ public class DAOFitting {
 		this.pValue = pValue;
 	}
 
-    public double [][] fit(ImageData data, double [] start) {
+    public double [][] fit(AbstractDoubleImage data, double [] start) {
 
     	double [] curStart = start;
 

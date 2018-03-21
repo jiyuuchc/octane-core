@@ -3,7 +3,7 @@ package edu.uchc.octane.core.utils;
 import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octane.core.datasource.RectangularImage;
+import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 
 public class ImageFilters {
 
@@ -125,8 +125,8 @@ public class ImageFilters {
 		return result2;
 	}
 
-	public static RectangularImage symmetricFilter(double[] h, RectangularImage a) {
+	public static RectangularDoubleImage symmetricFilter(double[] h, RectangularDoubleImage a) {
 		double [] newImg = symmetricFilter(h, a.getValueVector(), a.width);
-		return new RectangularImage(newImg, a.width, a.x0, a.y0);
+		return new RectangularDoubleImage(newImg, a.width, a.x0, a.y0);
 	}
 }

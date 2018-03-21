@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.datasource;
+package edu.uchc.octane.core.localizationimage;
 
 import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
@@ -8,11 +8,12 @@ import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.drift.Basdi;
 import edu.uchc.octane.core.utils.FastKDTree;
 import edu.uchc.octane.core.utils.HDataCollection;
 
-public class Localizations {
+public class LocalizationImage {
 
 	final Logger logger = LoggerFactory.getLogger(Basdi.class);
 
@@ -64,7 +65,7 @@ public class Localizations {
 
 	}
 
-	public Localizations(OctaneDataFile raw) {
+	public LocalizationImage(OctaneDataFile raw) {
 		locData = raw;
 		data = new double[raw.data.length + 1][]; // last column is for storing local density
 		System.arraycopy(raw.data, 0, data, 0, raw.data.length);
@@ -80,7 +81,7 @@ public class Localizations {
 		guessHeaders();
 	}
 	
-	public Localizations(Localizations loc) {
+	public LocalizationImage(LocalizationImage loc) {
 		this(new OctaneDataFile(loc.locData));
 	}
 

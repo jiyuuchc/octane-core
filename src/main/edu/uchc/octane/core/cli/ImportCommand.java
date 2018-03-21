@@ -1,4 +1,4 @@
-package edu.uchc.octane.core;
+package edu.uchc.octane.core.cli;
 
 import java.io.File;
 import java.io.FileOutputStream;

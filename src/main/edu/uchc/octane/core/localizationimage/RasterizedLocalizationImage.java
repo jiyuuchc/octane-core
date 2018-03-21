@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.image;
+package edu.uchc.octane.core.localizationimage;
 
 import java.awt.Rectangle;
 import java.io.IOException;
@@ -7,10 +7,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import edu.uchc.octane.core.datasource.Localizations;
 import edu.uchc.octane.core.datasource.OctaneDataFile;
 
-public class LocalizationImage extends Localizations {
+public class RasterizedLocalizationImage extends LocalizationImage {
 
 	private short [] pixels = null;
 	private boolean isDirty = true, isDone = false;
@@ -76,11 +75,11 @@ public class LocalizationImage extends Localizations {
 		}
 	}
 
-	public LocalizationImage(OctaneDataFile locData) {
+	public RasterizedLocalizationImage(OctaneDataFile locData) {
 		this(locData, 16.0, 5120, 5120);
 	}
 
-	public LocalizationImage(OctaneDataFile locData, double pixelSize, int dimX, int dimY) {
+	public RasterizedLocalizationImage(OctaneDataFile locData, double pixelSize, int dimX, int dimY) {
 		super(locData);
 		this.pixelSize = pixelSize;
 		this.dimx = dimX;
@@ -89,7 +88,7 @@ public class LocalizationImage extends Localizations {
 		filters = new HashMap<Integer, double[]>();
 	}
 
-	public LocalizationImage(ObjectInputStream s) throws ClassNotFoundException, IOException {
+	public RasterizedLocalizationImage(ObjectInputStream s) throws ClassNotFoundException, IOException {
 		this((OctaneDataFile) s.readObject());
 	}
 
