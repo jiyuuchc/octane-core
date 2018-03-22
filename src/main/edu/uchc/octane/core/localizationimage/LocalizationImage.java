@@ -9,22 +9,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.uchc.octane.core.datasource.OctaneDataFile;
-import edu.uchc.octane.core.drift.Basdi;
 import edu.uchc.octane.core.utils.FastKDTree;
 import edu.uchc.octane.core.utils.HDataCollection;
 
 public class LocalizationImage {
 
-	final Logger logger = LoggerFactory.getLogger(Basdi.class);
+	final Logger logger = LoggerFactory.getLogger(getClass());
 
-	final OctaneDataFile locData;
-	DoubleSummaryStatistics [] stats;
-	HashMap<String, Integer> headersMap;
+	final OctaneDataFile dataSrc;
+	DoubleSummaryStatistics [] stats = null;
+	HashMap<String, Integer> headersMap = null;
+    FastKDTree tree;
 
 	public final double [][]data;
 	public int xCol = 1, yCol = 2, zCol = -1, frameCol = 0, errCol = -1, intensityCol = -1, sigmaCol = -1, densityCol = -1;
-
-	FastKDTree tree;
 
 	class HDataImp implements HDataCollection {
 
@@ -66,23 +64,17 @@ public class LocalizationImage {
 	}
 
 	public LocalizationImage(OctaneDataFile raw) {
-		locData = raw;
+		dataSrc = raw;
 		data = new double[raw.data.length + 1][]; // last column is for storing local density
 		System.arraycopy(raw.data, 0, data, 0, raw.data.length);
 
 		stats = new DoubleSummaryStatistics[data.length];
-
-		headersMap = new HashMap<String, Integer> ();
-		for (int i = 0; i < locData.headers.length; i++) {
-			headersMap.put(locData.headers[i], i);
-		}
-		headersMap.put("LocalDensity", data.length - 1);
-
+		
 		guessHeaders();
 	}
 	
 	public LocalizationImage(LocalizationImage loc) {
-		this(new OctaneDataFile(loc.locData));
+		this(new OctaneDataFile(loc.dataSrc));
 	}
 
 	void guessHeaders() {
@@ -132,11 +124,11 @@ public class LocalizationImage {
 	}
 
 	public double [] getData(String colHeader) {
-		return data[headersMap.get(colHeader)];
+		return getData(getColFromHeader(colHeader));
 	}
 
 	public String[] getHeaders() {
-		return locData.headers;
+		return dataSrc.headers;
 	}
 
 	public int getNumLocalizations() {
@@ -168,7 +160,23 @@ public class LocalizationImage {
 		densityCol = localDensityCol;
 	}
 	
-	//in default axis convention:
+    public String getHeader(int i) {
+        return dataSrc.headers[i];
+    }
+    
+    public int getColFromHeader(String s) {
+        if (headersMap == null) {
+            headersMap = new HashMap<String, Integer> ();
+            for (int i = 0; i < dataSrc.headers.length; i++) {
+                headersMap.put(dataSrc.headers[i], i);
+            }
+            headersMap.put("LocalDensity", data.length - 1);            
+        }
+        
+        return headersMap.get(s);
+    }
+
+    //in default axis convention:
 	// rotation around top left corner (0,0)
 	// positive theta values rotate counter-clock-wise
 	public void rotate(double theta) {
@@ -180,5 +188,14 @@ public class LocalizationImage {
 			xData[i] = cosTheta * xData[i] - sinTheta * yData[i];
 			yData[i] = sinTheta * xData[i] + cosTheta * yData[i];
 		}
+	}
+	
+	public void translate(double dx, double dy) {
+        double [] xData = getData(xCol);
+        double [] yData = getData(yCol);
+        for (int i = 0; i < getNumLocalizations(); i ++) {
+            xData[i] += dx;
+            yData[i] += dy;
+        }	    
 	}
 }
