@@ -2,6 +2,7 @@ package edu.uchc.octane.core.fitting;
 
 import java.util.Arrays;
 
+import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresFactory;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
@@ -9,10 +10,14 @@ import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.optim.SimpleVectorValueChecker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.uchc.octane.core.datasource.ImageData;
 
 public class LeastSquare{
+
+    final Logger logger = LoggerFactory.getLogger(LeastSquare.class);
 
     public final static int MAX_ITERATIONS = 1000;
     public final static double CONVERGENCE_DELTA = 1e-4;
@@ -77,7 +82,13 @@ public class LeastSquare{
     		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
     		optimum = optimizer.optimize(lsp);
     	} catch (TooManyEvaluationsException e) {
+    	    logger.error("Evaluations exceded limit.");
+    		logger.error(e.getMessage());
     		return null;
+    	} catch (ConvergenceException e) {
+    	    logger.error("Convergence error.");
+    	    logger.error(e.getMessage());
+    	    return null;
     	}
 
     	return getResult();
