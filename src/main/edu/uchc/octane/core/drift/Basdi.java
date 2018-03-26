@@ -84,10 +84,10 @@ public class Basdi {
 	//should be called after prepareData(), changes this.theta
 	protected void guessInitialTheta(LocalizationImage locs) {
 
-		double maxX = FastMath.floor(locs.getSummaryStatitics(locs.xCol).getMax() / driftResolution);
-		double minX = FastMath.floor(locs.getSummaryStatitics(locs.xCol).getMin() / driftResolution);		
-		double maxY = FastMath.floor(locs.getSummaryStatitics(locs.yCol).getMax() / driftResolution);
-		double minY = FastMath.floor(locs.getSummaryStatitics(locs.yCol).getMin() / driftResolution);
+		double maxX = FastMath.floor(locs.getSummaryStatistics(locs.xCol).getMax() / driftResolution);
+		double minX = FastMath.floor(locs.getSummaryStatistics(locs.xCol).getMin() / driftResolution);		
+		double maxY = FastMath.floor(locs.getSummaryStatistics(locs.yCol).getMax() / driftResolution);
+		double minY = FastMath.floor(locs.getSummaryStatistics(locs.yCol).getMin() / driftResolution);
 
 		int width = (int) (maxX - minX + 1);
 		int height = (int) (maxY - minY + 1);
@@ -113,8 +113,8 @@ public class Basdi {
 		int [] cnts = new int[numOfKeyFrames];
 
 		//precounting;
-		int maxFrame = (int) locs.getSummaryStatitics(locs.frameCol).getMax();
-		int minFrame = (int) locs.getSummaryStatitics(locs.frameCol).getMin();
+		int maxFrame = (int) locs.getSummaryStatistics(locs.frameCol).getMax();
+		int minFrame = (int) locs.getSummaryStatistics(locs.frameCol).getMin();
 		int frameGroupSize = (maxFrame - minFrame + 1) / numOfKeyFrames;
 		for (int i = 0; i < locs.getNumLocalizations(); i++) {
 			double frame = rawFrames[i];

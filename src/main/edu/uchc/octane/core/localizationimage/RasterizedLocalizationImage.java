@@ -82,8 +82,8 @@ public class RasterizedLocalizationImage extends LocalizationImage {
 	public RasterizedLocalizationImage(OctaneDataFile locData, double pixelSize) {
 	    super(locData);
 	    this.pixelSize = pixelSize;
-	    int maxX = (int) FastMath.floor(getSummaryStatitics(xCol).getMax() / pixelSize);
-	    int maxY = (int) FastMath.floor(getSummaryStatitics(yCol).getMax() / pixelSize);
+	    int maxX = (int) FastMath.floor(getSummaryStatistics(xCol).getMax() / pixelSize);
+	    int maxY = (int) FastMath.floor(getSummaryStatistics(yCol).getMax() / pixelSize);
 	    dimx = findPreferredRasterSize(maxX);
 	    dimy = findPreferredRasterSize(maxY);
         setRoi(null);

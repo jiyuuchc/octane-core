@@ -112,12 +112,13 @@ public class LocalizationImage {
 
 	}
 	
-	public SummaryStatistics getSummaryStatitics(int col) {
+	public SummaryStatistics getSummaryStatistics(int col) {
 
 	    if (col < 0 || col >= data.length) {
 	        return null;
 	    }
 		if ( stats[col] == null) {
+		    stats[col] = new SummaryStatistics();
 		    for (double d : data[col]) {
 		        stats[col].addValue(d);
 		    }
@@ -125,10 +126,10 @@ public class LocalizationImage {
 		return stats[col];
 	}
 
-	public SummaryStatistics getSummaryStatitics(String header) {
+	public SummaryStatistics getSummaryStatistics(String header) {
 	    Integer col = getColFromHeader(header);
 		if (col != null ) {
-			return getSummaryStatitics(col);
+			return getSummaryStatistics(col);
 		} else {
 			return null;
 		}

@@ -49,7 +49,7 @@ public class TrackingDataFile extends OnePassTracking {
 		cols = new int[] {loc.xCol, loc.yCol, loc.zCol};
 		double [][] data = locData.data;
 
-		int maxFrame = (int) locData.getSummaryStatitics(locData.frameCol).getMax();
+		int maxFrame = (int) locData.getSummaryStatistics(locData.frameCol).getMax();
 		ArrayList<TrackingHData> [] dataset = new ArrayList[maxFrame];
 
 		for (int i = 0; i < maxFrame; i ++) {
