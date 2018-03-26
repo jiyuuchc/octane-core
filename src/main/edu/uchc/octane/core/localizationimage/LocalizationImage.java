@@ -194,8 +194,10 @@ public class LocalizationImage {
 		double cosTheta = FastMath.cos(theta);
 		double sinTheta = FastMath.sin(theta);
 		for (int i = 0; i < getNumLocalizations(); i ++) {
-			xData[i] = cosTheta * xData[i] - sinTheta * yData[i];
-			yData[i] = sinTheta * xData[i] + cosTheta * yData[i];
+			double x = cosTheta * xData[i] - sinTheta * yData[i];
+			double y = sinTheta * xData[i] + cosTheta * yData[i];
+			xData[i] = x;
+			yData[i] = y;
 		}
 	}
 	
