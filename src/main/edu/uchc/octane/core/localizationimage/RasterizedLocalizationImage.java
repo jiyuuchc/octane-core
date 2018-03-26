@@ -45,10 +45,17 @@ public class RasterizedLocalizationImage extends LocalizationImage {
 
 				boolean filteredOut = false;
 
+				synchronized(filters) {
 				for (Map.Entry<Integer, double[]> entry : filters.entrySet()) {
 				    int col = entry.getKey();
 				    double [] r = entry.getValue();
-				    if (data[col][cachedDataIdx[i]] < r[0] || data[col][cachedDataIdx[i]] > r[1]) {
+				    int c = cachedDataIdx[i];
+				    double [] vc = data[col];
+//				    if (vc==null) {
+//				        System.out.println(col);
+//				    }
+				    double v = vc[c];
+				    if ( v < r[0] || v > r[1]) {
 				        filteredOut = true;
 				        break;
 				    }
@@ -57,6 +64,7 @@ public class RasterizedLocalizationImage extends LocalizationImage {
 				    pixels[cachedPixelIdx[i]] ++;
 				}					
 			
+				}
 			}
 
 			isDone = true;
@@ -74,8 +82,8 @@ public class RasterizedLocalizationImage extends LocalizationImage {
 	public RasterizedLocalizationImage(OctaneDataFile locData, double pixelSize) {
 	    super(locData);
 	    this.pixelSize = pixelSize;
-	    int maxX = (int) FastMath.floor(getSummaryStatitics(xCol).getMax() / pixelSize) + 1;
-	    int maxY = (int) FastMath.floor(getSummaryStatitics(yCol).getMax() / pixelSize) + 1;
+	    int maxX = (int) FastMath.floor(getSummaryStatitics(xCol).getMax() / pixelSize);
+	    int maxY = (int) FastMath.floor(getSummaryStatitics(yCol).getMax() / pixelSize);
 	    dimx = findPreferredRasterSize(maxX);
 	    dimy = findPreferredRasterSize(maxY);
         setRoi(null);
@@ -95,8 +103,20 @@ public class RasterizedLocalizationImage extends LocalizationImage {
 		this((OctaneDataFile) s.readObject());
 	}
 
+	public RasterizedLocalizationImage(RasterizedLocalizationImage orig) {
+	    super(orig);
+	    pixelSize = orig.pixelSize;
+	    dimx = orig.dimx;
+	    dimy = orig.dimy;
+	    setRoi(orig.roi);
+	    filters = new HashMap<Integer, double[]>();
+	    for (Integer key : orig.filters.keySet()) {
+	        filters.put(key, orig.filters.get(key).clone());
+	    }
+	}
+
 	int findPreferredRasterSize(int d) {
-	    if (d > 10240) {
+	    if (d > 5120) {
 	        return 10 * ((int) FastMath.floor(d / 10.0) + 1);
 	    }
         //prefer 2^n * 10;
@@ -126,7 +146,9 @@ public class RasterizedLocalizationImage extends LocalizationImage {
 	public void addViewFilter(int col, double[] v) {
 	    
 	    quitCurrentRendering();
+	    synchronized (filters) {
 	    filters.put(col, v);
+	    }
 	}
 
 	public void setRoi(Rectangle rect) {

@@ -1,9 +1,8 @@
 package edu.uchc.octane.core.localizationimage;
 
-import java.util.Arrays;
-import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,7 @@ public class LocalizationImage {
 	final Logger logger = LoggerFactory.getLogger(getClass());
 
 	final OctaneDataFile dataSrc;
-	DoubleSummaryStatistics [] stats = null;
+	SummaryStatistics [] stats = null;
 	HashMap<String, Integer> headersMap = null;
     FastKDTree tree;
 
@@ -68,13 +67,26 @@ public class LocalizationImage {
 		data = new double[raw.data.length + 1][]; // last column is for storing local density
 		System.arraycopy(raw.data, 0, data, 0, raw.data.length);
 
-		stats = new DoubleSummaryStatistics[data.length];
+		stats = new SummaryStatistics[data.length];
+
+		if (headersMap == null) {
+            headersMap = new HashMap<String, Integer> ();
+            for (int i = 0; i < dataSrc.headers.length; i++) {
+                headersMap.put(dataSrc.headers[i], i);
+            }
+            headersMap.put("LocalDensity", data.length - 1);            
+        }
 		
 		guessHeaders();
 	}
 	
 	public LocalizationImage(LocalizationImage loc) {
 		this(new OctaneDataFile(loc.dataSrc));
+		for (int i = 0; i < stats.length; i++) {
+		    if (loc.stats[i] != null) {
+		        stats[i] = new SummaryStatistics(loc.stats[i]);
+		    }
+		}
 	}
 
 	void guessHeaders() {
@@ -98,22 +110,25 @@ public class LocalizationImage {
 			}
 		}
 
-		if (errCol == -1) {
-			errCol = data.length -1;
-		}
 	}
 	
-	public DoubleSummaryStatistics getSummaryStatitics(int col) {
+	public SummaryStatistics getSummaryStatitics(int col) {
 
+	    if (col < 0 || col >= data.length) {
+	        return null;
+	    }
 		if ( stats[col] == null) {
-			stats[col]=  Arrays.stream(data[col]).summaryStatistics();
+		    for (double d : data[col]) {
+		        stats[col].addValue(d);
+		    }
 		}
 		return stats[col];
 	}
 
-	public DoubleSummaryStatistics getSummaryStatitics(String header) {
-		if (headersMap.get(header) != null ) {
-			return getSummaryStatitics(headersMap.get(header));
+	public SummaryStatistics getSummaryStatitics(String header) {
+	    Integer col = getColFromHeader(header);
+		if (col != null ) {
+			return getSummaryStatitics(col);
 		} else {
 			return null;
 		}
@@ -164,14 +179,7 @@ public class LocalizationImage {
         return dataSrc.headers[i];
     }
     
-    public int getColFromHeader(String s) {
-        if (headersMap == null) {
-            headersMap = new HashMap<String, Integer> ();
-            for (int i = 0; i < dataSrc.headers.length; i++) {
-                headersMap.put(dataSrc.headers[i], i);
-            }
-            headersMap.put("LocalDensity", data.length - 1);            
-        }
+    public Integer getColFromHeader(String s) {
         
         return headersMap.get(s);
     }
