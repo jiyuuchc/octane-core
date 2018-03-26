@@ -3,6 +3,7 @@ package edu.uchc.octane.core.localizationimage;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,17 +14,14 @@ import edu.uchc.octane.core.datasource.OctaneDataFile;
 
 public class RasterizedLocalizationImage extends LocalizationImage implements Runnable {
 
-    private short[] pixels = null;
-    private Runnable renderingCallback = null;
-
-    private int[] cachedDataIdx = null;
-    private int[] cachedPixelIdx = null;
-
+    short[] pixels = null;
+    Runnable renderingCallback = null;
+    int[] cachedDataIdx = null;
+    int[] cachedPixelIdx = null;
     double pixelSize;
     int dimx, dimy;
     Rectangle roi;
     HashMap<Integer, double[]> filters;
-
     Thread renderingThread = null;
     boolean isDone;
 
@@ -164,9 +162,9 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
     }
 
     @Override
-    public synchronized void rotate(double theta) {
+    public synchronized void rotate(double theta, double x0, double y0) {
         quitCurrentRendering();
-        super.rotate(theta);
+        super.rotate(theta, x0, y0);
 
         cachedDataIdx = null;
         cachedPixelIdx = null;
@@ -203,6 +201,41 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
         System.arraycopy(tmpIdx2, 0, cachedPixelIdx, 0, cnt);
     }
 
+    public synchronized double [][] getFilteredData() {
+        if (cachedDataIdx == null) {
+            cachePositions();
+        }
+        
+        ArrayList<Integer> filteredList = new ArrayList<Integer>();
+        for (int i = 0; i < cachedDataIdx.length; i++) {
+            boolean filteredOut = false;
+
+            for (Map.Entry<Integer, double[]> entry : filters.entrySet()) {
+                int col = entry.getKey();
+                double[] r = entry.getValue();
+                int c = cachedDataIdx[i];
+                double[] vc = data[col];
+                double v = vc[c];
+                if (v < r[0] || v > r[1]) {
+                    filteredOut = true;
+                    break;
+                }
+            }
+            
+            if (!filteredOut) {
+                filteredList.add(i);
+            }
+        }
+        
+        double[][] newData = new double[data.length][filteredList.size()];
+        for (int i = 0; i < filteredList.size(); i++) {
+            for (int j = 0; j < data.length; j++) {
+                newData[j][i] = data[j][filteredList.get(i)];
+            }
+        }
+        return newData;
+    }
+    
     @Override
     public void run() {
 

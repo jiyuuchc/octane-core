@@ -12,7 +12,7 @@ public class TrackingDataFile extends OnePassTracking {
 
 	int dimension;
 	LocalizationImage locData;
-	double [][] data;
+	// double [][] data;
 	int [] cols;
 
 	public TrackingDataFile(double maxDisplacement, int maxBlinking) {
@@ -39,15 +39,15 @@ public class TrackingDataFile extends OnePassTracking {
 
 		@Override
 		public double get(int d) {
-			return data[cols[d]][idx];
+			return locData.getData(cols[d])[idx];
 		}
 	}
 
 	public OctaneDataFile processLocalizations(LocalizationImage loc) {
 		locData = loc;
-		data = loc.data;
+		//data = loc.data;
 		cols = new int[] {loc.xCol, loc.yCol, loc.zCol};
-		double [][] data = locData.data;
+		//double [][] data = locData.data;
 
 		int maxFrame = (int) locData.getSummaryStatistics(locData.frameCol).getMax();
 		ArrayList<TrackingHData> [] dataset = new ArrayList[maxFrame];
@@ -55,8 +55,8 @@ public class TrackingDataFile extends OnePassTracking {
 		for (int i = 0; i < maxFrame; i ++) {
 			dataset[i] = new ArrayList<TrackingHData>();
 		}
-		for (int i = 0; i < data[locData.frameCol].length; i ++ ) {
-			int frame = (int) data[locData.frameCol][i] - 1;
+		for (int i = 0; i < locData.getData(locData.frameCol).length; i ++ ) {
+			int frame = (int) locData.getData(locData.frameCol)[i] - 1;
 			if (frame >=0 && frame < maxFrame) {
 				dataset[frame].add(new TrackingHData(i));
 			}
@@ -64,7 +64,7 @@ public class TrackingDataFile extends OnePassTracking {
 
 		ArrayList<Trajectory> results = doTracking(dataset);
 
-		double [][] newData = new double[data.length][results.size()];
+		double [][] newData = new double[locData.getNumOfCol()][results.size()];
 		for (int i = 0 ; i < results.size(); i ++) {
 			mergeTrack(results.get(i), newData, i);
 		}
@@ -80,7 +80,7 @@ public class TrackingDataFile extends OnePassTracking {
 		for (int i = 0; i < track.size(); i ++) {
 			TrackingHData d = (TrackingHData) track.get(i);
 			for (int j = 0; j < target.length; j++) {
-				target[j][idx] += data[j][d.idx];
+				target[j][idx] += locData.getData(j)[d.idx];
 			}
 		}
 

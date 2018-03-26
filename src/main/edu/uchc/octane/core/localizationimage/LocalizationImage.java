@@ -19,10 +19,9 @@ public class LocalizationImage {
     SummaryStatistics[] stats = null;
     HashMap<String, Integer> headersMap = null;
     FastKDTree tree;
-
-    public final double[][] data;
-    public int xCol = 1, yCol = 2, zCol = -1, frameCol = 0, errCol = -1, intensityCol = -1, sigmaCol = -1,
-            densityCol = -1;
+    double[] localDensities;
+    final double[][] data;
+    public int xCol = 1, yCol = 2, zCol = -1, frameCol = 0, errCol = -1, intensityCol = -1, sigmaCol = -1;
 
     class HDataImp implements HDataCollection {
 
@@ -65,8 +64,7 @@ public class LocalizationImage {
 
     public LocalizationImage(OctaneDataFile raw) {
         dataSrc = raw;
-        data = new double[raw.data.length + 1][]; // last column is for storing local density
-        System.arraycopy(raw.data, 0, data, 0, raw.data.length);
+        data = raw.data;
 
         stats = new SummaryStatistics[data.length];
 
@@ -75,7 +73,7 @@ public class LocalizationImage {
             for (int i = 0; i < dataSrc.headers.length; i++) {
                 headersMap.put(dataSrc.headers[i], i);
             }
-            headersMap.put("LocalDensity", data.length - 1);
+            headersMap.put("LocalDensity", data.length);
         }
 
         guessHeaders();
@@ -168,12 +166,13 @@ public class LocalizationImage {
     }
 
     public void measureLocalDensity(double distance) {
-        assert (tree != null);
-        int localDensityCol = data.length - 1;
-        for (int i = 0; i < getNumLocalizations(); i++) {
-            data[localDensityCol][i] = tree.radiusSearch(i, distance).size();
+        if (tree == null) {
+            constructKDtree();
         }
-        densityCol = localDensityCol;
+        // int localDensityCol = data.length - 1;
+        for (int i = 0; i < getNumLocalizations(); i++) {
+            localDensities[i] = tree.radiusSearch(i, distance).size();
+        }
     }
 
     public String getHeader(int i) {
@@ -184,19 +183,23 @@ public class LocalizationImage {
         return headersMap.get(s);
     }
 
+    public int getNumOfCol() {
+        return data.length;
+    }
+
     // in default axis convention:
     // rotation around top left corner (0,0)
     // positive theta values rotate counter-clock-wise
-    public void rotate(double theta) {
+    public void rotate(double theta, double x0, double y0) {
         double[] xData = getData(xCol);
         double[] yData = getData(yCol);
         double cosTheta = FastMath.cos(theta);
         double sinTheta = FastMath.sin(theta);
         for (int i = 0; i < getNumLocalizations(); i++) {
-            double x = cosTheta * xData[i] - sinTheta * yData[i];
-            double y = sinTheta * xData[i] + cosTheta * yData[i];
-            xData[i] = x;
-            yData[i] = y;
+            double x = cosTheta * (xData[i] - x0) - sinTheta * (yData[i] - y0);
+            double y = sinTheta * (xData[i] - x0) + cosTheta * (yData[i] - y0);
+            xData[i] = x + x0;
+            yData[i] = y + y0;
         }
     }
 
