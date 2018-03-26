@@ -90,7 +90,6 @@ public class GaussianPSF implements PSFFittingFunction {
         return params;
     }
 
-
     @Override
 	public double[] parametersToPoint(double[] parameters) {
 

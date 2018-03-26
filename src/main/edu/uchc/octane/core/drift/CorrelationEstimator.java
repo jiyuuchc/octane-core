@@ -42,9 +42,8 @@ public class CorrelationEstimator {
 		}
 	}
 
-	//FIXME doesn't make sense that data and roi use different units
 	public void estimate(OctaneDataFile data, Rectangle roi, int numOfKeyFrames) {
-		RasterizedLocalizationImage img = new RasterizedLocalizationImage(data);
+		RasterizedLocalizationImage img = new RasterizedLocalizationImage(data, pixelSize);
 		img.setRoi(roi);
 		RasterizedLocalizationImage newImg;
 		double [] driftX = new double[numOfKeyFrames];

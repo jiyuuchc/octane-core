@@ -32,7 +32,7 @@ public class OctaneDataFile implements Serializable  {
 			data[i] = odf.data[i].clone();
 		}
 	}
-	
+
 	public static OctaneDataFile importFromThunderstorm(File csvFile) throws IOException {
 
 		ArrayList<double[]> locations = new ArrayList<double[]>();

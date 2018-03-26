@@ -129,4 +129,35 @@ public class ImageFilters {
 		double [] newImg = symmetricFilter(h, a.getValueVector(), a.width);
 		return new RectangularDoubleImage(newImg, a.width, a.x0, a.y0);
 	}
+	
+//	public static RectangularDoubleImage filterByFFT(RectangularDoubleImage filter, RectangularDoubleImage target) {
+//	    if (filter.height != target.height || filter.width != target.width) {
+//	        double [] p = new double[target.getLength()];
+//	        RectangularDoubleImage f2 = new RectangularDoubleImage(p, target.width);
+//	        filter.x0 = (target.width - filter.width) / 2;
+//	        filter.y0 = (target.height - filter.height) / 2;
+//	        f2.copyFrom(filter);
+//	        filter = f2;
+//	    }
+//	    double [] rPixels1 = new double[target.getLength() * 2];
+//	    double [] rPixels2 = new double[target.getLength() * 2];
+//	    System.arraycopy(filter.getValueVector(), 0, rPixels1, 0, filter.getLength());
+//	    System.arraycopy(target.getValueVector(), 0, rPixels2, 0, target.getLength());
+//        DoubleFFT_2D fft = new DoubleFFT_2D(target.height, target.width);
+//        fft.realForwardFull(rPixels1);
+//        fft.realForwardFull(rPixels2);
+//        for (int i = 0 ; i < target.getLength(); i += 2) {
+//            double r = rPixels1[i] * rPixels2[i] + rPixels1[i+1] * rPixels2[i+1];
+//            double c = - rPixels1[i] * rPixels2[i+1] + rPixels1[i+1] * rPixels2[i];
+//            rPixels1[i] = r;
+//            rPixels1[i+1] = c;
+//        }
+//
+//        fft.complexInverse(rPixels1, false);
+//        RectangularDoubleImage ret = target.clone();
+//        for (int i = 0; i < rPixels1.length / 2; i ++) {
+//            ret.setValue(i, rPixels1[i*2]);
+//        }
+//        return ret;
+//	}
 }
