@@ -67,11 +67,8 @@ public class DAOFitting {
     				bestPsf = multiPsf;
     				bestLsq = multiLsq;
     			}
-    		} else {
-    			break;
     		}
     	}
-
 
     	double [] tmpResult = bestLsq.getResult();
     	int subParaLen = tmpResult.length / bestPsf.numOfPSFs;
@@ -79,23 +76,8 @@ public class DAOFitting {
 
     	for (int i = 0; i < results.length; i++) {
     		System.arraycopy(tmpResult, i * subParaLen, results[i], 0, subParaLen);
-    		//FIXME hack
-    		//RealVector s = bestLsq.optimum.getSigma(0);
     	}
 
     	return results;
     }
-
-//    protected eliminateBadFits(Molecule mol, double maxX, double maxY) {
-//        if(!mol.isSingleMolecule()) {
-//            Vector<Molecule> detections = new Vector<Molecule>();
-//            for(Molecule m : mol.getDetections()) {
-//                if((abs(m.getX()) <= maxX) || (abs(m.getY()) <= maxY)) {
-//                    detections.add(m);
-//                }
-//            }
-//            mol.setDetections(detections);
-//        }
-//        return mol;
-//    }
 }
