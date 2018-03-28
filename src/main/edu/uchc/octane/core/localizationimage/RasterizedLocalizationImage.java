@@ -14,55 +14,68 @@ import edu.uchc.octane.core.datasource.OctaneDataFile;
 
 public class RasterizedLocalizationImage extends LocalizationImage implements Runnable {
 
+    final static double DEFAULT_PIXEL_SIZE = 16.0;
+
     short[] pixels = null;
     Runnable renderingCallback = null;
     int[] cachedDataIdx = null;
     int[] cachedPixelIdx = null;
     double pixelSize;
-    int dimx, dimy;
     Rectangle roi;
     HashMap<Integer, double[]> filters;
     Thread renderingThread = null;
     boolean isDone;
 
     public RasterizedLocalizationImage(OctaneDataFile locData) {
-        this(locData, 16.0);
+        this(locData, DEFAULT_PIXEL_SIZE);
     }
 
     public RasterizedLocalizationImage(OctaneDataFile locData, double pixelSize) {
-        super(locData);
-        this.pixelSize = pixelSize;
-        int maxX = (int) FastMath.floor(getSummaryStatistics(xCol).getMax() / pixelSize);
-        int maxY = (int) FastMath.floor(getSummaryStatistics(yCol).getMax() / pixelSize);
-        dimx = findPreferredRasterSize(maxX);
-        dimy = findPreferredRasterSize(maxY);
-        setRoi(null);
-        filters = new HashMap<Integer, double[]>();
+        this(locData, pixelSize, null);
     }
 
-    public RasterizedLocalizationImage(OctaneDataFile locData, double pixelSize, int dimX, int dimY) {
-        super(locData);
-        this.pixelSize = pixelSize;
-        this.dimx = dimX;
-        this.dimy = dimY;
-        setRoi(null);
-        filters = new HashMap<Integer, double[]>();
-    }
+     public RasterizedLocalizationImage(OctaneDataFile locData, double pixelSize, Rectangle roi) {
+         
+         super(locData);
+         
+         this.pixelSize = pixelSize;
+         filters = new HashMap<Integer, double[]>();
+
+         setRoi(roi);
+     }
 
     public RasterizedLocalizationImage(ObjectInputStream s) throws ClassNotFoundException, IOException {
         this((OctaneDataFile) s.readObject());
     }
 
     public RasterizedLocalizationImage(RasterizedLocalizationImage orig) {
+
         super(orig);
+
         pixelSize = orig.pixelSize;
-        dimx = orig.dimx;
-        dimy = orig.dimy;
-        setRoi(orig.roi);
+
+        roi = orig.roi;
+        setRoi(roi);
+
         filters = new HashMap<Integer, double[]>();
         for (Integer key : orig.filters.keySet()) {
             filters.put(key, orig.filters.get(key).clone());
         }
+    }
+
+    Rectangle getDefaultRoi() {
+        int maxX = (int) FastMath.floor(getSummaryStatistics(xCol).getMax() / pixelSize);
+        int minX = (int) FastMath.floor(getSummaryStatistics(xCol).getMin() / pixelSize);
+        int maxY = (int) FastMath.floor(getSummaryStatistics(yCol).getMax() / pixelSize);
+        int minY = (int) FastMath.floor(getSummaryStatistics(yCol).getMin() / pixelSize);
+        if (minX < 100 && minY < 100) {
+            minX = 0;
+            minY = 0;
+        } 
+//        int dimx = findPreferredRasterSize(maxX - minX);
+//        int dimy = findPreferredRasterSize(maxY - minY);
+        
+        return new Rectangle(minX, minY, maxX - minX, maxY - minY);
     }
 
     int findPreferredRasterSize(int d) {
@@ -78,11 +91,11 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
     }
 
     public int getDimX() {
-        return dimx;
+        return roi.width;
     }
 
     public int getDimY() {
-        return dimy;
+        return roi.height;
     }
 
     public double getPixelSize() {
@@ -102,7 +115,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
     public synchronized void setRoi(Rectangle rect) {
 
         if (rect == null) {
-            rect = new Rectangle(dimx, dimy);
+            rect = getDefaultRoi();
         }
 
         if (rect.equals(roi)) {
@@ -162,7 +175,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
     }
 
     public void rotate(double theta) {
-        rotate(theta, pixelSize * dimx / 2, pixelSize * dimy / 2);
+        rotate(theta, pixelSize * (roi.x + roi.width / 2.0), pixelSize * (roi.y + roi.height / 2.0));
     }
 
     @Override
@@ -214,11 +227,11 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
         System.arraycopy(tmpIdx2, 0, cachedPixelIdx, 0, cnt);
     }
 
-    public synchronized double [][] getFilteredData() {
+    public synchronized double[][] getFilteredData() {
         if (cachedDataIdx == null) {
             cachePositions();
         }
-        
+
         ArrayList<Integer> filteredList = new ArrayList<Integer>();
         for (int i = 0; i < cachedDataIdx.length; i++) {
             boolean filteredOut = false;
@@ -234,12 +247,12 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
                     break;
                 }
             }
-            
+
             if (!filteredOut) {
                 filteredList.add(cachedDataIdx[i]);
             }
         }
-        
+
         double[][] newData = new double[data.length][filteredList.size()];
         for (int i = 0; i < filteredList.size(); i++) {
             for (int j = 0; j < data.length; j++) {
@@ -248,7 +261,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
         }
         return newData;
     }
-    
+
     @Override
     public void run() {
 
