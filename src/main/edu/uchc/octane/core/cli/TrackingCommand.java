@@ -35,7 +35,7 @@ public class TrackingCommand {
 	}
 
 	public static void printHelp() {
-		String syntax = "octane merge [options] thunderstorm_data_file <output_file>";
+		String syntax = "octane merge [options] data_file <output_file>";
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(syntax, options);
 	}
