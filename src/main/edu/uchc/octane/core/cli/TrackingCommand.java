@@ -48,15 +48,15 @@ public class TrackingCommand {
 	public static void tracking(List<String> args) throws IOException, ClassNotFoundException {
 		System.out.println("Octane: merge tracks ...");
 
-		System.out.println("Loading File : " + args.get(0));
-		ObjectInputStream s = new ObjectInputStream(new FileInputStream(args.get(0)));
-		s.close();
-		System.out.println("Load File: done");
-
 		System.out.println("Tracking ...");
 		printParameters();
 
+		System.out.println("Loading File : " + args.get(0));
+		ObjectInputStream s = new ObjectInputStream(new FileInputStream(args.get(0)));
 		locData = new LocalizationImage((OctaneDataFile) s.readObject());
+        s.close();
+        System.out.println("Load File: done");
+		
 		TrackingDataFile tracker = new TrackingDataFile(trackingDistance, (int) blinkings);
 
 		OctaneDataFile mergedData = tracker.processLocalizations(locData);

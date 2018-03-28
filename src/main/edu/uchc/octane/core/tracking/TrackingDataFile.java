@@ -1,6 +1,7 @@
 package edu.uchc.octane.core.tracking;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 
@@ -14,13 +15,15 @@ public class TrackingDataFile extends OnePassTracking {
 	LocalizationImage locData;
 	// double [][] data;
 	int [] cols;
+	double maxDisplacement;
 
 	public TrackingDataFile(double maxDisplacement, int maxBlinking) {
 		this(maxDisplacement, maxBlinking, false);
 	}
 
 	public TrackingDataFile(double maxDisplacement, int maxBlinking, boolean is3D) {
-		super(maxDisplacement, maxBlinking);
+		super(maxBlinking);
+		this.maxDisplacement = maxDisplacement; 
 		dimension = is3D?3:2;
 	}
 
@@ -29,7 +32,6 @@ public class TrackingDataFile extends OnePassTracking {
 
 		public TrackingHData(int idx) {
 			this.idx = idx;
-
 		}
 
 		@Override
@@ -50,19 +52,19 @@ public class TrackingDataFile extends OnePassTracking {
 		//double [][] data = locData.data;
 
 		int maxFrame = (int) locData.getSummaryStatistics(locData.frameCol).getMax();
-		ArrayList<TrackingHData> [] dataset = new ArrayList[maxFrame];
+		List<TrackingHData> [] dataset = new ArrayList[maxFrame];
 
 		for (int i = 0; i < maxFrame; i ++) {
 			dataset[i] = new ArrayList<TrackingHData>();
 		}
-		for (int i = 0; i < locData.getData(locData.frameCol).length; i ++ ) {
+		for (int i = 0; i < locData.getNumLocalizations(); i ++ ) {
 			int frame = (int) locData.getData(locData.frameCol)[i] - 1;
 			if (frame >=0 && frame < maxFrame) {
 				dataset[frame].add(new TrackingHData(i));
 			}
 		}
 
-		ArrayList<Trajectory> results = doTracking(dataset);
+		List<Trajectory> results = doTracking(dataset, new TrivialConnecter(maxDisplacement));
 
 		double [][] newData = new double[locData.getNumOfCol()][results.size()];
 		for (int i = 0 ; i < results.size(); i ++) {

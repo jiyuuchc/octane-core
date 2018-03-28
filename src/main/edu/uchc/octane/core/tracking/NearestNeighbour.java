@@ -1,7 +1,6 @@
 package edu.uchc.octane.core.tracking;
 
-import java.util.Set;
-
+import java.util.List;
 import edu.uchc.octane.core.tracking.OnePassTracking.Trajectory;
 import edu.uchc.octane.core.utils.HData;
 
@@ -14,7 +13,7 @@ public class NearestNeighbour implements ConnectionOptimizer {
 	}
 
 	@Override
-	public void connect(Iterable<Trajectory> activeTracks, Set<HData> points, int curFrame) {
+	public void connect(List<Trajectory> activeTracks, List<HData> points, int curFrame) {
 		for (Trajectory track : activeTracks) {
 			HData fromPoint = track.get(track.size()-1);
 			double curMin = Double.MAX_VALUE;
@@ -29,7 +28,7 @@ public class NearestNeighbour implements ConnectionOptimizer {
 			if (curPoint != null) {
 				track.add(curPoint);
 				track.lastFrame = curFrame;
-				points.remove(points);
+				points.remove(curPoint);
 			}
 		}
 	}

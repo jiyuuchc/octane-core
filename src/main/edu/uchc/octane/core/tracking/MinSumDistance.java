@@ -1,96 +1,165 @@
 package edu.uchc.octane.core.tracking;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 
 import edu.uchc.octane.core.tracking.OnePassTracking.Trajectory;
 import edu.uchc.octane.core.utils.HData;
 
 public class MinSumDistance implements ConnectionOptimizer {
 
-	double maxDistance2;
-	HashMap<Trajectory, HData> connections;
+    double maxDistance2;
+    HashMap<Trajectory, HData> connections;
 
-	@Override
-	public void connect(Iterable<Trajectory> activeTracks, Set<HData> points, int curFrame) {
-		HData[] pointsArray = (HData[]) points.toArray();
-	}
+    MinSumDistance(double dist) {
+        maxDistance2 = dist * dist;
+    }
 
-	double formBestConnection(final Trajectory [] starts, final HData [] ends) {
-		if (starts.length == 0 || ends.length == 0) return 0;
+    @Override
+    public void connect(List<Trajectory> activeTracks, List<HData> points, int curFrame) {
+        // HData[] pointsArray = (HData[]) points.toArray();
+        connections = new HashMap<Trajectory, HData>();
 
-		Trajectory tr = starts[0];
-		Trajectory [] newStarts = Arrays.copyOfRange(starts, 1, starts.length);
+        List<Trajectory> tracks = new LinkedList<Trajectory>();
+        tracks.addAll(activeTracks);
+        process(tracks, points);
 
-		HData minP = null;
-		double min = formBestConnection(newStarts, ends) + maxDistance2; // first option is not connect
-		for (int idx = 0; idx < ends.length; idx ++) {
-			double curDist = distance(tr, ends[idx]);
+        for (Trajectory tr : activeTracks) {
 
-			HData [] newEnds = Arrays.copyOfRange(ends, 1, ends.length);
-			if (idx != 0) {
-				newEnds[idx - 1] = ends[0];
-			}
-			curDist += formBestConnection(newStarts, newEnds);
-			if (curDist < min) {
-				min = curDist;
-				minP = ends[idx];
-			}
-		}
-		connections.put(tr, minP);
-		return min;
-	}
+            HData p = connections.get(tr);
+            if (p != null) {
+                tr.add(p);
+                tr.lastFrame = curFrame;
+            }
+        }
+    }
 
-	double distance(Trajectory t, HData p) {
-		return t.get(t.size()-1).sqDistance(p);
-	}
+    // recursively optimize a network to find conenction minimize total distance^2
+    double formBestConnection(final Trajectory[] starts, final HData[] ends) {
+        if (starts.length == 0 || ends.length == 0)
+            return 0;
 
-	<T> void swap(T [] arr, int idx1, int idx2) {
-		T tmp = arr[idx1];
-		arr[idx1] = arr[idx2];
-		arr[idx2] = tmp;
-	}
+        Trajectory tr = starts[0];
+        Trajectory[] newStarts = Arrays.copyOfRange(starts, 1, starts.length);
 
-	void processNextFrame(Trajectory [] tracks, HData [] points, int curFrame) {
-		int startTrack = 0, startPoint = 0;
-		connections = new HashMap<Trajectory, HData>();
+        HData curMinEndPoint = null;
+        double curMinDist2 = formBestConnection(newStarts, ends) + maxDistance2; // first option is not connect
+        for (int idx = 0; idx < ends.length; idx++) {
+            double dist2 = distanceSq(tr, ends[idx]);
 
-		while (startTrack < tracks.length && startPoint < points.length ){
-			int tracksP1 = startTrack, tracksP2 = startTrack + 1;
-			int pointsP1 = startPoint, pointsP2 = startPoint;
+            if (dist2 < maxDistance2) {
 
-			while (tracksP1 < tracksP2 || pointsP1 < pointsP2) {
-				if (tracksP1 < tracksP2) {
-					for (int i = pointsP2; i < points.length; i++) {
-						if (distance(tracks[tracksP1], points[i]) < maxDistance2) {
-							swap(points, pointsP2 ++ , i);
-						}
-					}
-					tracksP1 ++;
-				}
+                HData[] newEnds = Arrays.copyOfRange(ends, 1, ends.length);
+                if (idx != 0) {
+                    newEnds[idx - 1] = ends[0];
+                }
+                dist2 += formBestConnection(newStarts, newEnds);
+                if (dist2 < curMinDist2) {
+                    curMinDist2 = dist2;
+                    curMinEndPoint = ends[idx];
+                }
+            }
+        }
+        connections.put(tr, curMinEndPoint);
+        return curMinDist2;
+    }
 
-				if (pointsP1 < pointsP2) {
-					for (int i = tracksP2; i < tracks.length; i++) {
-						if (distance(tracks[i], points[pointsP1]) < maxDistance2) {
-							swap(tracks, tracksP2 ++, i);
-						}
-					}
-					pointsP1 ++;
-				}
-			}
-			formBestConnection(Arrays.copyOfRange(tracks, startTrack, tracksP1), Arrays.copyOfRange(points, startPoint, pointsP1));
-			startTrack = tracksP1;
-			startPoint = pointsP1;
-		}
+    double distanceSq(Trajectory t, HData p) {
+        return t.get(t.size() - 1).sqDistance(p);
+    }
 
-		for ( int i = 0 ; i < tracks.length; i++) {
-			Trajectory tr = tracks[i];
-			HData p = connections.get(tr);
-			if ( p != null ) {
-				tr.add(p);
-				tr.lastFrame = curFrame;
-			}
-		}
-	}
+    void process(List<Trajectory> tracks, List<HData> points) {
+
+        while (!tracks.isEmpty() && !points.isEmpty()) {
+
+            List<Trajectory> starts = new ArrayList<Trajectory>();
+            List<HData> ends = new ArrayList<HData>();
+
+            starts.add(tracks.get(0));
+            tracks.remove(0);
+            int processedStarts = 0;
+            int processedEnds = 0;
+
+            while (processedStarts < starts.size() || processedEnds < ends.size()) {
+
+                // divide into smaller networks (starts, ends)
+                for (; processedStarts < starts.size(); processedStarts++) {
+                    Trajectory tr = starts.get(processedStarts);
+                    ListIterator<HData> it = points.listIterator();
+                    while (it.hasNext()) {
+                        HData point = it.next();
+                        if (distanceSq(tr, point) < maxDistance2) {
+                            ends.add(point);
+                            it.remove();
+                        }
+                    }
+                }
+
+                for (; processedEnds < ends.size(); processedEnds++) {
+                    HData point = ends.get(processedEnds);
+                    ListIterator<Trajectory> it = tracks.listIterator();
+                    while (it.hasNext()) {
+                        Trajectory tr = it.next();
+                        if (distanceSq(tr, point) < maxDistance2) {
+                            starts.add(tr);
+                            it.remove();
+                        }
+                    }
+                }
+            }
+
+            // proess the small network
+            if (ends.size() > 0) {
+                Trajectory[] s = new Trajectory[starts.size()];
+                HData[] e = new HData[ends.size()];
+                starts.toArray(s);
+                ends.toArray(e);
+                formBestConnection(s, e);
+            }
+        }
+    }
+
+    void process(Trajectory[] tracks, HData[] points) {
+        int curTrackIdx = 0, curPointIdx = 0;
+
+        while (curTrackIdx < tracks.length && curPointIdx < points.length) {
+            int trackIdx1 = curTrackIdx, trackIdx2 = curTrackIdx + 1;
+            int pointIdx1 = curPointIdx, pointIdx2 = curPointIdx;
+
+            while (trackIdx1 < trackIdx2 || pointIdx1 < pointIdx2) {
+                if (trackIdx1 < trackIdx2) {
+                    for (int i = pointIdx2; i < points.length; i++) {
+                        if (distanceSq(tracks[trackIdx1], points[i]) < maxDistance2) {
+                            swap(points, pointIdx2++, i);
+                        }
+                    }
+                    trackIdx1++;
+                }
+
+                if (pointIdx1 < pointIdx2) {
+                    for (int i = trackIdx2; i < tracks.length; i++) {
+                        if (distanceSq(tracks[i], points[pointIdx1]) < maxDistance2) {
+                            swap(tracks, trackIdx2++, i);
+                        }
+                    }
+                    pointIdx1++;
+                }
+            }
+            formBestConnection(Arrays.copyOfRange(tracks, curTrackIdx, trackIdx1),
+                    Arrays.copyOfRange(points, curPointIdx, pointIdx1));
+            curTrackIdx = trackIdx1;
+            curPointIdx = pointIdx1;
+        }
+    }
+
+    <T> void swap(T[] arr, int idx1, int idx2) {
+        T tmp = arr[idx1];
+        arr[idx1] = arr[idx2];
+        arr[idx2] = tmp;
+    }
+
 }
