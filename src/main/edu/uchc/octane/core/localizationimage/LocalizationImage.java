@@ -187,6 +187,27 @@ public class LocalizationImage {
         return data.length;
     }
 
+    public OctaneDataFile getDataSource() {
+        return dataSrc;
+    }
+
+    public void mergeWith(OctaneDataFile odf) {
+        if (odf == null) {
+            return;
+        }
+        if (data.length != odf.data.length) {
+            throw new IllegalArgumentException("Data dimension doesn't match");
+        }
+        
+        double [][] oldData = data.clone();
+        for (int i = 0; i < data.length; i ++) {
+            int newlen = oldData[i].length + odf.data[i].length ;
+            data[i] = new double[newlen];
+            System.arraycopy(oldData[i], 0, data[i], 0, oldData[i].length);
+            System.arraycopy(odf.data[i], 0, data[i], oldData[i].length, odf.data[i].length);
+        }
+    }
+    
     // in default axis convention:
     // rotation around top left corner (0,0)
     // positive theta values rotate counter-clock-wise
