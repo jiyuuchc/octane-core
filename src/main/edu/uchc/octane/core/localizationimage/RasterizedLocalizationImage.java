@@ -161,6 +161,10 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
         renderingThread = null;
     }
 
+    public void rotate(double theta) {
+        rotate(theta, pixelSize * dimx / 2, pixelSize * dimy / 2);
+    }
+
     @Override
     public synchronized void rotate(double theta, double x0, double y0) {
         quitCurrentRendering();
@@ -174,6 +178,15 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
     public synchronized void translate(double dx, double dy) {
         quitCurrentRendering();
         super.translate(dx, dy);
+
+        cachedDataIdx = null;
+        cachedPixelIdx = null;
+    }
+
+    @Override
+    public synchronized void mergeWith(OctaneDataFile odf) {
+        quitCurrentRendering();
+        super.mergeWith(odf);
 
         cachedDataIdx = null;
         cachedPixelIdx = null;
@@ -223,7 +236,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
             }
             
             if (!filteredOut) {
-                filteredList.add(i);
+                filteredList.add(cachedDataIdx[i]);
             }
         }
         
