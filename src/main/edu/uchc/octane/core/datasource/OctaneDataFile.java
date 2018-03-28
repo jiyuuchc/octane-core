@@ -48,7 +48,7 @@ public class OctaneDataFile implements Serializable  {
         		locations.add(oneLoc);
 
         		if (locations.size() % 1000000 == 0) {
-        			System.out.println("Read " + locations.size() + " lines.");
+        			logger.info("Read " + locations.size() + " lines.");
         		}
         	}
 
