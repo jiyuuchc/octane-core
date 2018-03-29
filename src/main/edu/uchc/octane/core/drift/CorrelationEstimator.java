@@ -17,7 +17,7 @@ import edu.uchc.octane.core.localizationimage.RasterizedLocalizationImage;
 public class CorrelationEstimator {
 
 	static final double smoothingBandWidth = 0.25;
-	final Logger logger = LoggerFactory.getLogger(CorrelationEstimator.class);
+	final Logger logger = LoggerFactory.getLogger(getClass());
 	double maxDistance;
 	double pixelSize;
 

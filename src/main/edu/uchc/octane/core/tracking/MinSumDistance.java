@@ -7,10 +7,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.uchc.octane.core.tracking.OnePassTracking.Trajectory;
 import edu.uchc.octane.core.utils.HData;
 
 public class MinSumDistance implements ConnectionOptimizer {
+
+    final Logger logger = LoggerFactory.getLogger(getClass());
 
     double maxDistance2;
     HashMap<Trajectory, HData> connections;
@@ -118,7 +123,11 @@ public class MinSumDistance implements ConnectionOptimizer {
                 HData[] e = new HData[ends.size()];
                 starts.toArray(s);
                 ends.toArray(e);
+                
+                logger.debug("subnetwork: %d:%d", s.length, e.length);
+                
                 formBestConnection(s, e);
+
             }
         }
     }
