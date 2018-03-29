@@ -61,7 +61,7 @@ public class OnePassTracking {
             List<HData> points = new LinkedList<HData>();
             points.addAll(localizations[curFrame]);
 
-            logger.info("Frame:%d - %d active tracks, %d candidates, %d stopped tracks",
+            logger.info("Frame:{} - {} active tracks, {} candidates, {} stopped tracks",
                     curFrame, activeTracks.size(), points.size(), trajectories.size());
 
             connecter.connect(activeTracks, points, curFrame);

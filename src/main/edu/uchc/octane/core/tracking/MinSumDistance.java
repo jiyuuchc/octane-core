@@ -124,7 +124,7 @@ public class MinSumDistance implements ConnectionOptimizer {
                 starts.toArray(s);
                 ends.toArray(e);
                 
-                logger.debug("subnetwork: %d:%d", s.length, e.length);
+                logger.debug("subnetwork: {}:{}", s.length, e.length);
                 
                 formBestConnection(s, e);
 
