@@ -26,12 +26,6 @@
   		<version>1.7.6</version>
   	</dependency>
   	<dependency>
-  		<groupId>org.slf4j</groupId>
-  		<artifactId>slf4j-jdk14</artifactId>
-  		<version>1.7.6</version>
-  		<optional>true</optional>
-  	</dependency>
-  	<dependency>
   		<groupId>edu.uchc.octane</groupId>
   		<artifactId>mmmstudio</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
