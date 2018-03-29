@@ -40,6 +40,12 @@
  
   <build>
     <sourceDirectory>src/main</sourceDirectory>
+    <resources>
+      <resource>
+        <directory>src/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>    
  	<plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -57,4 +63,11 @@
   </properties>  
 
   <name>octanecore</name>
+  <description>Single molecule localization microscopy data analysis tools. It can be used as a library but included some build-in cli as well.
+</description>
+  <organization>
+  	<name>UConn Health</name>
+  	<url>http://www.uchc.edu</url>
+  </organization>
+  <url>http://apache.cam.uchc.edu/yu/</url>
 </project>
