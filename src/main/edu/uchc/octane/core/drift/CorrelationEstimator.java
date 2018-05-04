@@ -76,12 +76,12 @@ public class CorrelationEstimator {
 		logger.info("Interpolating... ");
         if(numOfKeyFrames < 4) {
             LinearInterpolator interpolator = new LinearInterpolator();
-            xFunction = addLinearExtrapolationToBorders(interpolator.interpolate(keyFrames, driftX), 1 , maxFrameNum);
-            yFunction = addLinearExtrapolationToBorders(interpolator.interpolate(keyFrames, driftY), 1, maxFrameNum);
+            xFunction = addLinearExtrapolationToBorders(interpolator.interpolate(keyFrames, driftX), (int) stat.getMin(), maxFrameNum);
+            yFunction = addLinearExtrapolationToBorders(interpolator.interpolate(keyFrames, driftY), (int) stat.getMin(), maxFrameNum);
         } else {
             ModifiedLoess interpolator = new ModifiedLoess(smoothingBandWidth, 2);
-            xFunction = addLinearExtrapolationToBorders(interpolator.interpolate(keyFrames, driftX), 1, maxFrameNum);
-            yFunction = addLinearExtrapolationToBorders(interpolator.interpolate(keyFrames, driftY), 1, maxFrameNum);
+            xFunction = addLinearExtrapolationToBorders(interpolator.interpolate(keyFrames, driftX), (int) stat.getMin(), maxFrameNum);
+            yFunction = addLinearExtrapolationToBorders(interpolator.interpolate(keyFrames, driftY), (int) stat.getMin(), maxFrameNum);
         }
         logger.info("Interpolating: done ");
 	}
