@@ -29,7 +29,7 @@ public class DriftCommand {
 
 		options.getOption("h").setDescription("print this message");
 		options.getOption("n").setDescription("number of key frames");
-		options.getOption("h").setDescription("resolution of the drift calculation");
+		options.getOption("r").setDescription("resolution of the drift calculation");
 
 		return options;
 	}
