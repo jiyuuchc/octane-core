@@ -106,10 +106,22 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
         return filters;
     }
 
+    public void setViewFilters(HashMap<Integer, double[]> newFilters) {
+        filters = newFilters;
+    }
+
     public synchronized void addViewFilter(int col, double[] v) {
 
         quitCurrentRendering();
-        filters.put(col, v);
+        if (v != null ) {
+            filters.put(col, v);
+        } else {
+            filters.remove(col);
+        }
+    }
+    
+    public double [] getViewFilter(int col) {
+        return filters.get(Integer.valueOf(col));
     }
 
     public synchronized void setRoi(Rectangle rect) {
