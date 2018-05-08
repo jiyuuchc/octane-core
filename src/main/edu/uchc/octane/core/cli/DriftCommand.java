@@ -55,6 +55,7 @@ public class DriftCommand {
 				return;
 			}
 			numOfKeyFrames = CommandUtils.getParsedLong(cmd, "n", 10);
+			resolution = CommandUtils.getParsedDouble(cmd, "r", 16.0);
 
 			List<String> remainings = cmd.getArgList();
 			if (remainings.size() == 1) {
@@ -79,7 +80,7 @@ public class DriftCommand {
 
 		System.out.println("Correcting drift ...");
 
-		CorrelationEstimator corrector = new CorrelationEstimator();
+		CorrelationEstimator corrector = new CorrelationEstimator(resolution * 100, resolution);
 		System.out.println("Loading File : " + args.get(0));
 		ObjectInputStream s = new ObjectInputStream(new FileInputStream(args.get(0)));
 		OctaneDataFile data = (OctaneDataFile) s.readObject();
@@ -90,7 +91,7 @@ public class DriftCommand {
 
 		System.out.println("Estimating...");
 		//c.estimate( d, new Rectangle(1000,1000,2048,2048), 20);
-		corrector.estimate( data, null, (int) numOfKeyFrames);
+		corrector.estimate(data, null, (int) numOfKeyFrames);
 		corrector.correct(data);
 
 		System.out.println("Saving results to " + args.get(1));

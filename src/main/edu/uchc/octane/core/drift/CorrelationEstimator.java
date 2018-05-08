@@ -62,7 +62,7 @@ public class CorrelationEstimator {
 			double max =  min + framegroupSize - 1;
 
 			if ( i == numOfKeyFrames - 1 ) { max = maxFrameNum ;}
-			newImg = new RasterizedLocalizationImage(data);
+			newImg = new RasterizedLocalizationImage(data, pixelSize);
 			newImg.setRoi(roi);
 			newImg.addViewFilter(0, new double[] {min, max});
 
