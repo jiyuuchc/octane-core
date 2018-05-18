@@ -1,8 +1,10 @@
 package edu.uchc.octane.core.datasource;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -35,26 +37,58 @@ public class OctaneDataFile implements Serializable {
         }
     }
 
-    public static OctaneDataFile importFromThunderstorm(File csvFile) throws IOException {
+    public void exportToCSV(File csvFile) throws IOException{
+        logger.info("Writing data...");
+        BufferedWriter bw = new BufferedWriter(new FileWriter(csvFile));
 
-        logger.info("Reading data...");
+        for (int i = 0; i < data.length; i++) {
+            bw.write(headers[i]);
+            if (i != data.length - 1) {
+                bw.write(",");
+            }
+        }
+        bw.newLine();
+        
+        for (int i = 0; i < data[0].length; i ++) {
+            for (int j = 0; j < data.length; j++) {
+                bw.write(Double.toString(data[j][i]));
+                if (j != data.length - 1) {
+                    bw.write(",");
+                }
+            }
+            bw.newLine();
+        }
+
+        bw.close();
+    }
+
+    public static OctaneDataFile importFromCSV(File csvFile) {
+
+        logger.info("Importing CSV data...");
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
 
             ArrayList<double[]> locations = new ArrayList<double[]>();
             String line = br.readLine();
-            String [] headers = (String[]) CSVUtils.parseLine(line).toArray();
+            List<String> h = CSVUtils.parseLine(line);
+            
+            String [] headers = new String[h.size()];
+            h.toArray(headers);
 
             while ((line = br.readLine()) != null) {
 
                 List<String> row = CSVUtils.parseLine(line);
                 double[] oneLoc = new double[row.size()];
                 for (int i = 0; i < row.size(); i++) {
-                    oneLoc[i] = Double.parseDouble(row.get(i));
+                    try {
+                        oneLoc[i] = Double.parseDouble(row.get(i));
+                    } catch (NumberFormatException e) {
+                        oneLoc[i] = 0;
+                    }
                 }
                 locations.add(oneLoc);
             }
 
-            logger.info("Converting from thunderstorm format.");
+            logger.info("Converting from CSV format.");
 
             double[][] data = new double[headers.length][];
 

@@ -21,7 +21,7 @@ public class CSVUtils {
         List<String> result = new ArrayList<>();
 
         // if empty, return!
-        if (csvLine == null && csvLine.isEmpty()) {
+        if (csvLine == null || csvLine.isEmpty()) {
             return result;
         }
 
