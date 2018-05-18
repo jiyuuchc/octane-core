@@ -59,6 +59,7 @@ public class TrackingDataFile extends OnePassTracking {
 		for (int i = 0; i < maxFrame; i ++) {
 			dataset[i] = new ArrayList<TrackingHData>();
 		}
+		//FIXME this only works if data start from frame 1.
 		for (int i = 0; i < locData.getNumLocalizations(); i ++ ) {
 			int frame = (int) locData.getData(locData.frameCol)[i] - 1;
 			if (frame >=0 && frame < maxFrame) {
@@ -67,6 +68,7 @@ public class TrackingDataFile extends OnePassTracking {
 		}
 
 		List<Trajectory> results = doTracking(dataset, new TrivialConnecter(maxDisplacement));
+		//List<Trajectory> results = doTracking(dataset, new MinSumDistance(maxDisplacement));
 
 		//generate new datafile
 		if (doMerge) {
@@ -80,6 +82,11 @@ public class TrackingDataFile extends OnePassTracking {
 		} else {
 		    double [][] origData = locData.getDataSource().data;
 		    double [][] newData = new double[locData.getNumOfCol() + 1][locData.getNumLocalizations()];
+		    int s = 0;
+		    for (int i = 0; i < results.size(); i++) {
+		        s+= results.get(i).size();
+		    }
+		    assert(locData.getNumLocalizations() == s);
 		    int curRow = 0;
 		    for (int trackIdx = 0; trackIdx < results.size(); trackIdx++) {
 		        Trajectory tr = results.get(trackIdx);

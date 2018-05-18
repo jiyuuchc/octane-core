@@ -77,12 +77,16 @@ public class OnePassTracking {
             }
 
             // add new particles into the track list
+            logger.info("Add {} new trajectories", points.size());
             for (HData point : points) {
                 Trajectory t = new Trajectory(curFrame);
                 t.add(point);
                 activeTracks.add(t);
             }
         } // while
+
+        logger.info("Frame:{} - {} active tracks, {} stopped tracks",
+                localizations.length, activeTracks.size(), trajectories.size());
 
         trajectories.addAll(activeTracks);
         activeTracks = null;
