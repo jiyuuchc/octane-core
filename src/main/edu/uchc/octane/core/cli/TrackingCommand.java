@@ -23,19 +23,21 @@ public class TrackingCommand {
 	static Options options;
 	static double trackingDistance;
 	static long blinkings;
+	static boolean doMerge;
 	static LocalizationImage locData;
 
 	public static Options setupOptions() {
-		options = PatternOptionBuilder.parsePattern("ht%b%");
+		options = PatternOptionBuilder.parsePattern("htm%b%");
 
 		options.getOption("h").setDescription("print this message");
 		options.getOption("t").setDescription("maximum tracking distance");
+		options.getOption("m").setDescription("merge trajecories");
 		options.getOption("b").setDescription("maximum blinking frames");
 		return options;
 	}
 
 	public static void printHelp() {
-		String syntax = "octane merge [options] data_file <output_file>";
+		String syntax = "octane track [options] data_file <output_file>";
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(syntax, options);
 	}
@@ -43,12 +45,11 @@ public class TrackingCommand {
 	public static void printParameters() {
 		System.out.println("Tracking distance : " + trackingDistance);
 		System.out.println("Blinking : " + blinkings);
+		System.out.println("Merge trajectories : " + (doMerge?"yes":"no"));
 	}
 
 	public static void tracking(List<String> args) throws IOException, ClassNotFoundException {
-		System.out.println("Octane: merge tracks ...");
-
-		System.out.println("Tracking ...");
+		System.out.println("Octane: Tracking ...");
 		printParameters();
 
 		System.out.println("Loading File : " + args.get(0));
@@ -59,11 +60,11 @@ public class TrackingCommand {
 		
 		TrackingDataFile tracker = new TrackingDataFile(trackingDistance, (int) blinkings);
 
-		OctaneDataFile mergedData = tracker.processLocalizations(locData);
+		OctaneDataFile trackedData = tracker.processLocalizations(locData, doMerge);
 
         ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(args.get(1)));
         System.out.println("Output file: " + args.get(1));
-        fo.writeObject(mergedData);
+        fo.writeObject(trackedData);
         fo.close();
 
 	}
@@ -79,6 +80,7 @@ public class TrackingCommand {
 			}
 			trackingDistance = CommandUtils.getParsedDouble(cmd, "t", 200.0);
 			blinkings = CommandUtils.getParsedLong(cmd, "b", 1);
+			doMerge = cmd.hasOption("m");
 
 			List<String> remainings = cmd.getArgList();
 			if (remainings.size() == 1) {

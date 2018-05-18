@@ -15,7 +15,7 @@ public class Main {
         System.out.println("Octane(cli) v" + properties.getProperty("version") + " - available commands");
         System.out.println("\tanalyze\t analyze raw image data for localizations");
         System.out.println("\tdrift\t correct drift in the localzation data");
-        System.out.println("\tmerge\t track trajectories and merge coordinantes");
+        System.out.println("\ttrack\t track trajectories and merge coordinantes");
         System.out.println("\tcsv\t import from or export to CSV files");
         System.out.println();
         System.out.println("octane cmd -h for further help");
@@ -43,7 +43,7 @@ public class Main {
             DriftCommand.run(args);
         } else if (cmd.equals("analyze")) {
             AnalyzeCommand.run(args);
-        } else if (cmd.equals("merge")) {
+        } else if (cmd.equals("track")) {
             TrackingCommand.run(args);
         } else if (cmd.equals("csv")) {
             CsvCommand.run(args);

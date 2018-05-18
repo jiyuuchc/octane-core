@@ -46,10 +46,12 @@ public class TrackingDataFile extends OnePassTracking {
 	}
 
 	public OctaneDataFile processLocalizations(LocalizationImage loc) {
+	    return processLocalizations(loc, false);
+	}
+	
+	public OctaneDataFile processLocalizations(LocalizationImage loc, boolean doMerge) {
 		locData = loc;
-		//data = loc.data;
 		cols = new int[] {loc.xCol, loc.yCol, loc.zCol};
-		//double [][] data = locData.data;
 
 		int maxFrame = (int) locData.getSummaryStatistics(locData.frameCol).getMax();
 		List<TrackingHData> [] dataset = new ArrayList[maxFrame];
@@ -66,39 +68,70 @@ public class TrackingDataFile extends OnePassTracking {
 
 		List<Trajectory> results = doTracking(dataset, new TrivialConnecter(maxDisplacement));
 
-		double [][] newData = new double[locData.getNumOfCol()][results.size()];
-		for (int i = 0 ; i < results.size(); i ++) {
-			mergeTrack(results.get(i), newData, i);
+		//generate new datafile
+		if (doMerge) {
+		    double [][] newData = new double[locData.getNumOfCol()][results.size()];
+		    for (int i = 0 ; i < results.size(); i ++) {
+		        mergeTrack(results.get(i), newData, i);
+		    }
+		    
+		    return new OctaneDataFile(newData, locData.getHeaders());
+
+		} else {
+		    double [][] origData = locData.getDataSource().data;
+		    double [][] newData = new double[locData.getNumOfCol() + 1][locData.getNumLocalizations()];
+		    int curRow = 0;
+		    for (int trackIdx = 0; trackIdx < results.size(); trackIdx++) {
+		        Trajectory tr = results.get(trackIdx);
+		        for (int i = 0; i < tr.size(); i ++) { // loop through each node in trajectory
+		            TrackingHData d = (TrackingHData) tr.get(i);
+		            int oldRow = d.idx;
+		            for (int col = 0; col < locData.getNumOfCol(); col++ ) {
+		                newData[col][curRow] = origData[col][oldRow];
+		            }
+		            newData[loc.getNumOfCol()][curRow] = trackIdx;
+		            curRow ++;
+		        }
+		    }
+		    
+		    String [] newHeaders = new String[locData.getNumOfCol()+1];
+		    System.arraycopy(locData.getHeaders(), 0, newHeaders, 0, locData.getNumOfCol());
+		    newHeaders[locData.getNumOfCol()] = "TrackIdx";
+		    
+		    return new OctaneDataFile(newData, newHeaders);
 		}
-		return new OctaneDataFile(newData, locData.getHeaders());
 	}
 
 	public OctaneDataFile processLocalizations(OctaneDataFile data) {
-		return processLocalizations(new LocalizationImage(data));
+	    return processLocalizations(data, false);
 	}
 
-	void mergeTrack(Trajectory track, double[][] target, int idx) {
+	public OctaneDataFile processLocalizations(OctaneDataFile data, boolean doMerge) {
+		return processLocalizations(new LocalizationImage(data), doMerge);
+	}
+
+	void mergeTrack(Trajectory track, double[][] target, int trackIdx) {
 
 		for (int i = 0; i < track.size(); i ++) {
 			TrackingHData d = (TrackingHData) track.get(i);
 			for (int j = 0; j < target.length; j++) {
-				target[j][idx] += locData.getData(j)[d.idx];
+				target[j][trackIdx] += locData.getData(j)[d.idx];
 			}
 		}
 
 		//average most
 		for (int j = 0; j < target.length; j++) {
-			target[j][idx] /= track.size();
+			target[j][trackIdx] /= track.size();
 		}
 		//except for frames
-		target[locData.frameCol][idx] = track.lastFrame;
+		target[locData.frameCol][trackIdx] = track.lastFrame;
 		// and intensity
 		if (locData.intensityCol != -1) {
-			target[locData.intensityCol][idx] *= track.size();
+			target[locData.intensityCol][trackIdx] *= track.size();
 		}
 		//and error, very rough est
 		if (locData.errCol != -1) {
-			target[locData.errCol][idx] /= FastMath.sqrt(track.size());
+			target[locData.errCol][trackIdx] /= FastMath.sqrt(track.size());
 		}
 	}
 }
