@@ -17,21 +17,26 @@ import org.apache.commons.cli.PatternOptionBuilder;
 
 import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.localizationimage.LocalizationImage;
+import edu.uchc.octane.core.tracking.ConnectionOptimizer;
+import edu.uchc.octane.core.tracking.MinSumDistance;
 import edu.uchc.octane.core.tracking.TrackingDataFile;
+import edu.uchc.octane.core.tracking.TrivialConnecter;
 
 public class TrackingCommand {
 	static Options options;
 	static double trackingDistance;
 	static long blinkings;
 	static boolean doMerge;
+	static boolean isNetworkedTracking;
 	static LocalizationImage locData;
 
 	public static Options setupOptions() {
-		options = PatternOptionBuilder.parsePattern("htm%b%");
+		options = PatternOptionBuilder.parsePattern("htnm%b%");
 
 		options.getOption("h").setDescription("print this message");
 		options.getOption("t").setDescription("maximum tracking distance");
 		options.getOption("m").setDescription("merge trajecories");
+		options.getOption("n").setDescription("perform multi-particle tracking optimization");
 		options.getOption("b").setDescription("maximum blinking frames");
 		return options;
 	}
@@ -46,6 +51,7 @@ public class TrackingCommand {
 		System.out.println("Tracking distance : " + trackingDistance);
 		System.out.println("Blinking : " + blinkings);
 		System.out.println("Merge trajectories : " + (doMerge?"yes":"no"));
+		System.out.println("Networked tracking : " + (isNetworkedTracking?"yes":"no"));
 	}
 
 	public static void tracking(List<String> args) throws IOException, ClassNotFoundException {
@@ -58,7 +64,13 @@ public class TrackingCommand {
         s.close();
         System.out.println("Load File: done");
 		
-		TrackingDataFile tracker = new TrackingDataFile(trackingDistance, (int) blinkings);
+        ConnectionOptimizer optimizer;
+        if (isNetworkedTracking) {
+            optimizer = new TrivialConnecter(trackingDistance);
+        } else {
+            optimizer = new MinSumDistance(trackingDistance);
+        }
+		TrackingDataFile tracker = new TrackingDataFile(optimizer, (int) blinkings);
 
 		OctaneDataFile trackedData = tracker.processLocalizations(locData, doMerge);
 
@@ -81,7 +93,8 @@ public class TrackingCommand {
 			trackingDistance = CommandUtils.getParsedDouble(cmd, "t", 200.0);
 			blinkings = CommandUtils.getParsedLong(cmd, "b", 1);
 			doMerge = cmd.hasOption("m");
-
+			isNetworkedTracking  = cmd.hasOption("n");
+			        
 			List<String> remainings = cmd.getArgList();
 			if (remainings.size() == 1) {
 				String outputFile = remainings.get(0) + ".t";

@@ -15,15 +15,15 @@ public class TrackingDataFile extends OnePassTracking {
 	LocalizationImage locData;
 	// double [][] data;
 	int [] cols;
-	double maxDisplacement;
+	ConnectionOptimizer optimizer;
 
-	public TrackingDataFile(double maxDisplacement, int maxBlinking) {
-		this(maxDisplacement, maxBlinking, false);
+	public TrackingDataFile(ConnectionOptimizer optimizer, int maxBlinking) {
+		this(optimizer, maxBlinking, false);
 	}
 
-	public TrackingDataFile(double maxDisplacement, int maxBlinking, boolean is3D) {
+	public TrackingDataFile(ConnectionOptimizer optimizer, int maxBlinking, boolean is3D) {
 		super(maxBlinking);
-		this.maxDisplacement = maxDisplacement; 
+		this.optimizer = optimizer;
 		dimension = is3D?3:2;
 	}
 
@@ -67,7 +67,7 @@ public class TrackingDataFile extends OnePassTracking {
 			}
 		}
 
-		List<Trajectory> results = doTracking(dataset, new TrivialConnecter(maxDisplacement));
+		List<Trajectory> results = doTracking(dataset, optimizer);
 		//List<Trajectory> results = doTracking(dataset, new MinSumDistance(maxDisplacement));
 
 		//generate new datafile

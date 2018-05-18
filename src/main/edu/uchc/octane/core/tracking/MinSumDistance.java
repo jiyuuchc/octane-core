@@ -22,7 +22,7 @@ public class MinSumDistance implements ConnectionOptimizer {
     double maxDistance2;
     HashMap<Trajectory, HData> connections;
 
-    MinSumDistance(double dist) {
+    public MinSumDistance(double dist) {
         maxDistance2 = dist * dist;
         connections = new HashMap<Trajectory, HData>();
     }
