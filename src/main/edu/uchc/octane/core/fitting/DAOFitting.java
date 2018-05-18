@@ -36,10 +36,10 @@ public class DAOFitting {
 
     	for(int n = 2; n <= maxNumPeaks; n++) {
 
-    		double [] oldValues = data.getValueVector();
-    		data.setValueVector(multiLsq.optimum.getResiduals().toArray());
-    		double [] lastPeak = lsq.fit(data, start);
-    		data.setValueVector(oldValues);
+//    		double [] oldValues = data.getValueVector();
+//    		data.setValueVector(multiLsq.optimum.getResiduals().toArray());
+//    		double [] lastPeak = lsq.fit(data, start);
+//    		data.setValueVector(oldValues);
 
     		multiPsf = new MultiPSF(n, psf);
     		multiLsq = new LeastSquare(multiPsf);
@@ -47,11 +47,11 @@ public class DAOFitting {
     		double [] oldStart = curStart;
     		curStart = new double[n * start.length];
     		System.arraycopy(oldStart, 0, curStart, 0, oldStart.length);
-    		if (lastPeak != null ) {
-    			System.arraycopy(lastPeak, 0, curStart, oldStart.length, lastPeak.length);
-    		} else {
+//    		if (lastPeak != null ) {
+//    			System.arraycopy(lastPeak, 0, curStart, oldStart.length, lastPeak.length);
+//    		} else {
     			System.arraycopy(start, 0, curStart, oldStart.length, start.length);
-    		}
+//    		}
 
     		if (multiLsq.fit(data, curStart) != null) {
 
@@ -67,6 +67,8 @@ public class DAOFitting {
     				bestPsf = multiPsf;
     				bestLsq = multiLsq;
     			}
+    		} else {
+    		    break;
     		}
     	}
 

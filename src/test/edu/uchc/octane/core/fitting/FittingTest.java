@@ -1,7 +1,6 @@
 package edu.uchc.octane.core.fitting;
 
 import static org.junit.Assert.assertArrayEquals;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -143,6 +142,12 @@ public class FittingTest {
 		DAOFitting dao = new DAOFitting(psf, 4, 1e-6);
 		double[][] result = dao.fit(new RectangularDoubleImage(newValue, IMAGE_SIZE), start);
 		assert(result.length == 2);
+		//sort
+		if (result[0][0] > result[0][1]) {
+		    double [] r = result[0];
+		    result[0] = result[1];
+		    result[1] = r;
+		}
 		double [][] expected = { {3, 3, 1, 1.47, 0}, {5, 5, 1, 1.47, 0}};
 		assertArrayEquals(expected[0], result[0], 0.01);
 		assertArrayEquals(expected[1], result[1], 0.01);

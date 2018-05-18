@@ -30,7 +30,7 @@ public class AnalyzeCommand {
 
 	static Options options;
 	static long windowSize = 3;
-	static long thresholdIntensity = 100;
+	static long thresholdIntensity = 300;
 	static long backgroundIntensity = 1600;
 	static long startingFrame = 0;
 	static long endingFrame = -1;
@@ -136,12 +136,15 @@ public class AnalyzeCommand {
 				// System.out.println("Location " + (c++) +" : " + x + " - " + y + " - " + img.getValueAtCoordinate(x, y));
 				start[0] = x; start[1] = y;  start[2] = img.getValueAtCoordinate(x, y) * 10;
 
-				double [] results = fitter.fit(img, start);
-				if (results != null ) {
-					cnt[frame] ++;
-					synchronized(positions) {
-						positions.add(convertParameters(results, frame));
-					}
+				double [] result = fitter.fit(img, start);
+				if (result != null ) {
+                    // reject bad fitting
+                    double bg = result[result.length -1];
+                    double sigma = result[3];
+                    if (bg > 0.1 || sigma < 6) {
+                        positions.add(convertParameters(result, frame));
+                    }				    
+                    cnt[frame] ++;					
 				}
 				return true;
 			}
@@ -154,7 +157,8 @@ public class AnalyzeCommand {
 		DAOFitting fitter = new DAOFitting(new IntegratedGaussianPSF(false, false));
 		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
 		for (int i = 0; i < pixels.length; i ++) {
-			pixels[i] = iPixels[i] - backgroundIntensity ;
+		    double p = iPixels[i] >= 0 ? iPixels[i] : iPixels[i] + 65536.0;
+			pixels[i] = p - backgroundIntensity ;
 		}
 		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
 		cnt[frame] = 0;
@@ -173,7 +177,14 @@ public class AnalyzeCommand {
 					cnt[frame] += results.length;
 					synchronized(positions) {
 						for (int i = 0; i < results.length; i++) {
-							positions.add(convertParameters(results[i], frame));
+						    double [] result = results[i];
+						    
+						    // reject some bad fitting
+						    double bg = result[result.length -1];
+						    double sigma = result[3];
+						    if (bg > 0.1 || sigma < 6) {
+						            positions.add(convertParameters(result, frame));
+						    }
 						}
 					}
 				}
@@ -207,7 +218,11 @@ public class AnalyzeCommand {
 
 			if (img != null ) {
 				try {
-					processFrame(img, f);
+				    if (! multiPeak) {
+				        processFrame(img, f);
+				    } else {
+				        processFrameWithDAO(img,f);
+				    }
 				} catch (JSONException e) {
 					assert(false); //shouldn't happen
 				}

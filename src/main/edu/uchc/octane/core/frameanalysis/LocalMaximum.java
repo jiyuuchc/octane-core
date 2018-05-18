@@ -157,6 +157,13 @@ public class LocalMaximum{
 				int x = data.getXCordinate(pixel.idx);
 				int y = data.getYCordinate(pixel.idx);
 				RectangularDoubleImage subImage = new RectangularDoubleImage(data, x - ROISize, y - ROISize, ROISize * 2 + 1, ROISize * 2 + 1, true);
+				
+				//exclude fitted region from future peak detection
+				for (int i = 0; i < subImage.getLength(); i++) {
+				    int idx = filteredData.getIndexOfCoordinate(subImage.getXCordinate(i), subImage.getYCordinate(i));
+				    process(idx);
+				}
+				
 				if (callback.fit(subImage, x, y) == false) {
 					break;
 				}
