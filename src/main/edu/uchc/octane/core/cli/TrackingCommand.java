@@ -65,7 +65,7 @@ public class TrackingCommand {
         System.out.println("Load File: done");
 		
         ConnectionOptimizer optimizer;
-        if (isNetworkedTracking) {
+        if (! isNetworkedTracking) {
             optimizer = new TrivialConnecter(trackingDistance);
         } else {
             optimizer = new MinSumDistance(trackingDistance);
