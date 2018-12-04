@@ -31,7 +31,7 @@ public class TrackingCommand {
 	static LocalizationImage locData;
 
 	public static Options setupOptions() {
-		options = PatternOptionBuilder.parsePattern("htnm%b%");
+		options = PatternOptionBuilder.parsePattern("htnmb%");
 
 		options.getOption("h").setDescription("print this message");
 		options.getOption("t").setDescription("maximum tracking distance");
