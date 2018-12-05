@@ -51,20 +51,20 @@ public class TrackingDataFile extends OnePassTracking {
 	
 	public OctaneDataFile processLocalizations(LocalizationImage loc, boolean doMerge) {
 		locData = loc;
+		OctaneDataFile odf = loc.getDataSource();
 		cols = new int[] {loc.xCol, loc.yCol, loc.zCol};
 
 		int maxFrame = (int) locData.getSummaryStatistics(locData.frameCol).getMax();
-		List<TrackingHData> [] dataset = new ArrayList[maxFrame];
+		int minFrame = (int) locData.getSummaryStatistics(locData.frameCol).getMin();
+		List<TrackingHData> [] dataset = new ArrayList[maxFrame - minFrame + 1];
 
 		for (int i = 0; i < maxFrame; i ++) {
 			dataset[i] = new ArrayList<TrackingHData>();
 		}
-		//FIXME this only works if data start from frame 1.
+		// create dataset, index 0 --> minFrame
 		for (int i = 0; i < locData.getNumLocalizations(); i ++ ) {
-			int frame = (int) locData.getData(locData.frameCol)[i] - 1;
-			if (frame >=0 && frame < maxFrame) {
-				dataset[frame].add(new TrackingHData(i));
-			}
+			int frame = (int) locData.getData(locData.frameCol)[i];
+			dataset[frame - minFrame].add(new TrackingHData(i));
 		}
 
 		List<Trajectory> results = doTracking(dataset, optimizer);
@@ -72,16 +72,16 @@ public class TrackingDataFile extends OnePassTracking {
 
 		//generate new datafile
 		if (doMerge) {
-		    double [][] newData = new double[locData.getNumOfCol()][results.size()];
+		    double [][] newData = new double[odf.headers.length][results.size()];
 		    for (int i = 0 ; i < results.size(); i ++) {
 		        mergeTrack(results.get(i), newData, i);
 		    }
 		    
-		    return new OctaneDataFile(newData, locData.getHeaders());
+		    return new OctaneDataFile(newData, locData.getDataSource().headers);
 
 		} else {
-		    double [][] origData = locData.getDataSource().data;
-		    double [][] newData = new double[locData.getNumOfCol() + 1][locData.getNumLocalizations()];
+		    double [][] origData = odf.data;
+		    double [][] newData = new double[origData.length + 1][locData.getNumLocalizations()];
 		    int s = 0;
 		    for (int i = 0; i < results.size(); i++) {
 		        s+= results.get(i).size();
@@ -101,9 +101,9 @@ public class TrackingDataFile extends OnePassTracking {
 		        }
 		    }
 		    
-		    String [] newHeaders = new String[locData.getNumOfCol()+1];
-		    System.arraycopy(locData.getHeaders(), 0, newHeaders, 0, locData.getNumOfCol());
-		    newHeaders[locData.getNumOfCol()] = "TrackIdx";
+		    String [] newHeaders = new String[odf.headers.length + 1];
+		    System.arraycopy(odf.headers, 0, newHeaders, 0, odf.headers.length);
+		    newHeaders[newHeaders.length - 1] = "TrackIdx";
 		    
 		    return new OctaneDataFile(newData, newHeaders);
 		}
