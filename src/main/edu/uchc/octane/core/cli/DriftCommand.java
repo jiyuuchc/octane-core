@@ -76,15 +76,13 @@ public class DriftCommand {
 		}
 	}
 
-	public static void drift(List<String> args) throws IOException, IOException, ClassNotFoundException {
+	public static void drift(List<String> args) throws IOException, ClassNotFoundException {
 
 		System.out.println("Correcting drift ...");
 
 		CorrelationEstimator corrector = new CorrelationEstimator(resolution * 100, resolution);
 		System.out.println("Loading File : " + args.get(0));
-		ObjectInputStream s = new ObjectInputStream(new FileInputStream(args.get(0)));
-		OctaneDataFile data = (OctaneDataFile) s.readObject();
-		s.close();
+		OctaneDataFile data = OctaneDataFile.readFromFile(args.get(0));
 		System.out.println("Load File: done");
 
 		printParameters();
@@ -94,9 +92,7 @@ public class DriftCommand {
 		corrector.estimateAndCorrect(data, null, (int) numOfKeyFrames);
 
 		System.out.println("Saving results to " + args.get(1));
-		ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(args.get(1)));
-		fo.writeObject(data);
-		fo.close();
+		data.writeToFile(args.get(1));
 		System.out.println("Saving : done");
 	}
 }

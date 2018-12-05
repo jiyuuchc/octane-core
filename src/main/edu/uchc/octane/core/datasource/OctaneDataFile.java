@@ -3,9 +3,13 @@ package edu.uchc.octane.core.datasource;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,21 +28,59 @@ public class OctaneDataFile implements Serializable {
     public String[] headers;
     public double[][] data;
 
+    void validate() {
+    	if (headers.length != data.length) {
+    		throw new IllegalArgumentException("Header and data size mismatch");
+    	}
+    	
+    	for (int i = 1; i < data.length; i++) {
+    		if (data[i].length != data[i-1].length) {
+    			throw new IllegalArgumentException("Not all data columns have the same length");
+    		}
+    	}    	
+    }
+    
     public OctaneDataFile(double[][] data, String[] headers) {
-        this.data = data;
+
+    	this.data = data;
         this.headers = headers;
+        
+        validate();
     }
 
+    //copy constructor
     public OctaneDataFile(OctaneDataFile odf) {
-        headers = odf.headers.clone();
+
+    	headers = odf.headers.clone();
         data = new double[odf.data.length][];
         for (int i = 0; i < data.length; i++) {
             data[i] = odf.data[i].clone();
         }
+
     }
 
+    //merge ignores header differences
+    public void mergeWith(OctaneDataFile newOdf) {
+    	if (newOdf == null) {
+    		return;
+    	}
+        if (data.length != newOdf.data.length) {
+            throw new IllegalArgumentException("Data dimension doesn't match");
+        }
+
+        double [][] oldData = data.clone();
+        double [][] newData = newOdf.data;
+        for (int i = 0; i < data.length; i ++) {
+            int newlen = oldData[i].length + newData[i].length ;
+            data[i] = new double[newlen];
+            System.arraycopy(oldData[i], 0, data[i], 0, oldData[i].length);
+            System.arraycopy(newData[i], 0, data[i], oldData[i].length, newData[i].length);
+        }    	
+    }
+    
     public void exportToCSV(File csvFile) throws IOException{
-        logger.info("Writing data...");
+
+    	logger.info("Writing CSV data...");
         BufferedWriter bw = new BufferedWriter(new FileWriter(csvFile));
 
         for (int i = 0; i < data.length; i++) {
@@ -60,6 +102,27 @@ public class OctaneDataFile implements Serializable {
         }
 
         bw.close();
+    }
+    
+    public static OctaneDataFile readFromFile(String pathname) throws IOException, ClassNotFoundException {
+
+    	ObjectInputStream fi = new ObjectInputStream(new java.io.FileInputStream(pathname));
+        OctaneDataFile odf = (OctaneDataFile) fi.readObject();
+        
+        fi.close();
+        
+        try {
+        	odf.validate();
+        } catch (IllegalArgumentException e){
+        	throw new ClassNotFoundException(e.getMessage());
+        }
+        return odf;
+    }
+    
+    public void writeToFile(String pathname) throws IOException {
+		ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(pathname));
+		fo.writeObject(data);
+		fo.close();    	
     }
 
     public static OctaneDataFile importFromCSV(File csvFile) {

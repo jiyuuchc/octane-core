@@ -51,21 +51,16 @@ public class CsvCommand {
         System.out.println("Reading CSV file: " + csvFilepath);
 
         OctaneDataFile dataset = OctaneDataFile.importFromCSV(csvFile);
-        ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(args.get(1)));
-
+        
         System.out.println("Output file: " + args.get(1));
-        fo.writeObject(dataset);
-        fo.close();
-
-	}
+        dataset.writeToFile(args.get(1));
+ 	}
 
 	public static void readAndExport(List<String> args) throws IOException, ClassNotFoundException {
         System.out.println("Octane: export...");
         
         System.out.println("Reading octane data: " + args.get(0));
-        ObjectInputStream s = new ObjectInputStream(new FileInputStream(args.get(0)));
-        OctaneDataFile data = (OctaneDataFile) s.readObject();
-        s.close();
+        OctaneDataFile data = OctaneDataFile.readFromFile(args.get(0));
         
         String csvFilepath = args.get(1);
         

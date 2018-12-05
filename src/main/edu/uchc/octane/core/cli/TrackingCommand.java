@@ -59,9 +59,7 @@ public class TrackingCommand {
 		printParameters();
 
 		System.out.println("Loading File : " + args.get(0));
-		ObjectInputStream s = new ObjectInputStream(new FileInputStream(args.get(0)));
-		locData = new LocalizationImage((OctaneDataFile) s.readObject());
-        s.close();
+		locData = new LocalizationImage(OctaneDataFile.readFromFile(args.get(0)));
         System.out.println("Load File: done");
 		
         ConnectionOptimizer optimizer;
@@ -73,11 +71,8 @@ public class TrackingCommand {
 		TrackingDataFile tracker = new TrackingDataFile(optimizer, (int) blinkings);
 
 		OctaneDataFile trackedData = tracker.processLocalizations(locData, doMerge);
-
-        ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(args.get(1)));
         System.out.println("Output file: " + args.get(1));
-        fo.writeObject(trackedData);
-        fo.close();
+        trackedData.writeToFile(args.get(1));
 
 	}
 
