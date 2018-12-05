@@ -91,8 +91,7 @@ public class DriftCommand {
 
 		System.out.println("Estimating...");
 		//c.estimate( d, new Rectangle(1000,1000,2048,2048), 20);
-		corrector.estimate(data, null, (int) numOfKeyFrames);
-		corrector.correct(data);
+		corrector.estimateAndCorrect(data, null, (int) numOfKeyFrames);
 
 		System.out.println("Saving results to " + args.get(1));
 		ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(args.get(1)));

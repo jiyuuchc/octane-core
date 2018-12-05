@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.uchc.octane.core.datasource.OctaneDataFile;
+import edu.uchc.octane.core.localizationimage.LocalizationImage;
 import edu.uchc.octane.core.localizationimage.RasterizedLocalizationImage;
 
 public class CorrelationEstimator {
@@ -23,6 +24,9 @@ public class CorrelationEstimator {
 
     public PolynomialSplineFunction xFunction;
     public PolynomialSplineFunction yFunction;
+    
+    OctaneDataFile odf;
+    RasterizedLocalizationImage img;
 
 	public CorrelationEstimator() {
 		this(1600.0, 16.0);
@@ -33,17 +37,26 @@ public class CorrelationEstimator {
 		this.pixelSize = pixelSize;
 	}
 
-	public void correct(OctaneDataFile data) {
+	public void estimateAndCorrect(OctaneDataFile data, Rectangle roi, int numOfKeyFrames) {
+		
+		estimate(data, roi, numOfKeyFrames);
+		correct();
+	}
+	
+	public void correct() {
 
-		double [][] raw = data.data;
-		for (int i = 0; i < raw[0].length; i++) {
-			raw[1][i] += xFunction.value(raw[0][i]);
-			raw[2][i] += yFunction.value(raw[0][i]);
+		double [] xData = img.getData(img.xCol);
+		double [] yData = img.getData(img.yCol);
+		double [] frameData = img.getData(img.frameCol);
+		for (int i = 0; i < img.getNumLocalizations(); i++) {
+			xData[i] += xFunction.value(frameData[i]);
+			yData[i] += yFunction.value(frameData[i]);
 		}
 	}
 
 	public void estimate(OctaneDataFile data, Rectangle roi, int numOfKeyFrames) {
-		RasterizedLocalizationImage img = new RasterizedLocalizationImage(data, pixelSize);
+		odf = data;
+		img = new RasterizedLocalizationImage(data, pixelSize);
 		img.setRoi(roi);
 		RasterizedLocalizationImage newImg;
 		double [] driftX = new double[numOfKeyFrames];
