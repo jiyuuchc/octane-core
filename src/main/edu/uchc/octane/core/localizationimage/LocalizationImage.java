@@ -1,6 +1,7 @@
 package edu.uchc.octane.core.localizationimage;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.util.FastMath;
@@ -15,28 +16,34 @@ public class LocalizationImage {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
-    final OctaneDataFile dataSrc;
-    SummaryStatistics[] stats = null;
-    HashMap<String, Integer> headersMap = null;
-    FastKDTree tree;
-    double[] localDensities;
-    final double[][] data;
+    final OctaneDataFile odf;
+
+    ArrayList<SummaryStatistics> stats;
+    ArrayList<String> headerList;
+    ArrayList<double []> dataList;
+    
     public int xCol = 1, yCol = 2, zCol = -1, frameCol = 0, errCol = -1, intensityCol = -1, sigmaCol = -1;
 
+    FastKDTree tree;
+    
+    //represent data as HDataCollection
     class HDataImp implements HDataCollection {
 
         private double[][] data_;
         private int d = 0;
 
         public HDataImp() {
-            data_ = new double[2][];
-            data_[0] = data[xCol];
-            data_[1] = data[yCol];
+            data_ = new double[getDimension()][];
+            data_[0] = getData(xCol);
+            data_[1] = getData(yCol);
+            if (! is2DData() ) {
+            	data_[2] = getData(zCol);
+            }
         }
 
         @Override
         public int getDimension() {
-            return 2;
+            return is2DData() ? 2 : 3;
         }
 
         @Override
@@ -51,47 +58,54 @@ public class LocalizationImage {
 
         @Override
         public void selectDimension(int d) {
-            this.d = d;
-
+        	if (d >= 0 && d < data_.length) {
+        		this.d = d;
+        	} else {
+        		throw new IllegalArgumentException("Dimension out of bound"); 
+        	}
         }
 
         @Override
         public double get(int idx) {
             return get(idx, d);
         }
-
     }
 
-    public LocalizationImage(OctaneDataFile raw) {
-        dataSrc = raw;
-        data = raw.data;
+    public HDataCollection getHDataView() {
+    	return new HDataImp();
+    }
 
-        stats = new SummaryStatistics[data.length];
+    
+    public LocalizationImage(OctaneDataFile odf) {
+        this.odf = odf;
 
-        if (headersMap == null) {
-            headersMap = new HashMap<String, Integer>();
-            for (int i = 0; i < dataSrc.headers.length; i++) {
-                headersMap.put(dataSrc.headers[i], i);
-            }
-            headersMap.put("LocalDensity", data.length);
+        dataList = new ArrayList<>(Arrays.asList(odf.data));
+        headerList = new ArrayList<>(Arrays.asList(odf.headers));
+
+        stats = new ArrayList<SummaryStatistics>();
+        for (int i = 0; i < this.getNumOfCol(); i++) {
+        	stats.add(null);
         }
 
         guessHeaders();
     }
 
+    @SuppressWarnings("unchecked")
     public LocalizationImage(LocalizationImage loc) {
-        this(new OctaneDataFile(loc.dataSrc));
-        for (int i = 0; i < stats.length; i++) {
-            if (loc.stats[i] != null) {
-                stats[i] = new SummaryStatistics(loc.stats[i]);
-            }
-        }
+    	odf = loc.odf;
+
+    	dataList = (ArrayList<double[]>)loc.dataList.clone();
+    	stats = (ArrayList<SummaryStatistics>) loc.stats.clone();
+    	headerList = (ArrayList<String>)loc.headerList.clone();
+
+    	tree = loc.tree;
+    	
+    	guessHeaders();
     }
 
     void guessHeaders() {
-        for (String key : headersMap.keySet()) {
-            int col = headersMap.get(key);
-            key = key.toLowerCase();
+        for (int col = 0; col < headerList.size(); col ++) {
+            String key = headerList.get(col).toLowerCase();
             if (key.startsWith("x ") || key.equals("x")) {
                 xCol = col;
             } else if (key.startsWith("y ") || key.equals("y")) {
@@ -112,100 +126,128 @@ public class LocalizationImage {
 
     public SummaryStatistics getSummaryStatistics(int col) {
 
-        if (col < 0 || col >= data.length) {
+        if (col < 0 || col >= getNumOfCol()) {
             return null;
         }
-        if (stats[col] == null) {
-            stats[col] = new SummaryStatistics();
-            for (double d : data[col]) {
-                stats[col].addValue(d);
+        if (stats.get(col) == null) {
+            stats.set(col, new SummaryStatistics());
+            for (double d : getData(col)) {
+                stats.get(col).addValue(d);
             }
         }
-        return stats[col];
+        return stats.get(col);
     }
 
     public SummaryStatistics getSummaryStatistics(String header) {
-        Integer col = getColFromHeader(header);
-        if (col != null) {
-            return getSummaryStatistics(col);
-        } else {
-            return null;
-        }
+    	return getSummaryStatistics(getColFromHeader(header));
     }
 
     public double[] getData(int col) {
-        return data[col];
+    	if (col < 0 || col >= getNumOfCol()) {
+    		return null;
+    	} else {
+    		return dataList.get(col);
+    	}
     }
 
     public double[] getData(String colHeader) {
         return getData(getColFromHeader(colHeader));
     }
 
-    public String[] getHeaders() {
-        return dataSrc.headers;
-    }
-
     public int getNumLocalizations() {
-        return data[frameCol].length;
+        return getData(frameCol).length;
     }
 
     public double getXAt(int idx) {
-        return data[xCol][idx];
+        return getData(xCol)[idx];
     }
 
     public double getYAt(int idx) {
-        return data[yCol][idx];
+        return getData(yCol)[idx];
     }
 
     public double getZAt(int idx) {
-        return data[zCol][idx];
+        return getData(zCol)[idx];
+    }
+
+    public boolean is2DData() {
+    	return zCol == -1;
     }
 
     public void constructKDtree() {
-        tree = new FastKDTree(new HDataImp());
+    	logger.info("Construct a KDTree - start");
+        tree = new FastKDTree(getHDataView());
+        logger.info("Construct a KDTree - finished");
     }
 
     public void measureLocalDensity(double distance) {
         if (tree == null) {
             constructKDtree();
         }
-        // int localDensityCol = data.length - 1;
-        for (int i = 0; i < getNumLocalizations(); i++) {
-            localDensities[i] = tree.radiusSearch(i, distance).size();
+        
+        double [] localDensities = getData("density");
+
+        if ( localDensities == null) {
+        	localDensities = new double[getNumLocalizations()];
+            addAuxData("density", localDensities);
         }
+
+    	logger.info("Compute local density - start");
+        for (int i = 0; i < getNumLocalizations(); i++) {
+
+            localDensities[i] = tree.radiusSearch(i, distance).size();
+            if (i % 50000 == 0) {
+            	logger.info("Processed " + i + "/" + getNumLocalizations() +  " points");
+            }
+        }
+        logger.info("Compute local density - finished");
+        
     }
 
     public String getHeader(int i) {
-        return dataSrc.headers[i];
+        return headerList.get(i);
     }
 
-    public Integer getColFromHeader(String s) {
-        return headersMap.get(s);
+    public int getColFromHeader(String s) {
+    	return headerList.indexOf(s);
+    }
+
+    public ArrayList<String> getHeaders() {
+        return headerList;
     }
 
     public int getNumOfCol() {
-        return data.length;
+        return dataList.size();
     }
 
     public OctaneDataFile getDataSource() {
-        return dataSrc;
+        return odf;
     }
-
-    public void mergeWith(OctaneDataFile odf) {
-        if (odf == null) {
+    
+    public void mergeWith(OctaneDataFile newOdf) {
+        if (newOdf == null) {
             return;
         }
-        if (data.length != odf.data.length) {
-            throw new IllegalArgumentException("Data dimension doesn't match");
-        }
         
-        double [][] oldData = data.clone();
-        for (int i = 0; i < data.length; i ++) {
-            int newlen = oldData[i].length + odf.data[i].length ;
-            data[i] = new double[newlen];
-            System.arraycopy(oldData[i], 0, data[i], 0, oldData[i].length);
-            System.arraycopy(odf.data[i], 0, data[i], oldData[i].length, odf.data[i].length);
-        }
+        odf.mergeWith(newOdf);
+        
+        //reset and remove all auxiliary data
+        dataList = new ArrayList<>(Arrays.asList(odf.data));
+        headerList = new ArrayList<>(Arrays.asList(odf.headers));
+
+        stats = new ArrayList<SummaryStatistics>(getNumOfCol());
+
+        guessHeaders();
+    }
+    
+    public void addAuxData(String header, double[] newColumn) {
+    	if (newColumn.length != this.getNumLocalizations()) {
+    		throw new IllegalArgumentException("New data column length does match existing ones");
+    	}
+
+    	headerList.add(header);
+    	dataList.add(newColumn);
+    	stats.add(null);
     }
     
     // in default axis convention:

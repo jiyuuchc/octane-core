@@ -34,7 +34,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
         this(locData, pixelSize, null);
     }
 
-     public RasterizedLocalizationImage(OctaneDataFile locData, double pixelSize, Rectangle roi) {
+    public RasterizedLocalizationImage(OctaneDataFile locData, double pixelSize, Rectangle roi) {
          
          super(locData);
          
@@ -252,7 +252,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
                 int col = entry.getKey();
                 double[] r = entry.getValue();
                 int c = cachedDataIdx[i];
-                double[] vc = data[col];
+                double[] vc = getData(col);
                 double v = vc[c];
                 if (v < r[0] || v > r[1]) {
                     filteredOut = true;
@@ -265,10 +265,10 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
             }
         }
 
-        double[][] newData = new double[data.length][filteredList.size()];
+        double[][] newData = new double[odf.data.length][filteredList.size()];
         for (int i = 0; i < filteredList.size(); i++) {
-            for (int j = 0; j < data.length; j++) {
-                newData[j][i] = data[j][filteredList.get(i)];
+            for (int j = 0; j < odf.data.length; j++) {
+                newData[j][i] = odf.data[j][filteredList.get(i)];
             }
         }
         return newData;
@@ -299,7 +299,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
                 int col = entry.getKey();
                 double[] r = entry.getValue();
                 int c = cachedDataIdx[i];
-                double[] vc = data[col];
+                double[] vc = getData(col);
                 double v = vc[c];
                 if (v < r[0] || v > r[1]) {
                     filteredOut = true;
