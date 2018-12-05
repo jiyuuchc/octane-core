@@ -188,13 +188,14 @@ public class FastKDTree {
 		results = new ArrayList<Integer> ();
 		double sqRadius = radius * radius;
 		refIdx = ref;
-		radiusSearch(getRoot(), 0, sqRadius);
+		sqRadiusSearch(getRoot(), 0, sqRadius);
 
 		return results;
 	}
 
-	protected void radiusSearch(int current, int d, final double sqRadius )
+	void sqRadiusSearch(int current, int d, final double sqRadius )
 	{
+		int nearChild, awayChild;
 		// consider the current node
 		final double sqDistance = sqDistance(pointers[current], refIdx);
 		if ( sqDistance <= sqRadius )
@@ -205,21 +206,29 @@ public class FastKDTree {
 		final double axisDiff = data.get(refIdx) - getData(current);
 		final double axisSqDistance = axisDiff * axisDiff;
 
+		if (axisDiff < 0) {
+			nearChild = getLeft(current);
+			awayChild = getRight(current); 
+		} else {
+			nearChild = getRight(current);
+			awayChild = getLeft(current);
+		}
+
+//		int nearChild = axisDiff < 0 ? getLeft(current) : getRight(current);
+//		int awayChild = axisDiff < 0 ? getRight(current): getLeft(current);
+
+		if (++d >= data.getDimension()) { d = 0 ;}
+
 		// search the near branch
-		int nearChild = axisDiff < 0 ? getLeft(current) : getRight(current);
-		int awayChild = axisDiff < 0 ? getRight(current): getLeft(current);
-
-		if (++d >= data.getDimension()) { d= 0 ;}
-
 		if ( nearChild != -1 )
-			radiusSearch( nearChild, d, sqRadius );
+			sqRadiusSearch( nearChild, d, sqRadius );
 
 		// search the away branch - maybe
 		if ( ( axisSqDistance <= sqRadius ) && ( awayChild != -1 ) )
-			radiusSearch(awayChild, d, sqRadius );
+			sqRadiusSearch(awayChild, d, sqRadius );
 	}
 
-	private double sqDistance(int a, int b) {
+	double sqDistance(int a, int b) {
 		double d = 0;
 		for (int i = 0; i < data.getDimension(); i ++ ) {
 			double d1 = (data.get(a, i) - data.get(b, i));
