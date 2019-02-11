@@ -31,7 +31,7 @@ public class TrackingCommand {
 	static LocalizationImage locData;
 
 	public static Options setupOptions() {
-		options = PatternOptionBuilder.parsePattern("htnmb%");
+		options = PatternOptionBuilder.parsePattern("ht%nmb%");
 
 		options.getOption("h").setDescription("print this message");
 		options.getOption("t").setDescription("maximum tracking distance");
@@ -85,7 +85,7 @@ public class TrackingCommand {
 				printHelp();
 				return;
 			}
-			trackingDistance = CommandUtils.getParsedDouble(cmd, "t", 200.0);
+			trackingDistance = CommandUtils.getParsedDouble(cmd, "t", 60.0);
 			blinkings = CommandUtils.getParsedLong(cmd, "b", 1);
 			doMerge = cmd.hasOption("m");
 			isNetworkedTracking  = cmd.hasOption("n");
