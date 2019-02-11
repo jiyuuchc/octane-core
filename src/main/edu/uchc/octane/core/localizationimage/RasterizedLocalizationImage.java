@@ -25,6 +25,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
     HashMap<Integer, double[]> filters;
     Thread renderingThread = null;
     boolean isDone;
+    boolean isDirty;
 
     public RasterizedLocalizationImage(OctaneDataFile locData) {
         this(locData, DEFAULT_PIXEL_SIZE);
@@ -102,6 +103,12 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
         return pixelSize;
     }
 
+
+    public void setDirty() {
+    	isDirty = true;
+    	quitCurrentRendering();
+    }
+
     public HashMap<Integer, double[]> getViewFilters() {
         return filters;
     }
@@ -110,12 +117,13 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
         filters = newFilters;
     }
 
-    public synchronized void addViewFilter(int col, double[] v) {
+    public synchronized void setViewFilter(int col, double[] v) {
 
-        quitCurrentRendering();
         if (v != null ) {
+            setDirty(); // important to stop rendering thread before change filters
             filters.put(col, v);
-        } else {
+        } else if (filters.get(col) != null){
+        	setDirty(); // important to stop rendering thread before change filters
             filters.remove(col);
         }
     }
@@ -134,8 +142,8 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
             return;
         }
 
+        setDirty();
         roi = rect;
-        quitCurrentRendering();
 
         cachedDataIdx = null;
         cachedPixelIdx = null;
@@ -147,20 +155,23 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
     }
 
     public short[] getRendered() {
-        if (renderingThread == null) {
+        if (isDirty) {
             startRendering();
         }
 
-        try {
-            renderingThread.join();
-        } catch (InterruptedException e) {
-            return null;
+        if (renderingThread != null) {
+        	try {
+        		renderingThread.join();
+        	} catch (InterruptedException e) {
+        		return null;
+        	}
         }
 
         return pixels;
     }
 
     public synchronized void startRendering() {
+    	quitCurrentRendering();
         renderingThread = new Thread(this);
         renderingThread.start();
     }
@@ -192,7 +203,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
 
     @Override
     public synchronized void rotate(double theta, double x0, double y0) {
-        quitCurrentRendering();
+        setDirty();
         super.rotate(theta, x0, y0);
 
         cachedDataIdx = null;
@@ -201,7 +212,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
 
     @Override
     public synchronized void translate(double dx, double dy) {
-        quitCurrentRendering();
+        setDirty();
         super.translate(dx, dy);
 
         cachedDataIdx = null;
@@ -210,7 +221,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
 
     @Override
     public synchronized void mergeWith(OctaneDataFile odf) {
-        quitCurrentRendering();
+        setDirty();
         super.mergeWith(odf);
 
         cachedDataIdx = null;

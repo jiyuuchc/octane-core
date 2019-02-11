@@ -67,7 +67,7 @@ public class CorrelationEstimator {
 		DoubleSummaryStatistics stat =  Arrays.stream(data.data[0]).summaryStatistics();
 		int maxFrameNum = (int) stat.getMax();
 		int framegroupSize = maxFrameNum / numOfKeyFrames;
-		img.addViewFilter(0, new double[] {1, framegroupSize });
+		img.setViewFilter(0, new double[] {1, framegroupSize });
 		keyFrames[0] = (1 + framegroupSize) / 2.0;
 		for (int i = 1; i < numOfKeyFrames; i++) {
 			logger.info("Processing key frame: " + i);
@@ -77,7 +77,7 @@ public class CorrelationEstimator {
 			if ( i == numOfKeyFrames - 1 ) { max = maxFrameNum ;}
 			newImg = new RasterizedLocalizationImage(data, pixelSize);
 			newImg.setRoi(roi);
-			newImg.addViewFilter(0, new double[] {min, max});
+			newImg.setViewFilter(0, new double[] {min, max});
 
 			keyFrames[i] = (min + max) / 2.0;
 			int [] drift =  estimateDrift(img, newImg);
