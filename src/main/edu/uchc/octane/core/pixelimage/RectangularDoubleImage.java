@@ -5,6 +5,14 @@ public class RectangularDoubleImage extends AbstractDoubleImage {
 	double [] data;
 	// x0, y0 is the top-left coordinate of the data
 	public int x0, y0,width, height;
+	
+	public RectangularDoubleImage(int width, int height) {
+		this(width,  height, 0, 0);
+	}
+	
+	public RectangularDoubleImage(int width, int height, int x0, int y0) {
+		this(new double[width * height], width, x0, y0);
+	}
 
 	public RectangularDoubleImage(double [] data, int imageWidth) {
 		this(data, imageWidth, 0, 0);
