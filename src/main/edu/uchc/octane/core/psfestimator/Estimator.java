@@ -29,12 +29,16 @@ public class Estimator {
 	double [] initIntensities;
 	int psfHalfWidth;
 
-	public Estimator(int scaleFactor, RectangularDoubleImage[] data, int [] centerXs, int [] centerYs, double [] bgs, double [] intensities ) {
+	public Estimator(int scaleFactor, RectangularDoubleImage[] data, double [] centerXs, double [] centerYs, double [] bgs, double [] intensities ) {
 		cachedAssignments = new int[scaleFactor][scaleFactor][][];
 		this.scaleFactor = scaleFactor;
 		this.data = data;
-		this.centerXs = centerXs;
-		this.centerYs = centerYs;
+		this.centerXs = new int[centerXs.length];
+		this.centerYs = new int[centerXs.length];
+		for (int i = 0 ; i < centerXs.length; i++) {
+			this.centerXs[i] = (int)(centerXs[i] * scaleFactor);
+			this.centerYs[i] = (int)(centerYs[i] * scaleFactor);
+		}
 		this.initBgs = bgs;
 		this.initIntensities = intensities;
 
@@ -88,6 +92,8 @@ public class Estimator {
 		@Override
 		public Pair<RealVector, RealMatrix> value(RealVector point) {
 
+			long startTime = System.nanoTime();
+			
 			int imgSize = data[0].getLength();
 			int psfLength = (psfHalfWidth * 2 + 1) * (psfHalfWidth * 2 + 1);
 			RectangularDoubleImage psf = new RectangularDoubleImage(
@@ -122,6 +128,8 @@ public class Estimator {
 				}
 			}
 
+			long endTime = System.nanoTime();
+			System.out.println("Evaluation time" + (endTime - startTime)/1e9);
 			return new Pair<RealVector, RealMatrix>(new ArrayRealVector(values), jacobian);
 		} // value
 	} // class Jacobian

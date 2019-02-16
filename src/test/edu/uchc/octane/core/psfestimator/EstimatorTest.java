@@ -16,8 +16,8 @@ public class EstimatorTest {
 		int f = 2;
 		int roiWidth = 3;
 		double [] psf = {0,0,0,0,1,0,0,0,0};
-		int [] centerXs= {0,0,1,1};
-		int [] centerYs= {0,1,0,1};
+		double [] centerXs= {0,0,.5,.5};
+		double [] centerYs= {0,.5,0,.5};
 		double bg = 0;
 		double [] intensities = {1,1,1,1};		
 
@@ -34,7 +34,7 @@ public class EstimatorTest {
 	
 	@Test
 	public void testEstimatorElaborate() {
-		int f = 2;
+		int f = 3;
 		int roiWidth = 5;
 
 		double [] psf = {
@@ -49,11 +49,11 @@ public class EstimatorTest {
 				0, 0, 0, 0, 0, 0, 0, 0, 0			
 		};
 
-		int [] centerXs = {75,25,50,69,89,95,54,13,14,25,84,25,81,24,92,34,19,25,61};
-		int [] centerYs = {7,7,53,77,93,12,56,46,11,33,16,79,31,52,16,60,26,65,68};
+		double [] centerXs = {94.21,91.42,43.94,81.15,29.98,34.11,90.25,61.48,40.34,55.94,16.27,36.03,84.61,17.51,29.99,57.36,72.91,78.99};
+		double [] centerYs = {5.46,66.54,36.85,33.42,17.12,25.73,15.36,82.75,2.01,40.71,30.06,46.81,69.16,89.05,59.59,48.97,78.29,74.83};
 
 		double bg = 1;
-		double [] intensities = {3,2,3,1,3,1,2,3,4,1,4,4,2,2,2,2,2,3,3};
+		double [] intensities = {3,2,3,1,3,1,2,3,4,1,4,4,2,2,2,2,2,3};
 		
 		RectangularDoubleImage [] data = constructData(
 				psf, centerXs, centerYs, bg, intensities, roiWidth, f); 
@@ -66,7 +66,7 @@ public class EstimatorTest {
 		assertEquals(psfResult.getValue(8), 0.25, 1e-6);
 	}
 
-	RectangularDoubleImage [] constructData(double [] psf, int [] centerXs, int [] centerYs, double bg, double [] intensities, int roiWidth, int f) {
+	RectangularDoubleImage [] constructData(double [] psf, double [] centerXs, double [] centerYs, double bg, double [] intensities, int roiWidth, int f) {
 		RectangularDoubleImage [] data = new RectangularDoubleImage[centerXs.length];
 		int psfWidth = (int) (FastMath.sqrt(psf.length));
 		int psfHalfWidth = (psfWidth - 1) /2 ;
@@ -76,13 +76,13 @@ public class EstimatorTest {
 			RectangularDoubleImage img = new RectangularDoubleImage(
 					roiWidth * f, 
 					roiWidth * f, 
-					(centerXs[i]/f-roiHalfWidth)*f, 
-					(centerYs[i]/f-roiHalfWidth)*f);
+					((int)centerXs[i]-roiHalfWidth)*f, 
+					((int)centerYs[i]-roiHalfWidth)*f);
 			RectangularDoubleImage psfImage = new RectangularDoubleImage(
 					psf,
 					psfWidth,
-					centerXs[i] - psfHalfWidth, 
-					centerYs[i] - psfHalfWidth);
+					(int) (centerXs[i] * f - psfHalfWidth), 
+					(int) (centerYs[i] * f - psfHalfWidth));
 			img.copyFrom(psfImage);
 			double [] imgValues = img.getValueVector();
 			for (int k = 0; k < img.getLength(); k++) {

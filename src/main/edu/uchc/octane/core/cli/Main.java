@@ -17,6 +17,7 @@ public class Main {
         System.out.println("\tdrift\t correct drift in the localzation data");
         System.out.println("\ttrack\t track trajectories and merge coordinantes");
         System.out.println("\tcsv\t import from or export to CSV files");
+        System.out.println("\tpsf\t estimate PSF from data");
         System.out.println();
         System.out.println("octane cmd -h for further help");
     }
@@ -47,7 +48,10 @@ public class Main {
             TrackingCommand.run(args);
         } else if (cmd.equals("csv")) {
             CsvCommand.run(args);
-        } else {
+        } else if (cmd.equals("psf")) {
+        	PsfCommand.run(args);
+        }
+        else {
             printHelp();
         }
     }
