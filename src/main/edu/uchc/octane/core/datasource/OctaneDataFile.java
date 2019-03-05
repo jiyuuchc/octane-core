@@ -121,7 +121,7 @@ public class OctaneDataFile implements Serializable {
     
     public void writeToFile(String pathname) throws IOException {
 		ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(pathname));
-		fo.writeObject(data);
+		fo.writeObject(this);
 		fo.close();    	
     }
 
