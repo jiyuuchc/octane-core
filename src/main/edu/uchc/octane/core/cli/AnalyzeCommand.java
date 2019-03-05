@@ -138,13 +138,15 @@ public class AnalyzeCommand {
 
 				double [] result = fitter.fit(img, start);
 				if (result != null ) {
-                    // reject bad fitting
-                    double bg = result[result.length -1];
-                    double sigma = result[3];
-                    if (bg > 0.1 || sigma < 6) {
-                        positions.add(convertParameters(result, frame));
-                    }				    
-                    cnt[frame] ++;					
+					// reject bad fitting
+					double bg = result[result.length -1];
+					double sigma = result[3];
+					if (bg > 0.1 || sigma < 6) {
+						synchronized(positions) {
+							positions.add(convertParameters(result, frame));
+						}
+					}				    
+					cnt[frame] ++;					
 				}
 				return true;
 			}
@@ -157,7 +159,7 @@ public class AnalyzeCommand {
 		DAOFitting fitter = new DAOFitting(new IntegratedGaussianPSF(false, false));
 		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
 		for (int i = 0; i < pixels.length; i ++) {
-		    double p = iPixels[i] >= 0 ? iPixels[i] : iPixels[i] + 65536.0;
+			double p = iPixels[i] >= 0 ? iPixels[i] : iPixels[i] + 65536.0;
 			pixels[i] = p - backgroundIntensity ;
 		}
 		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
@@ -175,16 +177,17 @@ public class AnalyzeCommand {
 				double [][] results = fitter.fit(img, start);
 				if (results != null ) {
 					cnt[frame] += results.length;
-					synchronized(positions) {
-						for (int i = 0; i < results.length; i++) {
-						    double [] result = results[i];
-						    
-						    // reject some bad fitting
-						    double bg = result[result.length -1];
-						    double sigma = result[3];
-						    if (bg > 0.1 || sigma < 6) {
-						            positions.add(convertParameters(result, frame));
-						    }
+
+					for (int i = 0; i < results.length; i++) {
+						double [] result = results[i];
+
+						// reject some bad fitting
+						double bg = result[result.length -1];
+						double sigma = result[3];
+						if (bg > 0.1 || sigma < 6) {
+							synchronized(positions) {
+								positions.add(convertParameters(result, frame));
+							}
 						}
 					}
 				}
@@ -218,11 +221,11 @@ public class AnalyzeCommand {
 
 			if (img != null ) {
 				try {
-				    if (! multiPeak) {
-				        processFrame(img, f);
-				    } else {
-				        processFrameWithDAO(img,f);
-				    }
+					if (! multiPeak) {
+						processFrame(img, f);
+					} else {
+						processFrameWithDAO(img,f);
+					}
 				} catch (JSONException e) {
 					assert(false); //shouldn't happen
 				}
@@ -246,9 +249,9 @@ public class AnalyzeCommand {
 
 		System.out.println("Saving to file: " + args.get(1));
 		ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(args.get(1)));
-        System.out.println("Output file: " + args.get(1));
-        fo.writeObject(raw);
-        fo.close();
+		System.out.println("Output file: " + args.get(1));
+		fo.writeObject(raw);
+		fo.close();
 	}
 
 	static double[] convertParameters(double [] param, int f) {
