@@ -4,14 +4,14 @@ import static org.junit.Assert.assertArrayEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.uchc.octane.core.fitting.AsymmetricGaussianPSF;
-import edu.uchc.octane.core.fitting.DAOFitting;
-import edu.uchc.octane.core.fitting.GaussianPSF;
-import edu.uchc.octane.core.fitting.IntegratedGaussianPSF;
-import edu.uchc.octane.core.fitting.IterativeShrinkageAndThreshold;
-import edu.uchc.octane.core.fitting.LeastSquare;
-import edu.uchc.octane.core.fitting.MultiPSF;
-import edu.uchc.octane.core.fitting.RadialSymmetryFitting;
+import edu.uchc.octane.core.fitting.deconvolution.IterativeShrinkageAndThreshold;
+import edu.uchc.octane.core.fitting.leastsquare.AsymmetricGaussianPSF;
+import edu.uchc.octane.core.fitting.leastsquare.DAOFitting;
+import edu.uchc.octane.core.fitting.leastsquare.GaussianPSF;
+import edu.uchc.octane.core.fitting.leastsquare.IntegratedGaussianPSF;
+import edu.uchc.octane.core.fitting.leastsquare.LeastSquare;
+import edu.uchc.octane.core.fitting.leastsquare.MultiPSF;
+import edu.uchc.octane.core.fitting.radialsymmetry.RadialSymmetryFitting;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 
 public class FittingTest {

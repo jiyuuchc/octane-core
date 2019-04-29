@@ -1,8 +1,10 @@
-package edu.uchc.octane.core.fitting;
+package edu.uchc.octane.core.fitting.leastsquare;
 
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.util.FastMath;
+
+import edu.uchc.octane.core.fitting.leastsquare.GaussianPSF.Params;
 
 public class IntegratedGaussianPSF extends GaussianPSF {
 

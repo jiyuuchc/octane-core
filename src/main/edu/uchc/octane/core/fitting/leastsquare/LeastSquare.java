@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.fitting;
+package edu.uchc.octane.core.fitting.leastsquare;
 
 import java.util.Arrays;
 
@@ -13,9 +13,10 @@ import org.apache.commons.math3.optim.SimpleVectorValueChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.uchc.octane.core.fitting.Fitter;
 import edu.uchc.octane.core.pixelimage.AbstractDoubleImage;
 
-public class LeastSquare{
+public class LeastSquare implements Fitter{
 
     final Logger logger = LoggerFactory.getLogger(LeastSquare.class);
 
@@ -64,6 +65,7 @@ public class LeastSquare{
     	return weights;
     }
 
+    @Override
     public double [] fit(AbstractDoubleImage data, double [] start) {
     	psf.setFittingData(data);
     	LeastSquaresProblem lsp = LeastSquaresFactory.create(
@@ -94,6 +96,7 @@ public class LeastSquare{
     	return getResult();
     }
 
+    @Override
     public double [] getResult() {
     	return psf.convertParametersInternalToExternal(optimum.getPoint().toArray());
     }

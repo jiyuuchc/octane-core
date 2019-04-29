@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.fitting;
+package edu.uchc.octane.core.fitting.leastsquare;
 
 import java.util.Arrays;
 

@@ -18,10 +18,10 @@ import org.json.JSONException;
 import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
 
 import edu.uchc.octane.core.datasource.OctaneDataFile;
-import edu.uchc.octane.core.fitting.AsymmetricGaussianPSF;
-import edu.uchc.octane.core.fitting.DAOFitting;
-import edu.uchc.octane.core.fitting.IntegratedGaussianPSF;
-import edu.uchc.octane.core.fitting.LeastSquare;
+import edu.uchc.octane.core.fitting.leastsquare.AsymmetricGaussianPSF;
+import edu.uchc.octane.core.fitting.leastsquare.DAOFitting;
+import edu.uchc.octane.core.fitting.leastsquare.IntegratedGaussianPSF;
+import edu.uchc.octane.core.fitting.leastsquare.LeastSquare;
 import edu.uchc.octane.core.frameanalysis.LocalMaximum;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import mmcorej.TaggedImage;
