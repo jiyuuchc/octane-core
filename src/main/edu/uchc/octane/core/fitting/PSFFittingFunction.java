@@ -9,8 +9,8 @@ public interface PSFFittingFunction {
 
 	MultivariateVectorFunction getValueFunction();
 	MultivariateMatrixFunction getJacobian();
-	double[] pointToParameters(double[] point);
-	double[] parametersToPoint(double[] parameters);
+	double[] convertParametersInternalToExternal(double[] internalParameters);
+	double[] convertParametersExternalToInternal(double[] externalParameters);
 	void setFittingData(AbstractDoubleImage data);
 	int getDoF();
 }

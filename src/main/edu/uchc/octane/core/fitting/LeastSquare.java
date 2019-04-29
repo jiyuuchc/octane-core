@@ -69,7 +69,7 @@ public class LeastSquare{
     	LeastSquaresProblem lsp = LeastSquaresFactory.create(
     			LeastSquaresFactory.model(psf.getValueFunction(), psf.getJacobian()),
     			new ArrayRealVector(data.getValueVector()),
-    			new ArrayRealVector(psf.parametersToPoint(start)),
+    			new ArrayRealVector(psf.convertParametersExternalToInternal(start)),
     			LeastSquaresFactory.evaluationChecker(new SimpleVectorValueChecker(CONVERGENCE_DELTA, CONVERGENCE_DELTA)),
     			maxIter,
     			maxIter);
@@ -95,6 +95,6 @@ public class LeastSquare{
     }
 
     public double [] getResult() {
-    	return psf.pointToParameters(optimum.getPoint().toArray());
+    	return psf.convertParametersInternalToExternal(optimum.getPoint().toArray());
     }
 }

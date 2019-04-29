@@ -86,27 +86,27 @@ public class GaussianPSF implements PSFFittingFunction {
     }
 
     @Override
-    public double[] pointToParameters(double[] point) {
-        if (!data.isCoordinateValid((int) FastMath.floor(point[Params.X]), (int) FastMath.floor(point[Params.Y]))) {
+    public double[] convertParametersInternalToExternal(double[] internalParameters) {
+        if (!data.isCoordinateValid((int) FastMath.floor(internalParameters[Params.X]), (int) FastMath.floor(internalParameters[Params.Y]))) {
             return null;
         }
 
-        double[] params = point.clone();
+        double[] params = internalParameters.clone();
 
-        params[Params.SIGMA] = FastMath.abs(point[Params.SIGMA] / FastMath.sqrt(2));
-        params[Params.OFFSET] = point[Params.OFFSET] * point[Params.OFFSET];
-        params[Params.INTENSITY] = sq(point[Params.INTENSITY]) * FastMath.PI * sq(point[Params.SIGMA]);
+        params[Params.SIGMA] = FastMath.abs(internalParameters[Params.SIGMA] / FastMath.sqrt(2));
+        params[Params.OFFSET] = internalParameters[Params.OFFSET] * internalParameters[Params.OFFSET];
+        params[Params.INTENSITY] = sq(internalParameters[Params.INTENSITY]) * FastMath.PI * sq(internalParameters[Params.SIGMA]);
         return params;
     }
 
     @Override
-    public double[] parametersToPoint(double[] parameters) {
+    public double[] convertParametersExternalToInternal(double[] externalParameters) {
 
-        double[] point = parameters.clone();
+        double[] point = externalParameters.clone();
 
-        point[Params.SIGMA] = parameters[Params.SIGMA] * FastMath.sqrt(2);
-        point[Params.OFFSET] = FastMath.sqrt(parameters[Params.OFFSET]);
-        point[Params.INTENSITY] = FastMath.sqrt(parameters[Params.INTENSITY] / FastMath.PI / sq(point[Params.SIGMA]));
+        point[Params.SIGMA] = externalParameters[Params.SIGMA] * FastMath.sqrt(2);
+        point[Params.OFFSET] = FastMath.sqrt(externalParameters[Params.OFFSET]);
+        point[Params.INTENSITY] = FastMath.sqrt(externalParameters[Params.INTENSITY] / FastMath.PI / sq(point[Params.SIGMA]));
 
         return point;
     }

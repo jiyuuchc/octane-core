@@ -105,15 +105,15 @@ public class MultiPSF implements PSFFittingFunction {
     }
 
     @Override
-    public double[] pointToParameters(double[] point) {
+    public double[] convertParametersInternalToExternal(double[] internalParameters) {
 
-        unifyParams(point);
+        unifyParams(internalParameters);
 
-        int subParaLen = point.length / numOfPSFs;
-        double[] retVal = new double[point.length];
+        int subParaLen = internalParameters.length / numOfPSFs;
+        double[] retVal = new double[internalParameters.length];
         for (int i = 0; i < numOfPSFs; i++) {
-            double[] tmp = Arrays.copyOfRange(point, i * subParaLen, (i + 1) * subParaLen);
-            double[] tmpVal = singlePSF.pointToParameters(tmp);
+            double[] tmp = Arrays.copyOfRange(internalParameters, i * subParaLen, (i + 1) * subParaLen);
+            double[] tmpVal = singlePSF.convertParametersInternalToExternal(tmp);
 
             if (tmpVal == null) {
                 return null;
@@ -125,12 +125,12 @@ public class MultiPSF implements PSFFittingFunction {
     }
 
     @Override
-    public double[] parametersToPoint(double[] parameters) {
-        int subParaLen = parameters.length / numOfPSFs;
-        double[] retVal = new double[parameters.length];
+    public double[] convertParametersExternalToInternal(double[] externalParameters) {
+        int subParaLen = externalParameters.length / numOfPSFs;
+        double[] retVal = new double[externalParameters.length];
         for (int i = 0; i < numOfPSFs; i++) {
-            double[] tmp = Arrays.copyOfRange(parameters, i * subParaLen, (i + 1) * subParaLen);
-            double[] tmpVal = singlePSF.parametersToPoint(tmp);
+            double[] tmp = Arrays.copyOfRange(externalParameters, i * subParaLen, (i + 1) * subParaLen);
+            double[] tmpVal = singlePSF.convertParametersExternalToInternal(tmp);
             System.arraycopy(tmpVal, 0, retVal, i * subParaLen, subParaLen);
         }
         return retVal;
