@@ -1,6 +1,8 @@
 package edu.uchc.octane.core.fitting;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.*;
+
+import org.apache.commons.math3.util.FastMath;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -11,6 +13,9 @@ import edu.uchc.octane.core.fitting.leastsquare.GaussianPSF;
 import edu.uchc.octane.core.fitting.leastsquare.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.leastsquare.LeastSquare;
 import edu.uchc.octane.core.fitting.leastsquare.MultiPSF;
+import edu.uchc.octane.core.fitting.maximumlikelihood.ConjugateGradient;
+import edu.uchc.octane.core.fitting.maximumlikelihood.PoissonLogLikelihoodAstigmatic;
+import edu.uchc.octane.core.fitting.maximumlikelihood.PoissonLogLikelihoodSymmetric;
 import edu.uchc.octane.core.fitting.radialsymmetry.RadialSymmetryFitting;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 
@@ -153,6 +158,41 @@ public class FittingTest {
 		assertArrayEquals(expected[1], result[1], 0.01);
 	}
 
+	@Test
+	public void testMaximumLikelihoodConjugateGradient() {
+		double [] start = {5,5.5,1.0,200,5};
+		//double [] start = {6,5,1.0,250,10};
+
+		double[] data = new double [TEST_VALUES.length];
+		for (int i = 0; i < data.length; i ++) {
+			data[i] = FastMath.round(TEST_VALUES[i] * 250 + 10);
+		}
+		
+		System.out.println("Maximum Likelihood fitting with Conjugate Gradient");
+
+		PoissonLogLikelihoodSymmetric func = new PoissonLogLikelihoodSymmetric();
+		//func.setData(new RectangularDoubleImage(data, IMAGE_SIZE));
+		//double v1 = func.getObjectiveFunction().getObjectiveFunction().value(start);
+		//double v2 = func.getObjectiveFunction().getObjectiveFunction().value(p2);
+		//assertTrue(v1 < v2);
+		//double [] g1 = func.getObjectiveFunctionGradient().getObjectiveFunctionGradient().value(start);
+				
+		
+		ConjugateGradient fitter = new ConjugateGradient (func);
+		double[] result = fitter.fit(new RectangularDoubleImage(data, IMAGE_SIZE), start );
+		
+		assertEquals(6.0, result[0], 0.01);
+		assertEquals(5.0, result[1], 0.01);
+		
+		PoissonLogLikelihoodAstigmatic func_a = new PoissonLogLikelihoodAstigmatic(1.4, 1, 0, 0, 0);
+		fitter = new ConjugateGradient(func_a);
+		double [] result_a = fitter.fit(new RectangularDoubleImage(data, IMAGE_SIZE), start );
+		
+		assertEquals(6.0, result_a[0], 0.01);
+		assertEquals(5.0, result_a[1], 0.01);
+		assertEquals(0.3, result_a[2], 0.05);
+	}
+	
 	@Ignore
 	@Test
 	public void testIsta() {
