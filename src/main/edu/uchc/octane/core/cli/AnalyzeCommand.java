@@ -15,7 +15,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
 import org.json.JSONException;
-import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
 
 import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.fitting.AsymmetricGaussianPSF;
@@ -24,7 +23,6 @@ import edu.uchc.octane.core.fitting.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.LeastSquare;
 import edu.uchc.octane.core.frameanalysis.LocalMaximum;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
-import mmcorej.TaggedImage;
 
 public class AnalyzeCommand {
 
@@ -200,7 +198,7 @@ public class AnalyzeCommand {
 		System.out.println("Analyze data: " + args.get(0));
 
 		positions = new ArrayList<double[]>();
-		TaggedImageStorageMultipageTiff stackReader = new TaggedImageStorageMultipageTiff(args.get(0), false, null, false, false, false);
+		MMTaggedTiff stackReader = new MMTaggedTiff(args.get(0), false, false);
 		int frames = stackReader.getSummaryMetadata().getInt("Frames");
 		System.out.println("Total frames: " + frames);
 
