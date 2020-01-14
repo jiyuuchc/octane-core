@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.fitting;
+package edu.uchc.octane.core.fitting.leastsquare;
 
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
@@ -9,8 +9,8 @@ public interface PSFFittingFunction {
 
 	MultivariateVectorFunction getValueFunction();
 	MultivariateMatrixFunction getJacobian();
-	double[] pointToParameters(double[] point);
-	double[] parametersToPoint(double[] parameters);
+	double[] convertParametersInternalToExternal(double[] internalParameters);
+	double[] convertParametersExternalToInternal(double[] externalParameters);
 	void setFittingData(AbstractDoubleImage data);
 	int getDoF();
 }

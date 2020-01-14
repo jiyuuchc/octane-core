@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.fitting;
+package edu.uchc.octane.core.fitting.leastsquare;
 
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
@@ -84,37 +84,37 @@ public class AsymmetricGaussianPSF implements PSFFittingFunction {
 	}
 
 	@Override
-	public double[] pointToParameters(double[] point) {
+	public double[] convertParametersInternalToExternal(double[] internalParameters) {
 
 	    if (!data.isCoordinateValid(
-                (int) FastMath.floor(point[Params.X]), 
-                (int) FastMath.floor(point[Params.Y]))) {
+                (int) FastMath.floor(internalParameters[Params.X]), 
+                (int) FastMath.floor(internalParameters[Params.Y]))) {
             return null;
         }
 
-	    if (point[Params.SIGMAX] <=0 || point[Params.SIGMAY] <= 0) {
+	    if (internalParameters[Params.SIGMAX] <=0 || internalParameters[Params.SIGMAY] <= 0) {
 	        return null;
 	    }
 	    
-    	double [] params = point.clone();
+    	double [] params = internalParameters.clone();
 
-    	params[Params.SIGMAX] = point[Params.SIGMAX] / FastMath.sqrt(2);
-        params[Params.SIGMAY] = point[Params.SIGMAY] / FastMath.sqrt(2);
-        params[Params.OFFSET] = sq(point[Params.OFFSET]);
-    	params[Params.INTENSITY] = sq(point[Params.INTENSITY]) * FastMath.PI * point[Params.SIGMAX] * point[Params.SIGMAY];
+    	params[Params.SIGMAX] = internalParameters[Params.SIGMAX] / FastMath.sqrt(2);
+        params[Params.SIGMAY] = internalParameters[Params.SIGMAY] / FastMath.sqrt(2);
+        params[Params.OFFSET] = sq(internalParameters[Params.OFFSET]);
+    	params[Params.INTENSITY] = sq(internalParameters[Params.INTENSITY]) * FastMath.PI * internalParameters[Params.SIGMAX] * internalParameters[Params.SIGMAY];
         return params;
     }
 
     @Override
-	public double[] parametersToPoint(double[] parameters) {
+	public double[] convertParametersExternalToInternal(double[] externalParameters) {
 
-    	double [] point = parameters.clone();
+    	double [] point = externalParameters.clone();
 
-        point[Params.SIGMAX] = parameters[Params.SIGMAX] * FastMath.sqrt(2);
-        point[Params.SIGMAY] = parameters[Params.SIGMAY] * FastMath.sqrt(2);
-        point[Params.OFFSET] = FastMath.sqrt(parameters[Params.OFFSET]);
+        point[Params.SIGMAX] = externalParameters[Params.SIGMAX] * FastMath.sqrt(2);
+        point[Params.SIGMAY] = externalParameters[Params.SIGMAY] * FastMath.sqrt(2);
+        point[Params.OFFSET] = FastMath.sqrt(externalParameters[Params.OFFSET]);
     	point[Params.INTENSITY] =
-    			FastMath.sqrt(parameters[Params.INTENSITY] / FastMath.PI / point[Params.SIGMAX] / point[Params.SIGMAY]);
+    			FastMath.sqrt(externalParameters[Params.INTENSITY] / FastMath.PI / point[Params.SIGMAX] / point[Params.SIGMAY]);
 
         return point;
     }

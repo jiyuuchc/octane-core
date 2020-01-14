@@ -1,8 +1,10 @@
-package edu.uchc.octane.core.fitting;
+package edu.uchc.octane.core.fitting.leastsquare;
 
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.util.FastMath;
+
+import edu.uchc.octane.core.fitting.leastsquare.GaussianPSF.Params;
 
 public class IntegratedGaussianPSF extends GaussianPSF {
 
@@ -113,30 +115,30 @@ public class IntegratedGaussianPSF extends GaussianPSF {
     }
 
     @Override
-    public double[] pointToParameters(double[] point) {
+    public double[] convertParametersInternalToExternal(double[] internalParameters) {
 
-        if (!data.isCoordinateValid((int) FastMath.floor(point[Params.X]), (int) FastMath.floor(point[Params.Y]))) {
+        if (!data.isCoordinateValid((int) FastMath.floor(internalParameters[Params.X]), (int) FastMath.floor(internalParameters[Params.Y]))) {
             return null;
         }
         
-        if (point[Params.SIGMA] <=0) {
+        if (internalParameters[Params.SIGMA] <=0) {
             return null;
         }
 
-        double[] transformed = point.clone();
+        double[] transformed = internalParameters.clone();
 
-        transformed[Params.INTENSITY] = point[Params.INTENSITY] * point[Params.INTENSITY];
-        transformed[Params.OFFSET] = point[Params.OFFSET] * point[Params.OFFSET];
+        transformed[Params.INTENSITY] = internalParameters[Params.INTENSITY] * internalParameters[Params.INTENSITY];
+        transformed[Params.OFFSET] = internalParameters[Params.OFFSET] * internalParameters[Params.OFFSET];
 
         return transformed;
     }
 
     @Override
-    public double[] parametersToPoint(double[] parameters) {
-        double[] transformed = parameters.clone();
+    public double[] convertParametersExternalToInternal(double[] externalParameters) {
+        double[] transformed = externalParameters.clone();
 
-        transformed[Params.INTENSITY] = FastMath.sqrt(parameters[Params.INTENSITY]);
-        transformed[Params.OFFSET] = FastMath.sqrt(parameters[Params.OFFSET]);
+        transformed[Params.INTENSITY] = FastMath.sqrt(externalParameters[Params.INTENSITY]);
+        transformed[Params.OFFSET] = FastMath.sqrt(externalParameters[Params.OFFSET]);
 
         return transformed;
     }

@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.fitting;
+package edu.uchc.octane.core.fitting.deconvolution;
 
 import org.apache.commons.math3.util.FastMath;
 
