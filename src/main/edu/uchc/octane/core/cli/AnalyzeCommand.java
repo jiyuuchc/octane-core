@@ -108,24 +108,9 @@ public class AnalyzeCommand {
 			return;
 		}
 	}
-
-	static void processFrame(TaggedImage img, int frame) throws JSONException {
-		short [] iPixels = (short[]) img.pix;
-		double [] pixels = new double[iPixels.length];
-		LeastSquare fitter;
-		if (asymmetric) {
-			fitter = new LeastSquare(new AsymmetricGaussianPSF());
-		}else {
-			fitter = new LeastSquare(new IntegratedGaussianPSF());
-		}
-		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
-		for (int i = 0; i < pixels.length; i ++) {
-			pixels[i] = iPixels[i] - backgroundIntensity ;
-		}
-		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
-		cnt[frame] = 0;
-
-		finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
+	
+	static LocalMaximum.CallBackFunctions getCallbackSimple(LeastSquare fitter, int frame) {
+		return new LocalMaximum.CallBackFunctions() {
 			double [] start = {0, 0, 0, 1.5, 1};
 
 			@Override
@@ -138,8 +123,35 @@ public class AnalyzeCommand {
 				if (result != null ) {
 					// reject bad fitting
 					double bg = result[result.length -1];
-					double sigma = result[3];
-					if (bg > 0.1 || sigma < 6) {
+					//double sigma = result[3];
+					if (bg > 0.1) {
+						synchronized(positions) {
+							positions.add(convertParameters(result, frame));
+						}
+					}				    
+					cnt[frame] ++;					
+				}
+				return true;
+			}			
+		};
+	}
+
+	static LocalMaximum.CallBackFunctions getCallbackCalibration(LeastSquare fitter, int frame) {
+		return new LocalMaximum.CallBackFunctions() {
+			double [] start = {0, 0, 0, 1.5, 1.5, 1};
+
+			@Override
+			public boolean fit(RectangularDoubleImage img, int x, int y) {
+
+				start[0] = x; start[1] = y;  start[2] = img.getValueAtCoordinate(x, y) * 10;
+
+				double [] result = fitter.fit(img, start);
+				if (result != null ) {
+					// reject bad fitting
+					double bg = result[result.length -1];
+					//double sigmax = result[3];
+					//double sigmay = result[4];					
+					if (bg > 0 ) {
 						synchronized(positions) {
 							positions.add(convertParameters(result, frame));
 						}
@@ -148,22 +160,11 @@ public class AnalyzeCommand {
 				}
 				return true;
 			}
-		});
+		};
 	}
 
-	static void processFrameWithDAO(TaggedImage img, int frame) throws JSONException {
-		short [] iPixels = (short[]) img.pix;
-		double [] pixels = new double[iPixels.length];
-		DAOFitting fitter = new DAOFitting(new IntegratedGaussianPSF(false, false));
-		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
-		for (int i = 0; i < pixels.length; i ++) {
-			double p = iPixels[i] >= 0 ? iPixels[i] : iPixels[i] + 65536.0;
-			pixels[i] = p - backgroundIntensity ;
-		}
-		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
-		cnt[frame] = 0;
-
-		finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
+	static LocalMaximum.CallBackFunctions getCallbackDAO(DAOFitting fitter, int frame) {
+		return new LocalMaximum.CallBackFunctions() {
 			double [] start = {0, 0, 0, 1.5, 1};
 
 			@Override
@@ -191,7 +192,44 @@ public class AnalyzeCommand {
 				}
 				return true;
 			}
-		});
+		};
+	}
+
+	static void processFrame(TaggedImage img, int frame) throws JSONException {
+		short [] iPixels = (short[]) img.pix;
+		double [] pixels = new double[iPixels.length];
+		LeastSquare fitter;
+		if (asymmetric) {
+			fitter = new LeastSquare(new AsymmetricGaussianPSF());
+		}else {
+			fitter = new LeastSquare(new IntegratedGaussianPSF());
+		}
+		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
+		for (int i = 0; i < pixels.length; i ++) {
+			pixels[i] = iPixels[i] - backgroundIntensity ;
+		}
+		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
+		cnt[frame] = 0;
+		if (asymmetric) {
+			finder.processFrame(data, getCallbackCalibration(fitter, frame));
+		} else {
+			finder.processFrame(data, getCallbackSimple(fitter, frame));
+		}
+	}
+
+	static void processFrameWithDAO(TaggedImage img, int frame) throws JSONException {
+		short [] iPixels = (short[]) img.pix;
+		double [] pixels = new double[iPixels.length];
+		DAOFitting fitter = new DAOFitting(new IntegratedGaussianPSF(false, false));
+		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
+		for (int i = 0; i < pixels.length; i ++) {
+			double p = iPixels[i] >= 0 ? iPixels[i] : iPixels[i] + 65536.0;
+			pixels[i] = p - backgroundIntensity ;
+		}
+		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
+		cnt[frame] = 0;
+
+		finder.processFrame(data, getCallbackDAO(fitter, frame));
 	}
 
 	public static void process(List<String> args) throws JSONException, IOException {
