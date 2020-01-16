@@ -147,9 +147,14 @@ public class MultiPSF implements PSFFittingFunction {
         double [] p = singlePSF.setFittingData(data);
         valueFunction = singlePSF.getValueFunction();
         jacobianFunction = singlePSF.getJacobian();
-        // return p;
-        //FIXME
-        return null;
+//        double [] guess = new double[p.length * numOfPSFs];
+//        for (int i = 0 ; i < numOfPSFs; i++) {
+//        	System.arraycopy(p, 0, guess, i*p.length, p.length);
+//        }
+//        return guess;
+        // this may be not appropriate, because it is the parameter for only 1 psf.
+        // how ever the header also only return for 1 psf, so at least it is consistent.
+        return p;
     }
 
     @Override

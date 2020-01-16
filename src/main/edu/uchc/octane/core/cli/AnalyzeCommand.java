@@ -173,22 +173,18 @@ public class AnalyzeCommand {
 				// System.out.println("Location " + (c++) +" : " + x + " - " + y + " - " + img.getValueAtCoordinate(x, y));
 				start[0] = x; start[1] = y;  start[2] = img.getValueAtCoordinate(x, y) * 10;
 
-				double [][] results = fitter.fit(img, start);
-				if (results != null ) {
-					cnt[frame] += results.length;
+				double [] results = fitter.fit(img, start);
+				while (results != null ) {
+					cnt[frame] ++;
 
-					for (int i = 0; i < results.length; i++) {
-						double [] result = results[i];
-
-						// reject some bad fitting
-						double bg = result[result.length -1];
-						double sigma = result[3];
-						if (bg > 0.1 || sigma < 6) {
-							synchronized(positions) {
-								positions.add(convertParameters(result, frame));
-							}
+					double bg = results[results.length -1];
+					double sigma = results[3];
+					if (bg > 0.1 || sigma < 6) {
+						synchronized(positions) {
+							positions.add(convertParameters(results, frame));
 						}
 					}
+					results = fitter.getResult();
 				}
 				return true;
 			}

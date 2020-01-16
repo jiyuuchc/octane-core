@@ -145,17 +145,20 @@ public class FittingTest {
 		double [] start = {5, 5, 1, 1.5, 0};
 		IntegratedGaussianPSF psf = new IntegratedGaussianPSF();
 		DAOFitting dao = new DAOFitting(psf, 4, 1e-6);
-		double[][] result = dao.fit(new RectangularDoubleImage(newValue, IMAGE_SIZE), start);
-		assert(result.length == 2);
+		double[] result0 = dao.fit(new RectangularDoubleImage(newValue, IMAGE_SIZE), start);
+		assertNotNull(result0);
+		double [] result1 = dao.getResult();
+		assertNotNull(result1);
+		assertNull(dao.getResult());
 		//sort
-		if (result[0][0] > result[0][1]) {
-		    double [] r = result[0];
-		    result[0] = result[1];
-		    result[1] = r;
+		if (result0[0] > result1[0]) {
+		    double [] r = result0;
+		    result0 = result1;
+		    result1 = r;
 		}
 		double [][] expected = { {3, 3, 1, 1.47, 0}, {5, 5, 1, 1.47, 0}};
-		assertArrayEquals(expected[0], result[0], 0.01);
-		assertArrayEquals(expected[1], result[1], 0.01);
+		assertArrayEquals(expected[0], result0, 0.01);
+		assertArrayEquals(expected[1], result1, 0.01);
 	}
 
 	@Test

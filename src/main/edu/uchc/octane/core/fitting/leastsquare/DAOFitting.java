@@ -2,14 +2,17 @@ package edu.uchc.octane.core.fitting.leastsquare;
 
 import org.apache.commons.math3.distribution.FDistribution;
 
+import edu.uchc.octane.core.fitting.Fitter;
 import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
-public class DAOFitting {
+public class DAOFitting implements Fitter{
 
 	MultiPSF multiPsf;
 	PSFFittingFunction psf;
 	int maxNumPeaks;
 	double pValue;
+	double [][] results;
+	int resultCnt;
 
 	public DAOFitting(PSFFittingFunction psf) {
 		this(psf, 4, 1e-6);
@@ -19,20 +22,24 @@ public class DAOFitting {
 		this.psf = psf;
 		this.maxNumPeaks = max;
 		this.pValue = pValue;
+		this.results = null;
 	}
 
-    public double [][] fit(PixelImageBase data, double [] start) {
+    public double [] fit(PixelImageBase data, double [] start) {
 
+    	if (start == null) {
+    		start = psf.setFittingData(data);
+    	}
     	double [] curStart = start;
 
 		MultiPSF multiPsf = new MultiPSF(1, psf);
-		LeastSquare multiLsq = new LeastSquare(multiPsf);
-		LeastSquare lsq = new LeastSquare(psf);
-		if (multiLsq.fit(data, curStart) == null) {
+		LeastSquare fitter = new LeastSquare(multiPsf);
+		// LeastSquare lsq = new LeastSquare(psf);
+		if (fitter.fit(data, curStart) == null) {
 			return null;
 		}
 		MultiPSF bestPsf = multiPsf;
-		LeastSquare bestLsq = multiLsq;
+		LeastSquare bestLsq = fitter;
 
     	for(int n = 2; n <= maxNumPeaks; n++) {
 
@@ -42,7 +49,7 @@ public class DAOFitting {
 //    		data.setValueVector(oldValues);
 
     		multiPsf = new MultiPSF(n, psf);
-    		multiLsq = new LeastSquare(multiPsf);
+    		fitter = new LeastSquare(multiPsf);
 
     		double [] oldStart = curStart;
     		curStart = new double[n * start.length];
@@ -53,19 +60,19 @@ public class DAOFitting {
     			System.arraycopy(start, 0, curStart, oldStart.length, start.length);
 //    		}
 
-    		if (multiLsq.fit(data, curStart) != null) {
+    		if (fitter.fit(data, curStart) != null) {
 
     			double pValue = 1.0 - new FDistribution(
     					multiPsf.getDoF() - bestPsf.getDoF(),
     					data.getLength() - multiPsf.getDoF())
     					.cumulativeProbability(
-    							( (bestLsq.optimum.getCost() - multiLsq.optimum.getCost()) / (multiPsf.getDoF() - bestPsf.getDoF()))
-    							/ (multiLsq.optimum.getCost() / (data.getLength() - multiPsf.getDoF()) )
+    							( (bestLsq.optimum.getCost() - fitter.optimum.getCost()) / (multiPsf.getDoF() - bestPsf.getDoF()))
+    							/ (fitter.optimum.getCost() / (data.getLength() - multiPsf.getDoF()) )
     							);
 
     			if(!Double.isNaN(pValue) && (pValue < this.pValue) ) {
     				bestPsf = multiPsf;
-    				bestLsq = multiLsq;
+    				bestLsq = fitter;
     			}
     		} else {
     		    break;
@@ -80,6 +87,31 @@ public class DAOFitting {
     		System.arraycopy(tmpResult, i * subParaLen, results[i], 0, subParaLen);
     	}
 
-    	return results;
+    	this.results = results;
+    	this.resultCnt = 1;
+
+    	return results[0];
     }
+
+	@Override
+	public double[] getResult() {
+		if (resultCnt < results.length) {
+			return results[resultCnt ++];
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public String[] getHeaders() {
+		return psf.getHeaders();
+	}
+	
+	public int getNumParticles() {
+		if (results != null) {
+			return results.length;
+		} else {
+			return 0;
+		}
+	}
 }
