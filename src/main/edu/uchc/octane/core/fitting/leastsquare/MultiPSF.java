@@ -29,6 +29,11 @@ public class MultiPSF implements PSFFittingFunction {
         this.unified = unified;
     }
 
+    @Override
+    public String [] getHeaders() {
+    	return singlePSF.getHeaders();
+    }
+
     private void unifyParams(double[] point) {
         if (unified == null || numOfPSFs <= 1) {
             return;

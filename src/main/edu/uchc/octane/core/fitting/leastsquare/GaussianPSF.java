@@ -20,6 +20,13 @@ public class GaussianPSF implements PSFFittingFunction {
         public static final int PARAMS_LENGTH = 5;
     }
 
+    final String [] headers = {"x","y","intensity","sigma","offset"};
+    
+    @Override 
+    public String [] getHeaders() {
+    	return headers;
+    }
+
     public GaussianPSF() {
         this(false, false);
     }

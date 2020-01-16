@@ -36,4 +36,9 @@ public interface PSFFittingFunction {
 	 * @return degree of freedom of the PSF
 	 */
 	int getDoF();
+	
+	/**
+	 * @return names of the parameters fitted
+	 */
+	String [] getHeaders();
 }

@@ -4,7 +4,6 @@ import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octane.core.fitting.leastsquare.GaussianPSF.Params;
 import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
 public class AsymmetricGaussianPSF implements PSFFittingFunction {
@@ -22,7 +21,14 @@ public class AsymmetricGaussianPSF implements PSFFittingFunction {
     	public static final int PARAMS_LENGTH = 6;
     }
 
-	public AsymmetricGaussianPSF() {
+    final String [] headers = {"x","y","intensity","sigmax","sigmay","offset"};
+    
+    @Override 
+    public String [] getHeaders() {
+    	return headers;
+    }
+
+    public AsymmetricGaussianPSF() {
 		this(false);
 	}
 
