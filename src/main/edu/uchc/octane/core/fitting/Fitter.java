@@ -11,14 +11,11 @@ public interface Fitter {
 	 * Perform a local fitting 
 	 * @param data A small image to be fitted
 	 * @param start Initial guess of the parameters. can be null.
-	 * @return Fitted parameters.
+	 * @return Fitted parameters for one particle.
 	 */
 	public double [] fit(PixelImageBase data, double [] start);
 
-	/**
-	 * @return The fitting result, assuming function 'fit' was called previously.
-	 */
-	public double [] getResult();
+	// public double [] getResult();
 	
 	/**
 	 * @return Names of the parameters.

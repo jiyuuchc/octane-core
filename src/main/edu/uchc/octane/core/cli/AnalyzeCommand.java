@@ -186,7 +186,7 @@ public class AnalyzeCommand {
 							positions.add(convertParameters(results, frame));
 						}
 					}
-					results = fitter.getResult();
+					results = fitter.getNextResult();
 				}
 				return true;
 			}

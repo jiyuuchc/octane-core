@@ -147,9 +147,9 @@ public class FittingTest {
 		DAOFitting dao = new DAOFitting(psf, 4, 1e-6);
 		double[] result0 = dao.fit(new RectangularDoubleImage(newValue, IMAGE_SIZE), start);
 		assertNotNull(result0);
-		double [] result1 = dao.getResult();
+		double [] result1 = dao.getNextResult();
 		assertNotNull(result1);
-		assertNull(dao.getResult());
+		assertNull(dao.getNextResult());
 		//sort
 		if (result0[0] > result1[0]) {
 		    double [] r = result0;

@@ -93,8 +93,7 @@ public class DAOFitting implements Fitter{
     	return results[0];
     }
 
-	@Override
-	public double[] getResult() {
+	public double[] getNextResult() {
 		if (resultCnt < results.length) {
 			return results[resultCnt ++];
 		} else {

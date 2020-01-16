@@ -57,8 +57,7 @@ public class ConjugateGradient implements Fitter {
 		return getResult();
 	}
 
-	@Override
-	public double[] getResult() {
+	double[] getResult() {
 		if (result != null) {
 			return result.getPoint();
 		} else {

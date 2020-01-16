@@ -100,8 +100,7 @@ public class LeastSquare implements Fitter{
     	return getResult();
     }
 
-    @Override
-    public double [] getResult() {
+    double [] getResult() {
     	return psf.convertParametersInternalToExternal(optimum.getPoint().toArray());
     }
 
