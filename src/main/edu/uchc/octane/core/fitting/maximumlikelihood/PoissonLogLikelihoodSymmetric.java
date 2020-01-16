@@ -15,12 +15,18 @@ public class PoissonLogLikelihoodSymmetric implements LikelihoodModel {
 
 	// double x0, y0, z0, bg0, in0;
 	PixelImageBase data;
-	
+	final String [] headers = {"x","y","sigma","intensity","offset"};
+
 	public PoissonLogLikelihoodSymmetric() {
 	}
 	
 	public void setData(PixelImageBase data) {
 		this.data = data;
+	}
+
+	@Override
+	public String [] getHeaders() {
+		return headers;
 	}
 
     public ObjectiveFunction getObjectiveFunction() {

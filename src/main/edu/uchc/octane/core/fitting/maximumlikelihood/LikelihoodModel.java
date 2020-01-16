@@ -10,4 +10,5 @@ public interface LikelihoodModel {
 	public ObjectiveFunction getObjectiveFunction();
 	public ObjectiveFunctionGradient getObjectiveFunctionGradient();
 	public void setData(PixelImageBase data);
+	public String [] getHeaders();
 }

@@ -63,4 +63,9 @@ public class ConjugateGradient implements Fitter {
 			return null;
 		}
 	}
+
+	@Override
+	public String[] getHeaders() {
+		return func.getHeaders();
+	}
 }

@@ -31,6 +31,12 @@ public class PoissonLogLikelihoodAstigmatic implements LikelihoodModel {
 		this.p2 = p2;
 	}
 	
+	final String [] headers = {"x","y","z","intensity","offset"};
+	@Override
+	public String [] getHeaders() {
+		return headers;
+	}
+
 	public void setData(PixelImageBase data) {
 		this.data = data;
 	}
