@@ -67,7 +67,11 @@ public class LeastSquare implements Fitter{
 
     @Override
     public double [] fit(PixelImageBase data, double [] start) {
-    	psf.setFittingData(data);
+    	double [] guess = psf.setFittingData(data);
+    	if (start == null) {
+    		start = guess;
+    	}
+
     	LeastSquaresProblem lsp = LeastSquaresFactory.create(
     			LeastSquaresFactory.model(psf.getValueFunction(), psf.getJacobian()),
     			new ArrayRealVector(data.getValueVector()),
@@ -100,4 +104,9 @@ public class LeastSquare implements Fitter{
     public double [] getResult() {
     	return psf.convertParametersInternalToExternal(optimum.getPoint().toArray());
     }
+
+	@Override
+	public String[] getHeaders() {
+		return psf.getHeaders();
+	}
 }

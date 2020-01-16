@@ -37,8 +37,16 @@ public class PoissonLogLikelihoodAstigmatic implements LikelihoodModel {
 		return headers;
 	}
 
-	public void setData(PixelImageBase data) {
+	public double [] setData(PixelImageBase data) {
 		this.data = data;
+		double [] guess = new double[5];
+		int idxCenter = data.getLength() / 2;
+		guess[0] = data.getXCordinate(idxCenter);
+		guess[1] = data.getYCordinate(idxCenter);
+		guess[2] = 0;
+		guess[4] = data.getValue(0);
+		guess[3] = (data.getValue(idxCenter) - guess[4]) * 10;
+		return guess;		
 	}
 
     public ObjectiveFunction getObjectiveFunction() {

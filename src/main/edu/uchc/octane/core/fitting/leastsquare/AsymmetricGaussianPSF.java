@@ -133,10 +133,10 @@ public class AsymmetricGaussianPSF implements PSFFittingFunction {
         int idx = data.getLength() / 2;
         p[Params.X] = data.getXCordinate(idx);
         p[Params.Y] = data.getYCordinate(idx);
-        p[Params.INTENSITY] = data.getValue(idx) * 10;
+        p[Params.OFFSET] = Math.min(data.getValue(0), data.getValue(data.getLength()-1));
+        p[Params.INTENSITY] = Math.max(100, (data.getValue(idx) - p[Params.OFFSET]) * 10);
         p[Params.SIGMAX] = 2;
         p[Params.SIGMAY] = 2;
-        p[Params.OFFSET] = data.getValue(0);
 
         return p;		
 	}

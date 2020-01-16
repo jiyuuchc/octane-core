@@ -37,8 +37,10 @@ public class ConjugateGradient implements Fitter {
 	@Override
 	public double[] fit(PixelImageBase data, double[] start) {
 		
-		func.setData(data);
-		
+		double [] guess = func.setData(data);
+		if (start == null) {
+			start = guess;
+		}
 		try {
 			result = optimizer.optimize(
 					func.getObjectiveFunction(),
