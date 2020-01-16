@@ -17,7 +17,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
 import org.json.JSONException;
 
-import edu.uchc.octane.core.datasource.OctaneDataFile;
+import edu.uchc.octane.core.localizationdata.LocalizationDataset;
 
 public class CsvCommand {
 
@@ -50,7 +50,7 @@ public class CsvCommand {
         // long startTime = System.currentTimeMillis();
         System.out.println("Reading CSV file: " + csvFilepath);
 
-        OctaneDataFile dataset = OctaneDataFile.importFromCSV(csvFile);
+        LocalizationDataset dataset = LocalizationDataset.importFromCSV(csvFile);
         
         System.out.println("Output file: " + args.get(1));
         dataset.writeToFile(args.get(1));
@@ -60,7 +60,7 @@ public class CsvCommand {
         System.out.println("Octane: export...");
         
         System.out.println("Reading octane data: " + args.get(0));
-        OctaneDataFile data = OctaneDataFile.readFromFile(args.get(0));
+        LocalizationDataset data = LocalizationDataset.readFromFile(args.get(0));
         
         String csvFilepath = args.get(1);
         

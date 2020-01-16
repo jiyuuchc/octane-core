@@ -15,7 +15,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
 
-import edu.uchc.octane.core.datasource.OctaneDataFile;
+import edu.uchc.octane.core.localizationdata.LocalizationDataset;
 import edu.uchc.octane.core.localizationimage.LocalizationImage;
 import edu.uchc.octane.core.tracking.ConnectionOptimizer;
 import edu.uchc.octane.core.tracking.MinSumDistance;
@@ -59,7 +59,7 @@ public class TrackingCommand {
 		printParameters();
 
 		System.out.println("Loading File : " + args.get(0));
-		locData = new LocalizationImage(OctaneDataFile.readFromFile(args.get(0)));
+		locData = new LocalizationImage(LocalizationDataset.readFromFile(args.get(0)));
         System.out.println("Load File: done");
 		
         ConnectionOptimizer optimizer;
@@ -70,7 +70,7 @@ public class TrackingCommand {
         }
 		TrackingDataFile tracker = new TrackingDataFile(optimizer, (int) blinkings);
 
-		OctaneDataFile trackedData = tracker.processLocalizations(locData, doMerge);
+		LocalizationDataset trackedData = tracker.processLocalizations(locData, doMerge);
         System.out.println("Output file: " + args.get(1));
         trackedData.writeToFile(args.get(1));
 

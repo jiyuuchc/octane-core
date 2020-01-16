@@ -16,12 +16,12 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
 import org.json.JSONException;
 
-import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.fitting.leastsquare.AsymmetricGaussianPSF;
 import edu.uchc.octane.core.fitting.leastsquare.DAOFitting;
 import edu.uchc.octane.core.fitting.leastsquare.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.leastsquare.LeastSquare;
 import edu.uchc.octane.core.frameanalysis.LocalMaximum;
+import edu.uchc.octane.core.localizationdata.LocalizationDataset;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 
 public class AnalyzeCommand {
@@ -281,7 +281,7 @@ public class AnalyzeCommand {
 				data[i][j] = positions.get(j)[i];
 			}
 		}
-		OctaneDataFile raw = new OctaneDataFile(data, headers);
+		LocalizationDataset raw = new LocalizationDataset(data, headers);
 
 		System.out.println("Saving to file: " + args.get(1));
 		ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(args.get(1)));

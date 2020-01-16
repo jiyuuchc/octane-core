@@ -3,8 +3,8 @@ package edu.uchc.octane.core.drift;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.drift.Basdi;
+import edu.uchc.octane.core.localizationdata.LocalizationDataset;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 
 public class BasdiTest {
@@ -65,7 +65,7 @@ public class BasdiTest {
         double [][] data = {xarray, yarray, farray};
         String [] header = {"x",  "y", "frame"};
         
-        OctaneDataFile odf = new OctaneDataFile(data, header);
+        LocalizationDataset odf = new LocalizationDataset(data, header);
         Basdi basdi = new Basdi(10, 1);
         
         basdi.estimate(odf, 10);

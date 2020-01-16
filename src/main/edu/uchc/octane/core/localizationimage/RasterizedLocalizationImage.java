@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octane.core.datasource.OctaneDataFile;
+import edu.uchc.octane.core.localizationdata.LocalizationDataset;
 
 public class RasterizedLocalizationImage extends LocalizationImage implements Runnable {
 
@@ -27,15 +27,15 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
     boolean isDone;
     boolean isDirty;
 
-    public RasterizedLocalizationImage(OctaneDataFile locData) {
+    public RasterizedLocalizationImage(LocalizationDataset locData) {
         this(locData, DEFAULT_PIXEL_SIZE);
     }
 
-    public RasterizedLocalizationImage(OctaneDataFile locData, double pixelSize) {
+    public RasterizedLocalizationImage(LocalizationDataset locData, double pixelSize) {
         this(locData, pixelSize, null);
     }
 
-    public RasterizedLocalizationImage(OctaneDataFile locData, double pixelSize, Rectangle roi) {
+    public RasterizedLocalizationImage(LocalizationDataset locData, double pixelSize, Rectangle roi) {
          
          super(locData);
          
@@ -46,7 +46,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
      }
 
     public RasterizedLocalizationImage(ObjectInputStream s) throws ClassNotFoundException, IOException {
-        this((OctaneDataFile) s.readObject());
+        this((LocalizationDataset) s.readObject());
     }
 
     public RasterizedLocalizationImage(RasterizedLocalizationImage orig) {
@@ -220,7 +220,7 @@ public class RasterizedLocalizationImage extends LocalizationImage implements Ru
     }
 
     @Override
-    public synchronized void mergeWith(OctaneDataFile odf) {
+    public synchronized void mergeWith(LocalizationDataset odf) {
         setDirty();
         super.mergeWith(odf);
 

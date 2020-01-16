@@ -8,7 +8,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uchc.octane.core.datasource.OctaneDataFile;
+import edu.uchc.octane.core.localizationdata.LocalizationDataset;
 import edu.uchc.octane.core.utils.FastKDTree;
 import edu.uchc.octane.core.utils.HDataCollection;
 
@@ -16,7 +16,7 @@ public class LocalizationImage {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
-    final OctaneDataFile odf;
+    final LocalizationDataset odf;
 
     ArrayList<SummaryStatistics> stats;
     ArrayList<String> headerList;
@@ -76,7 +76,7 @@ public class LocalizationImage {
     }
 
     
-    public LocalizationImage(OctaneDataFile odf) {
+    public LocalizationImage(LocalizationDataset odf) {
         this.odf = odf;
 
         dataList = new ArrayList<>(Arrays.asList(odf.data));
@@ -220,11 +220,11 @@ public class LocalizationImage {
         return dataList.size();
     }
 
-    public OctaneDataFile getDataSource() {
+    public LocalizationDataset getDataSource() {
         return odf;
     }
     
-    public void mergeWith(OctaneDataFile newOdf) {
+    public void mergeWith(LocalizationDataset newOdf) {
         if (newOdf == null) {
             return;
         }
