@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.cli;
+package edu.uchc.octane.core.utils;
 
 import org.json.JSONObject;
 

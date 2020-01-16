@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.cli;
+package edu.uchc.octane.core.utils;
 
 import java.io.File;
 import java.io.IOException;

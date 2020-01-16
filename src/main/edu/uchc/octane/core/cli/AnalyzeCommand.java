@@ -23,6 +23,8 @@ import edu.uchc.octane.core.fitting.leastsquare.LeastSquare;
 import edu.uchc.octane.core.frameanalysis.LocalMaximum;
 import edu.uchc.octane.core.localizationdata.LocalizationDataset;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
+import edu.uchc.octane.core.utils.MMTaggedTiff;
+import edu.uchc.octane.core.utils.TaggedImage;
 
 public class AnalyzeCommand {
 
