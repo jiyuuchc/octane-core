@@ -1,8 +1,8 @@
-package edu.uchc.octane.core.fitting.deconvolution;
+package edu.uchc.octane.core.deconvolution;
 
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octane.core.pixelimage.AbstractDoubleImage;
+import edu.uchc.octane.core.pixelimage.PixelImageBase;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import edu.uchc.octane.core.utils.ImageFilters;
 
@@ -12,7 +12,7 @@ public class IterativeShrinkageAndThreshold {
     public final static double CONVERGENCE_DELTA = 1e-6;
 
     public int maxIters;
-    public AbstractDoubleImage data;
+    public PixelImageBase data;
     public double psfSigma;
     public int scaleFactor;
     public double ts, lambda;

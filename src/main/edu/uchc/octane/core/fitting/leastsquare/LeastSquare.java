@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.uchc.octane.core.fitting.Fitter;
-import edu.uchc.octane.core.pixelimage.AbstractDoubleImage;
+import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
 public class LeastSquare implements Fitter{
 
@@ -42,7 +42,7 @@ public class LeastSquare implements Fitter{
         this.useWeighting = useWeighting;
     }
 
-    protected double[] calcWeights(AbstractDoubleImage data) {
+    protected double[] calcWeights(PixelImageBase data) {
     	double[] weights = new double[data.getLength()];
     	if(!useWeighting){
     		Arrays.fill(weights, 1);
@@ -66,7 +66,7 @@ public class LeastSquare implements Fitter{
     }
 
     @Override
-    public double [] fit(AbstractDoubleImage data, double [] start) {
+    public double [] fit(PixelImageBase data, double [] start) {
     	psf.setFittingData(data);
     	LeastSquaresProblem lsp = LeastSquaresFactory.create(
     			LeastSquaresFactory.model(psf.getValueFunction(), psf.getJacobian()),
@@ -84,11 +84,11 @@ public class LeastSquare implements Fitter{
     		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
     		optimum = optimizer.optimize(lsp);
     	} catch (TooManyEvaluationsException e) {
-    	    logger.error("Evaluations exceded limit.");
+    	    //logger.error("Evaluations exceded limit.");
     		logger.error(e.getMessage());
     		return null;
     	} catch (ConvergenceException e) {
-    	    logger.error("Convergence error.");
+    	    //logger.error("Convergence error.");
     	    logger.error(e.getMessage());
     	    return null;
     	}

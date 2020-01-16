@@ -206,7 +206,7 @@ public class AnalyzeCommand {
 		}
 		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
 		for (int i = 0; i < pixels.length; i ++) {
-			pixels[i] = iPixels[i] - backgroundIntensity ;
+			pixels[i] = iPixels[i]&0xffff - backgroundIntensity ;
 		}
 		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
 		cnt[frame] = 0;

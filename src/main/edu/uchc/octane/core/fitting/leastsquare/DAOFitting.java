@@ -2,7 +2,7 @@ package edu.uchc.octane.core.fitting.leastsquare;
 
 import org.apache.commons.math3.distribution.FDistribution;
 
-import edu.uchc.octane.core.pixelimage.AbstractDoubleImage;
+import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
 public class DAOFitting {
 
@@ -21,7 +21,7 @@ public class DAOFitting {
 		this.pValue = pValue;
 	}
 
-    public double [][] fit(AbstractDoubleImage data, double [] start) {
+    public double [][] fit(PixelImageBase data, double [] start) {
 
     	double [] curStart = start;
 

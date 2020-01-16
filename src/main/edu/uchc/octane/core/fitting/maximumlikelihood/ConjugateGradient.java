@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.uchc.octane.core.fitting.Fitter;
-import edu.uchc.octane.core.pixelimage.AbstractDoubleImage;
+import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
 public class ConjugateGradient implements Fitter {
 
@@ -35,7 +35,7 @@ public class ConjugateGradient implements Fitter {
 	}
 
 	@Override
-	public double[] fit(AbstractDoubleImage data, double[] start) {
+	public double[] fit(PixelImageBase data, double[] start) {
 		
 		func.setData(data);
 		

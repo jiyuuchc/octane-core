@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.fitting.radialsymmetry;
+package edu.uchc.octane.core.radialsymmetry;
 
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 

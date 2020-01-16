@@ -6,7 +6,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octane.core.pixelimage.AbstractDoubleImage;
+import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
 public class PoissonLogLikelihoodSymmetric implements LikelihoodModel {
 
@@ -14,12 +14,12 @@ public class PoissonLogLikelihoodSymmetric implements LikelihoodModel {
 	final static double sqrt2 = FastMath.sqrt(2);
 
 	// double x0, y0, z0, bg0, in0;
-	AbstractDoubleImage data;
+	PixelImageBase data;
 	
 	public PoissonLogLikelihoodSymmetric() {
 	}
 	
-	public void setData(AbstractDoubleImage data) {
+	public void setData(PixelImageBase data) {
 		this.data = data;
 	}
 

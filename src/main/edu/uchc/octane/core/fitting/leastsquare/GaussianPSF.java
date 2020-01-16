@@ -4,11 +4,11 @@ import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octane.core.pixelimage.AbstractDoubleImage;
+import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
 public class GaussianPSF implements PSFFittingFunction {
 
-    AbstractDoubleImage data;
+    PixelImageBase data;
     boolean fixSigma, fixOffset;
 
     public static class Params {
@@ -112,8 +112,17 @@ public class GaussianPSF implements PSFFittingFunction {
     }
 
     @Override
-    public void setFittingData(AbstractDoubleImage data) {
+    public double [] setFittingData(PixelImageBase data) {
         this.data = data;
+        double [] p = new double[Params.PARAMS_LENGTH];
+        int idx = data.getLength() / 2;
+        p[Params.X] = data.getXCordinate(idx);
+        p[Params.Y] = data.getYCordinate(idx);
+        p[Params.INTENSITY] = data.getValue(idx) * 10;
+        p[Params.SIGMA] = 2;
+        p[Params.OFFSET] = data.getValue(0);
+
+        return p;
     }
 
     @Override

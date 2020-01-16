@@ -6,7 +6,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.uchc.octane.core.fitting.deconvolution.IterativeShrinkageAndThreshold;
+import edu.uchc.octane.core.deconvolution.IterativeShrinkageAndThreshold;
 import edu.uchc.octane.core.fitting.leastsquare.AsymmetricGaussianPSF;
 import edu.uchc.octane.core.fitting.leastsquare.DAOFitting;
 import edu.uchc.octane.core.fitting.leastsquare.GaussianPSF;
@@ -16,8 +16,8 @@ import edu.uchc.octane.core.fitting.leastsquare.MultiPSF;
 import edu.uchc.octane.core.fitting.maximumlikelihood.ConjugateGradient;
 import edu.uchc.octane.core.fitting.maximumlikelihood.PoissonLogLikelihoodAstigmatic;
 import edu.uchc.octane.core.fitting.maximumlikelihood.PoissonLogLikelihoodSymmetric;
-import edu.uchc.octane.core.fitting.radialsymmetry.RadialSymmetryFitting;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
+import edu.uchc.octane.core.radialsymmetry.RadialSymmetryFitting;
 
 public class FittingTest {
 

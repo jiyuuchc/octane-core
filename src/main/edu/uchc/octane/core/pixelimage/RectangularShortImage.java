@@ -1,18 +1,18 @@
 package edu.uchc.octane.core.pixelimage;
 
 /**
- * A rectangular pixel image with a double array (row-major or Y-major order) as its internal representation.
+ * A rectangular pixel image with a short array as its internal representation.
  */
-public class RectangularDoubleImage extends RectangularImage {
+public class RectangularShortImage extends RectangularImage {
 
-	double [] data;
-	
+	short [] data;
+
 	/**
 	 * A zero-filled rectangular image
 	 * @param width
 	 * @param height
 	 */
-	public RectangularDoubleImage(int width, int height) {
+	public RectangularShortImage(int width, int height) {
 		this(width,  height, 0, 0);
 	}
 	
@@ -23,8 +23,8 @@ public class RectangularDoubleImage extends RectangularImage {
 	 * @param x0 X coordinate of top-left corner 
 	 * @param y0 Y coordinate of top-left corner
 	 */
-	public RectangularDoubleImage(int width, int height, int x0, int y0) {
-		this(new double[width * height], width, x0, y0);
+	public RectangularShortImage(int width, int height, int x0, int y0) {
+		this(new short[width * height], width, x0, y0);
 	}
 
 	/**
@@ -32,7 +32,7 @@ public class RectangularDoubleImage extends RectangularImage {
 	 * @param data First element corresponds to (0,0)
 	 * @param imageWidth
 	 */
-	public RectangularDoubleImage(double [] data, int imageWidth) {
+	public RectangularShortImage(short [] data, int imageWidth) {
 		this(data, imageWidth, 0, 0);
 	}
 
@@ -43,7 +43,7 @@ public class RectangularDoubleImage extends RectangularImage {
 	 * @param x0
 	 * @param y0
 	 */
-	public RectangularDoubleImage(double [] data, int imageWidth, int x0, int y0) {
+	public RectangularShortImage(short [] data, int imageWidth, int x0, int y0) {
 		this.data = data;
 		this.x0 = x0;
 		this.y0 = y0;
@@ -64,11 +64,11 @@ public class RectangularDoubleImage extends RectangularImage {
 	 * @param height
 	 * @param fixBounding If true, fix illegal coordinates by shrinking them, otherwise, throw an exception
 	 */
-	public RectangularDoubleImage(RectangularDoubleImage origData, int x0, int y0, int width, int height, boolean fixBounding ) {
+	public RectangularShortImage(RectangularShortImage origData, int x0, int y0, int width, int height, boolean fixBounding ) {
 
 		fixBounds(origData, x0, y0, width, height, fixBounding);
 
-		this.data = new double[width * height];
+		this.data = new short[width * height];
 		int origIdx = (this.y0 - origData.y0) * origData.width + this.x0 - origData.x0;
 		for (int i = 0; i < this.height; i ++) {
 			System.arraycopy(origData.data, origIdx , this.data, i * this.width, this.width);
@@ -84,7 +84,7 @@ public class RectangularDoubleImage extends RectangularImage {
 	 * @param width
 	 * @param height
 	 */
-	public RectangularDoubleImage(RectangularDoubleImage origData, int x0, int y0, int width, int height) {
+	public RectangularShortImage(RectangularShortImage origData, int x0, int y0, int width, int height) {
 		this(origData, x0, y0, width, height, false);
 	}
 
@@ -92,31 +92,17 @@ public class RectangularDoubleImage extends RectangularImage {
 	 *Create a clone. Pixel data are duplicated.
 	 */
 	@Override
-	public RectangularDoubleImage clone() {
-		return new RectangularDoubleImage(data.clone(), width, x0, y0);
-	}
-
-	@Override
-	public double[] getValueVector() {
-		return data.clone();
-	}
-
-	@Override
-	public void setValueVector(double[] values) {
-		if (values.length != data.length) {
-			throw(new IllegalArgumentException("Incorrect input array length: " + values.length));
-		}
-		data = values.clone();
+	public RectangularShortImage clone() {
+		return new RectangularShortImage(data.clone(), width, x0, y0);
 	}
 
 	@Override
 	public double getValue(int idx) {
-		return data[idx];
+		return (double) (data[idx]);
 	}
 
 	@Override
 	public void setValue(int idx, double v) {
-		data[idx] = v;
+		data[idx] = (short) v; 
 	}
 }
-

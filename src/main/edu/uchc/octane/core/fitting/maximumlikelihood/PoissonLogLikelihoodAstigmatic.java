@@ -6,7 +6,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octane.core.pixelimage.AbstractDoubleImage;
+import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
 public class PoissonLogLikelihoodAstigmatic implements LikelihoodModel {
 
@@ -21,7 +21,7 @@ public class PoissonLogLikelihoodAstigmatic implements LikelihoodModel {
 	double cntsPerPhoton;
 
 	// double x0, y0, z0, bg0, in0;
-	AbstractDoubleImage data;
+	PixelImageBase data;
 	
 	public PoissonLogLikelihoodAstigmatic(double sigma0, double p0, double p1, double p2, double gamma) {
 		this.gamma = gamma;
@@ -31,7 +31,7 @@ public class PoissonLogLikelihoodAstigmatic implements LikelihoodModel {
 		this.p2 = p2;
 	}
 	
-	public void setData(AbstractDoubleImage data) {
+	public void setData(PixelImageBase data) {
 		this.data = data;
 	}
 

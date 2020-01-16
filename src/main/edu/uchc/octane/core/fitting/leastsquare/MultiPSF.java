@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 
-import edu.uchc.octane.core.pixelimage.AbstractDoubleImage;
+import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
 /**
  * Representation of multi-molecule model.
@@ -16,7 +16,7 @@ public class MultiPSF implements PSFFittingFunction {
     int numOfPSFs;
     MultivariateVectorFunction valueFunction;
     MultivariateMatrixFunction jacobianFunction;
-    AbstractDoubleImage data;
+    PixelImageBase data;
     int[] unified;
 
     public MultiPSF(int n, PSFFittingFunction single) {
@@ -137,12 +137,14 @@ public class MultiPSF implements PSFFittingFunction {
     }
 
     @Override
-    public void setFittingData(AbstractDoubleImage data) {
+    public double [] setFittingData(PixelImageBase data) {
         this.data = data;
-        singlePSF.setFittingData(data);
+        double [] p = singlePSF.setFittingData(data);
         valueFunction = singlePSF.getValueFunction();
         jacobianFunction = singlePSF.getJacobian();
-
+        // return p;
+        //FIXME
+        return null;
     }
 
     @Override

@@ -66,7 +66,7 @@ public class LocalMaximum{
 
 		this.threshold = threshold;
 		this.tolerance = noise;
-		this.ROISize = ROISize;
+		this.ROISize = ROISize; 
 	}
 
 	public boolean isProcessed(int index) {
@@ -170,5 +170,4 @@ public class LocalMaximum{
 			}
 		}
 	}
-
 }
