@@ -25,6 +25,7 @@ import edu.uchc.octane.core.fitting.leastsquare.PSFFittingFunction;
 import edu.uchc.octane.core.frameanalysis.LocalMaximum;
 import edu.uchc.octane.core.localizationdata.LocalizationDataset;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
+import edu.uchc.octane.core.pixelimage.RectangularImage;
 import edu.uchc.octane.core.utils.MMTaggedTiff;
 import edu.uchc.octane.core.utils.TaggedImage;
 
@@ -183,9 +184,9 @@ public class AnalyzeCommand {
 			Fitter fitter = multiPeak ? new DAOFitting(psf) :  new LeastSquare(psf);
 
 			@Override
-			public boolean fit(RectangularDoubleImage ROI, int x, int y) {
+			public boolean fit(RectangularImage ROI, int x, int y) {
 
-				double [] results = fitter.fit(data, null);
+				double [] results = fitter.fit(ROI, null);
 				while (results != null ){
 					cnt[frame]++;
 					synchronized(positions) {
