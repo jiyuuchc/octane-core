@@ -5,7 +5,7 @@ import edu.uchc.octane.core.pixelimage.PixelImageBase;
 /**
  * Interface for single particle fitting classes.
  */
-public interface Fitter {
+public interface Fitter extends Cloneable {
 
 	/**
 	 * Perform a local fitting 

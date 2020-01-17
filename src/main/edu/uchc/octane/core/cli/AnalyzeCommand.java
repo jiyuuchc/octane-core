@@ -16,10 +16,12 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
 import org.json.JSONException;
 
+import edu.uchc.octane.core.fitting.Fitter;
 import edu.uchc.octane.core.fitting.leastsquare.AsymmetricGaussianPSF;
 import edu.uchc.octane.core.fitting.leastsquare.DAOFitting;
 import edu.uchc.octane.core.fitting.leastsquare.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.leastsquare.LeastSquare;
+import edu.uchc.octane.core.fitting.leastsquare.PSFFittingFunction;
 import edu.uchc.octane.core.frameanalysis.LocalMaximum;
 import edu.uchc.octane.core.localizationdata.LocalizationDataset;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
@@ -40,6 +42,7 @@ public class AnalyzeCommand {
 
 	static int [] cnt;
 	static List<double[]> positions;
+	static String [] headers;
 
 	public static Options setupOptions() {
 		options = PatternOptionBuilder.parsePattern("hw%t%b%s%e%p%ma");
@@ -111,127 +114,11 @@ public class AnalyzeCommand {
 		}
 	}
 	
-	static LocalMaximum.CallBackFunctions getCallbackSimple(LeastSquare fitter, int frame) {
-		return new LocalMaximum.CallBackFunctions() {
-			double [] start = {0, 0, 0, 1.5, 1};
-
-			@Override
-			public boolean fit(RectangularDoubleImage img, int x, int y) {
-
-				// System.out.println("Location " + (c++) +" : " + x + " - " + y + " - " + img.getValueAtCoordinate(x, y));
-				start[0] = x; start[1] = y;  start[2] = img.getValueAtCoordinate(x, y) * 10;
-
-				double [] result = fitter.fit(img, start);
-				if (result != null ) {
-					// reject bad fitting
-					double bg = result[result.length -1];
-					//double sigma = result[3];
-					if (bg > 0.1) {
-						synchronized(positions) {
-							positions.add(convertParameters(result, frame));
-						}
-					}				    
-					cnt[frame] ++;					
-				}
-				return true;
-			}			
-		};
-	}
-
-	static LocalMaximum.CallBackFunctions getCallbackCalibration(LeastSquare fitter, int frame) {
-		return new LocalMaximum.CallBackFunctions() {
-			double [] start = {0, 0, 0, 1.5, 1.5, 1};
-
-			@Override
-			public boolean fit(RectangularDoubleImage img, int x, int y) {
-
-				start[0] = x; start[1] = y;  start[2] = img.getValueAtCoordinate(x, y) * 10;
-
-				double [] result = fitter.fit(img, start);
-				if (result != null ) {
-					// reject bad fitting
-					double bg = result[result.length -1];
-					//double sigmax = result[3];
-					//double sigmay = result[4];					
-					if (bg > 0 ) {
-						synchronized(positions) {
-							positions.add(convertParameters(result, frame));
-						}
-					}				    
-					cnt[frame] ++;					
-				}
-				return true;
-			}
-		};
-	}
-
-	static LocalMaximum.CallBackFunctions getCallbackDAO(DAOFitting fitter, int frame) {
-		return new LocalMaximum.CallBackFunctions() {
-			double [] start = {0, 0, 0, 1.5, 1};
-
-			@Override
-			public boolean fit(RectangularDoubleImage img, int x, int y) {
-
-				// System.out.println("Location " + (c++) +" : " + x + " - " + y + " - " + img.getValueAtCoordinate(x, y));
-				start[0] = x; start[1] = y;  start[2] = img.getValueAtCoordinate(x, y) * 10;
-
-				double [] results = fitter.fit(img, start);
-				while (results != null ) {
-					cnt[frame] ++;
-
-					double bg = results[results.length -1];
-					double sigma = results[3];
-					if (bg > 0.1 || sigma < 6) {
-						synchronized(positions) {
-							positions.add(convertParameters(results, frame));
-						}
-					}
-					results = fitter.getNextResult();
-				}
-				return true;
-			}
-		};
-	}
-
-	static void processFrame(TaggedImage img, int frame) throws JSONException {
-		short [] iPixels = (short[]) img.pix;
-		double [] pixels = new double[iPixels.length];
-		LeastSquare fitter;
-		if (asymmetric) {
-			fitter = new LeastSquare(new AsymmetricGaussianPSF());
-		}else {
-			fitter = new LeastSquare(new IntegratedGaussianPSF());
-		}
-		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
-		for (int i = 0; i < pixels.length; i ++) {
-			pixels[i] = iPixels[i]&0xffff - backgroundIntensity ;
-		}
-		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
-		cnt[frame] = 0;
-		if (asymmetric) {
-			finder.processFrame(data, getCallbackCalibration(fitter, frame));
-		} else {
-			finder.processFrame(data, getCallbackSimple(fitter, frame));
-		}
-	}
-
-	static void processFrameWithDAO(TaggedImage img, int frame) throws JSONException {
-		short [] iPixels = (short[]) img.pix;
-		double [] pixels = new double[iPixels.length];
-		DAOFitting fitter = new DAOFitting(new IntegratedGaussianPSF(false, false));
-		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
-		for (int i = 0; i < pixels.length; i ++) {
-			double p = iPixels[i] >= 0 ? iPixels[i] : iPixels[i] + 65536.0;
-			pixels[i] = p - backgroundIntensity ;
-		}
-		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
-		cnt[frame] = 0;
-
-		finder.processFrame(data, getCallbackDAO(fitter, frame));
-	}
-
 	public static void process(List<String> args) throws JSONException, IOException {
 		System.out.println("Analyze data: " + args.get(0));
+
+		PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
+		headers = psf.getHeaders();
 
 		positions = new ArrayList<double[]>();
 		MMTaggedTiff stackReader = new MMTaggedTiff(args.get(0), false, false);
@@ -255,11 +142,7 @@ public class AnalyzeCommand {
 
 			if (img != null ) {
 				try {
-					if (! multiPeak) {
-						processFrame(img, f);
-					} else {
-						processFrameWithDAO(img,f);
-					}
+					processFrame(img, f);
 				} catch (JSONException e) {
 					assert(false); //shouldn't happen
 				}
@@ -269,10 +152,6 @@ public class AnalyzeCommand {
 
 		stackReader.close();
 
-		String [] headers = {"frame","x", "y", "intensity", "sigma", "offset"};
-		if (asymmetric && !multiPeak) {
-			headers = new String [] {"frame","x", "y", "intensity", "sigmaX", "sigmaY", "offset"};
-		}
 		double [][] data = new double[headers.length][positions.size()];
 		for (int i = 0; i < headers.length; i ++) {
 			for (int j = 0; j < positions.size(); j++) {
@@ -287,21 +166,58 @@ public class AnalyzeCommand {
 		fo.writeObject(raw);
 		fo.close();
 	}
+	
+	static void processFrame(TaggedImage img, int frame) throws JSONException {
+		short [] iPixels = (short[]) img.pix;
+		double [] pixels = new double[iPixels.length];
+
+		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
+		for (int i = 0; i < pixels.length; i ++) {
+			pixels[i] = iPixels[i]&0xffff - backgroundIntensity ;
+		}
+		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
+		cnt[frame] = 0;
+
+		finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
+			PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
+			Fitter fitter = multiPeak ? new DAOFitting(psf) :  new LeastSquare(psf);
+
+			@Override
+			public boolean fit(RectangularDoubleImage ROI, int x, int y) {
+
+				double [] results = fitter.fit(data, null);
+				while (results != null ){
+					cnt[frame]++;
+					synchronized(positions) {
+						positions.add(convertParameters(results, frame));
+					}
+					if (multiPeak) {
+						results = ((DAOFitting) fitter).getNextResult();
+					} else {
+						results = null;
+					}
+				}
+
+				return true;
+			}
+		});
+	}
 
 	static double[] convertParameters(double [] param, int f) {
 		double [] r = new double[param.length + 1];
+
+		// first column is frame number (1-based)
 		r[0] = f + 1;
-		r[1] = param[0] * pixelSize ; //x
-		r[2] = param[1] * pixelSize ; //y
-		r[3] = param[2];
-		if (asymmetric && !multiPeak) {
-			r[4] = param[3] * pixelSize;
-			r[5] = param[4] * pixelSize;
-			r[6] = param[5];
-		} else {
-			r[4] = param[3] * pixelSize;
-			r[5] = param[4];
+
+		for (int i = 0; i < headers.length; i++) {
+			String s = headers[i]; 
+			if ( s.equals("x") || s.equals("y") || s.equals("z") || s.startsWith("sigma")) {
+				r[i+1] = param[i] * pixelSize;
+			} else {
+				r[i+1] = param[i];
+			}
 		}
+
 		return r;
 	}
 }

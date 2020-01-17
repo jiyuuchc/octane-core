@@ -9,7 +9,7 @@ import edu.uchc.octane.core.pixelimage.PixelImageBase;
  * PSFs for LeastSquare fitter all have this interface  
  * @author Ji Yu
  */
-public interface PSFFittingFunction {
+public interface PSFFittingFunction extends Cloneable {
 
 	MultivariateVectorFunction getValueFunction();
 	MultivariateMatrixFunction getJacobian();

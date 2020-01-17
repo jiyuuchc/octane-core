@@ -7,7 +7,6 @@ import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
 public class DAOFitting implements Fitter{
 
-	MultiPSF multiPsf;
 	PSFFittingFunction psf;
 	int maxNumPeaks;
 	double pValue;

@@ -18,7 +18,7 @@ import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
 public class LeastSquare implements Fitter{
 
-    final Logger logger = LoggerFactory.getLogger(LeastSquare.class);
+    final static Logger logger = LoggerFactory.getLogger(LeastSquare.class);
 
     public final static int MAX_ITERATIONS = 1000;
     public final static double CONVERGENCE_DELTA = 1e-4;
