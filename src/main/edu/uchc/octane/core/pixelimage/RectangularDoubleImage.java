@@ -65,8 +65,34 @@ public class RectangularDoubleImage extends RectangularImage {
 	 * @param fixBounding If true, fix illegal coordinates by shrinking them, otherwise, throw an exception
 	 */
 	public RectangularDoubleImage(RectangularDoubleImage origData, int x0, int y0, int width, int height, boolean fixBounding ) {
+		if (width <= 0 || height <=0 || width > origData.width || height > origData.height) {
+			throw new IllegalArgumentException("Invalid image size.");
+		}
 
-		fixBounds(origData, x0, y0, width, height, fixBounding);
+		if ( ! origData.isCoordinateValid(x0, y0) || ! origData.isCoordinateValid(x0 + width - 1 , y0 + height - 1) ) {
+			if (! fixBounding) {
+				throw new IllegalArgumentException("subimage region out of bound.");
+			} else {
+				if (x0 < origData.x0) {
+					x0 = origData.x0;
+				}
+				if (y0 < origData.y0) {
+					y0 = origData.y0;
+				}
+
+				if (x0 + width > origData.x0 + origData.width) {
+					x0 = origData.x0 + origData.width - width;
+				}
+				if (y0 + height > origData.y0 + origData.height) {
+					y0 = origData.y0 + origData.height - height;
+				};
+			}
+		}
+		this.x0 = x0;
+		this.y0 = y0;
+		this.width = width;
+		this.height = height;		
+
 
 		this.data = new double[width * height];
 		int origIdx = (this.y0 - origData.y0) * origData.width + this.x0 - origData.x0;
@@ -117,6 +143,11 @@ public class RectangularDoubleImage extends RectangularImage {
 	@Override
 	public void setValue(int idx, double v) {
 		data[idx] = v;
+	}
+
+	@Override
+	public RectangularImage getSubImage(int x0, int y0, int width, int height, boolean fixBounding) {
+		return new RectangularDoubleImage(this, x0, y0, width, height, fixBounding);
 	}
 }
 
