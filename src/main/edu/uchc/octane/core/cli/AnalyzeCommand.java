@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -119,7 +120,8 @@ public class AnalyzeCommand {
 		System.out.println("Analyze data: " + args.get(0));
 
 		PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
-		headers = psf.getHeaders();
+		headers = Arrays.copyOf(psf.getHeaders(), psf.getHeaders().length + 1);
+		headers[headers.length - 1] = "frame";
 
 		positions = new ArrayList<double[]>();
 		MMTaggedTiff stackReader = new MMTaggedTiff(args.get(0), false, false);
@@ -205,17 +207,19 @@ public class AnalyzeCommand {
 	}
 
 	static double[] convertParameters(double [] param, int f) {
-		double [] r = new double[param.length + 1];
+		double [] r = new double[headers.length];
 
-		// first column is frame number (1-based)
-		r[0] = f + 1;
+		assert(param.length == headers.length - 1);
 
-		for (int i = 0; i < headers.length; i++) {
+		// last column is frame number (1-based)
+		r[r.length - 1] = f + 1;
+
+		for (int i = 0; i < param.length; i++) {
 			String s = headers[i]; 
 			if ( s.equals("x") || s.equals("y") || s.equals("z") || s.startsWith("sigma")) {
-				r[i+1] = param[i] * pixelSize;
+				r[i] = param[i] * pixelSize;
 			} else {
-				r[i+1] = param[i];
+				r[i] = param[i];
 			}
 		}
 
