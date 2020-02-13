@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octane.core.localizationdata.LocalizationDataset;
+import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.localizationimage.LocalizationImage;
 import edu.uchc.octane.core.utils.HData;
 
@@ -45,13 +45,13 @@ public class TrackingDataFile extends OnePassTracking {
 		}
 	}
 
-	public LocalizationDataset processLocalizations(LocalizationImage loc) {
+	public OctaneDataFile processLocalizations(LocalizationImage loc) {
 	    return processLocalizations(loc, false);
 	}
 	
-	public LocalizationDataset processLocalizations(LocalizationImage loc, boolean doMerge) {
+	public OctaneDataFile processLocalizations(LocalizationImage loc, boolean doMerge) {
 		locData = loc;
-		LocalizationDataset odf = loc.getDataSource();
+		OctaneDataFile odf = loc.getDataSource();
 		cols = new int[] {loc.xCol, loc.yCol, loc.zCol};
 
 		int maxFrame = (int) locData.getSummaryStatistics(locData.frameCol).getMax();
@@ -77,7 +77,7 @@ public class TrackingDataFile extends OnePassTracking {
 		        mergeTrack(results.get(i), newData, i);
 		    }
 		    
-		    return new LocalizationDataset(newData, locData.getDataSource().headers);
+		    return new OctaneDataFile(newData, locData.getDataSource().headers);
 
 		} else {
 		    double [][] origData = odf.data;
@@ -105,15 +105,15 @@ public class TrackingDataFile extends OnePassTracking {
 		    System.arraycopy(odf.headers, 0, newHeaders, 0, odf.headers.length);
 		    newHeaders[newHeaders.length - 1] = "TrackIdx";
 		    
-		    return new LocalizationDataset(newData, newHeaders);
+		    return new OctaneDataFile(newData, newHeaders);
 		}
 	}
 
-	public LocalizationDataset processLocalizations(LocalizationDataset data) {
+	public OctaneDataFile processLocalizations(OctaneDataFile data) {
 	    return processLocalizations(data, false);
 	}
 
-	public LocalizationDataset processLocalizations(LocalizationDataset data, boolean doMerge) {
+	public OctaneDataFile processLocalizations(OctaneDataFile data, boolean doMerge) {
 		return processLocalizations(new LocalizationImage(data), doMerge);
 	}
 

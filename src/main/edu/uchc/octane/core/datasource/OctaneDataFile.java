@@ -1,9 +1,8 @@
-package edu.uchc.octane.core.localizationdata;
+package edu.uchc.octane.core.datasource;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -19,11 +18,11 @@ import org.slf4j.LoggerFactory;
 
 import edu.uchc.octane.core.utils.CSVUtils;
 
-public class LocalizationDataset implements Serializable {
+public class OctaneDataFile implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    static final Logger logger = LoggerFactory.getLogger(LocalizationDataset.class);
+    static final Logger logger = LoggerFactory.getLogger(OctaneDataFile.class);
 
     public String[] headers;
     public double[][] data;
@@ -40,7 +39,7 @@ public class LocalizationDataset implements Serializable {
     	}    	
     }
     
-    public LocalizationDataset(double[][] data, String[] headers) {
+    public OctaneDataFile(double[][] data, String[] headers) {
 
     	this.data = data;
         this.headers = headers;
@@ -49,7 +48,7 @@ public class LocalizationDataset implements Serializable {
     }
 
     //copy constructor
-    public LocalizationDataset(LocalizationDataset odf) {
+    public OctaneDataFile(OctaneDataFile odf) {
 
     	headers = odf.headers.clone();
         data = new double[odf.data.length][];
@@ -60,7 +59,7 @@ public class LocalizationDataset implements Serializable {
     }
 
     //merge ignores header differences
-    public void mergeWith(LocalizationDataset newOdf) {
+    public void mergeWith(OctaneDataFile newOdf) {
     	if (newOdf == null) {
     		return;
     	}
@@ -104,10 +103,10 @@ public class LocalizationDataset implements Serializable {
         bw.close();
     }
     
-    public static LocalizationDataset readFromFile(String pathname) throws IOException, ClassNotFoundException {
+    public static OctaneDataFile readFromFile(String pathname) throws IOException, ClassNotFoundException {
 
     	ObjectInputStream fi = new ObjectInputStream(new java.io.FileInputStream(pathname));
-        LocalizationDataset odf = (LocalizationDataset) fi.readObject();
+        OctaneDataFile odf = (OctaneDataFile) fi.readObject();
         
         fi.close();
         
@@ -125,7 +124,7 @@ public class LocalizationDataset implements Serializable {
 		fo.close();    	
     }
 
-    public static LocalizationDataset importFromCSV(File csvFile) {
+    public static OctaneDataFile importFromCSV(File csvFile) {
 
         logger.info("Importing CSV data...");
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
@@ -165,7 +164,7 @@ public class LocalizationDataset implements Serializable {
                 }
             }
 
-            LocalizationDataset dataset = new LocalizationDataset(data, headers);
+            OctaneDataFile dataset = new OctaneDataFile(data, headers);
 
             return dataset;
 

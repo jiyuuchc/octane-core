@@ -7,7 +7,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uchc.octane.core.localizationdata.LocalizationDataset;
+import edu.uchc.octane.core.datasource.OctaneDataFile;
 import edu.uchc.octane.core.localizationimage.LocalizationImage;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import edu.uchc.octane.core.utils.ImageFilters;
@@ -69,7 +69,7 @@ public class Basdi {
         this.creepProbability = creepProbability;
     }
 
-    public void estimate(LocalizationDataset data, int numOfKeyFrames) {
+    public void estimate(OctaneDataFile data, int numOfKeyFrames) {
         LocalizationImage locs = new LocalizationImage(data);
         prepareData(locs, numOfKeyFrames);
         guessInitialTheta(locs);
@@ -140,7 +140,7 @@ public class Basdi {
     }
 
     // needs this.intFrame, this.drift
-    protected void correct(LocalizationDataset data) {
+    protected void correct(OctaneDataFile data) {
         LocalizationImage locs = new LocalizationImage(data);
         double[] xcol = locs.getData(locs.xCol);
         double[] ycol = locs.getData(locs.yCol);
