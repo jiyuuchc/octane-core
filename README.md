@@ -17,8 +17,6 @@ The available commands are:  analyze track drift cvs
 
 To visualize the analyses result, use the octane-view plugin in ImageJ.
 
-The CLI depends on mmmstudio (another of my repositories). You don't need it if you are not using the CLI.
-
 To build a single jar file with all dependencies, use 
 
  mvn assembly:single
