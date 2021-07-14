@@ -150,6 +150,8 @@ public class AnalyzeCommand {
 					assert(false); //shouldn't happen
 				}
 				System.out.println("Processed frame " + f + ", Found " + cnt[f] + " molecules." );
+			} else {
+				System.out.println("Error reading frame " + f);
 			}
 		});
 
