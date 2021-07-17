@@ -24,6 +24,9 @@ import edu.uchc.octane.core.fitting.leastsquare.DAOFitting;
 import edu.uchc.octane.core.fitting.leastsquare.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.leastsquare.LeastSquare;
 import edu.uchc.octane.core.fitting.leastsquare.PSFFittingFunction;
+import edu.uchc.octane.core.fitting.maximumlikelihood.ConjugateGradient;
+import edu.uchc.octane.core.fitting.maximumlikelihood.LikelihoodModel;
+import edu.uchc.octane.core.fitting.maximumlikelihood.PoissonLogLikelihoodSymmetric;
 import edu.uchc.octane.core.frameanalysis.LocalMaximum;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import edu.uchc.octane.core.pixelimage.RectangularImage;
@@ -41,13 +44,14 @@ public class AnalyzeCommand {
 	static double pixelSize = 160;
 	static boolean multiPeak = false;
 	static boolean asymmetric = false;
+	static boolean useLeastSquare = false;
 
 	static int [] cnt;
 	static List<double[]> positions;
 	static String [] headers;
 
 	public static Options setupOptions() {
-		options = PatternOptionBuilder.parsePattern("hw%t%b%s%e%p%ma");
+		options = PatternOptionBuilder.parsePattern("hw%t%b%s%e%p%mal");
 
 		options.getOption("h").setDescription("print this message");
 		options.getOption("w").setDescription("fitting window size");
@@ -56,8 +60,10 @@ public class AnalyzeCommand {
 		options.getOption("s").setDescription("starting frame");
 		options.getOption("e").setDescription("ending frame");
 		options.getOption("p").setDescription("pixel size");
+
 		options.getOption("m").setDescription("perform multi-peak fitting");
 		options.getOption("a").setDescription("asymmetric psf fitting (for 3D)");
+		options.getOption("l").setDescription("use least square fitter (multi-peak always use least square fitter)");
 
 		return options;
 	}
@@ -96,6 +102,7 @@ public class AnalyzeCommand {
 			pixelSize = CommandUtils.getParsedDouble(cmd, "p", pixelSize);
 			multiPeak = cmd.hasOption("m");
 			asymmetric = cmd.hasOption("a");
+			useLeastSquare = cmd.hasOption("m") || cmd.hasOption("a") || cmd.hasOption("l");
 
 			List<String> remainings = cmd.getArgList();
 			if (remainings.size() == 1) {
@@ -115,7 +122,7 @@ public class AnalyzeCommand {
 			return;
 		}
 	}
-	
+
 	public static void process(List<String> args) throws JSONException, IOException {
 		System.out.println("Analyze data: " + args.get(0));
 
@@ -171,7 +178,7 @@ public class AnalyzeCommand {
 		fo.writeObject(raw);
 		fo.close();
 	}
-	
+
 	static void processFrame(TaggedImage img, int frame) throws JSONException {
 		short [] iPixels = (short[]) img.pix;
 		double [] pixels = new double[iPixels.length];
@@ -183,29 +190,45 @@ public class AnalyzeCommand {
 		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
 		cnt[frame] = 0;
 
-		finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
-			PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
-			Fitter fitter = multiPeak ? new DAOFitting(psf) :  new LeastSquare(psf);
+		if (useLeastSquare) {
+			finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
+				PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
+				Fitter fitter = multiPeak ? new DAOFitting(psf) :  new LeastSquare(psf);
+	
+				@Override
+				public boolean fit(RectangularImage ROI, int x, int y) {
+	
+					double [] results = fitter.fit(ROI, null);
+					while (results != null ){
+						cnt[frame]++;
+						synchronized(positions) {
+							positions.add(convertParameters(results, frame));
+						}
+						if (multiPeak) {
+							results = ((DAOFitting) fitter).getNextResult();
+						} else {
+							results = null;
+						}
+					}
+	
+					return true;
+				}
+			});
+		} else {
+			finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
+				LikelihoodModel model =  new PoissonLogLikelihoodSymmetric();
+				Fitter fitter = new ConjugateGradient(model);
 
-			@Override
-			public boolean fit(RectangularImage ROI, int x, int y) {
-
-				double [] results = fitter.fit(ROI, null);
-				while (results != null ){
-					cnt[frame]++;
-					synchronized(positions) {
+				@Override
+				public boolean fit(RectangularImage ROI, int x, int y) {
+					double [] results = fitter.fit(ROI, null);
+					if (results != null) {
 						positions.add(convertParameters(results, frame));
 					}
-					if (multiPeak) {
-						results = ((DAOFitting) fitter).getNextResult();
-					} else {
-						results = null;
-					}
+					return true;
 				}
-
-				return true;
-			}
-		});
+			});
+		}
 	}
 
 	static double[] convertParameters(double [] param, int f) {
@@ -217,7 +240,7 @@ public class AnalyzeCommand {
 		r[r.length - 1] = f + 1;
 
 		for (int i = 0; i < param.length; i++) {
-			String s = headers[i]; 
+			String s = headers[i];
 			if ( s.equals("x") || s.equals("y") || s.equals("z") || s.startsWith("sigma")) {
 				r[i] = param[i] * pixelSize;
 			} else {
