@@ -3,12 +3,14 @@ package edu.uchc.octane.core.drift;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import org.junit.Ignore;
+
 import edu.uchc.octane.core.datasource.OctaneDataFile;
-import edu.uchc.octane.core.drift.Basdi;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 
 public class BasdiTest {
 
+	@Ignore
 	@Test
 	public void testExyf2() {
 		System.out.println("Basdi test: exyf2 function");
@@ -35,6 +37,7 @@ public class BasdiTest {
 		assertArrayEquals(expected, result.getValueVector(), 0.0001);
 	}
 	
+	@Ignore
 	@Test
 	public void testUpdateThetaOneFrame() {
 		System.out.println("Basdi test: updateThetaOneFrame");
@@ -56,6 +59,7 @@ public class BasdiTest {
 		assertArrayEquals(expected, result.getValueVector(), 0.001);
 	}
 
+	@Ignore
     @Test
     public void testBasdiSimple() {
         

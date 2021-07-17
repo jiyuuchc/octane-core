@@ -4,8 +4,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.uchc.octane</groupId>
 	<artifactId>octane-core</artifactId>
-	<version>1.0</version>
+	<version>1.1-SNAPSHOT</version>
 	<dependencies>
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<version>4.13.2</version>
+		<scope>test</scope>
+	</dependency>
 		<dependency>
 			<groupId>commons-cli</groupId>
 			<artifactId>commons-cli</artifactId>
@@ -65,10 +71,18 @@
 							<mainClass>edu.uchc.octane.core.cli.Main</mainClass>
 						</manifest>
 					</archive>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
+					<descriptors>
+						<descriptor>src/main/assembly/bin.xml</descriptor>
+					</descriptors>
 				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -77,9 +91,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-	<name>octanecore</name>
+	<name>octane-core</name>
 	<description>Single molecule localization microscopy data analysis tools. It can be used as a library but included some build-in cli as well.
-</description>
+	</description>
 	<organization>
 		<name>UConn Health</name>
 		<url>http://www.uchc.edu</url>
