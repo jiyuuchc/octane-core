@@ -200,7 +200,7 @@ public class FastKDTree {
 		final double sqDistance = sqDistance(pointers[current], refIdx);
 		if ( sqDistance <= sqRadius )
 		{
-			results.add( new Integer(current) );
+			results.add(Integer.valueOf(current));
 		}
 		data.selectDimension(d);
 		final double axisDiff = data.get(refIdx) - getData(current);
@@ -243,7 +243,7 @@ public class FastKDTree {
 		double sqRadius = radius * radius;
 		for ( int i = 0; i < data.size(); i ++) {
 			if ( sqDistance(ref, i) < sqRadius ) {
-				results.add(new Integer(i));
+				results.add(Integer.valueOf(i));
 			}
 		}
 		return results;

@@ -205,7 +205,7 @@ public class Basdi {
         for (int d = 0; d < oldDrifts.length; d++) {
             double[] oldDrift = oldDrifts[d];
             double[] newDrift = newDrifts[d];
-            int sum = 0, sum0 = 0;
+            int sum = 0;
             for (int i = 0; i < oldDrift.length; i++) {
                 sum += (oldDrift[i] - newDrift[i]) * (oldDrift[i] - newDrift[i]);
                 //sum0 += oldDrift[i] * oldDrift[i];

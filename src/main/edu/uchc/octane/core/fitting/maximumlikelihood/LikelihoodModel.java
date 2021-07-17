@@ -9,6 +9,10 @@ public interface LikelihoodModel {
 
 	public ObjectiveFunction getObjectiveFunction();
 	public ObjectiveFunctionGradient getObjectiveFunctionGradient();
+
+	//returns a guess for the fitting parameters. useful initial values for fitting  
 	public double [] setData(PixelImageBase data);
+
+	// returns descriptions of parameters
 	public String [] getHeaders();
 }

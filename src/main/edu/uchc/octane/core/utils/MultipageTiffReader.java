@@ -62,7 +62,7 @@ public class MultipageTiffReader {
 	private RandomAccessFile raFile_;
 	private FileChannel fileChannel_;
 
-	private JSONObject displayAndComments_;
+	// private JSONObject displayAndComments_;
 	private JSONObject summaryMetadata_;
 	private int byteDepth_ = 0;;
 	private boolean rgb_;
@@ -97,7 +97,7 @@ public class MultipageTiffReader {
 	 * @throws java.io.IOException
 	 */
 	public MultipageTiffReader(File file) throws IOException {
-		displayAndComments_ = new JSONObject();
+		// displayAndComments_ = new JSONObject();
 		file_ = file;
 		try {
 			createFileChannel(false);

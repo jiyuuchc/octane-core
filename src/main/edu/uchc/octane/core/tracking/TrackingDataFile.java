@@ -56,6 +56,8 @@ public class TrackingDataFile extends OnePassTracking {
 
 		int maxFrame = (int) locData.getSummaryStatistics(locData.frameCol).getMax();
 		int minFrame = (int) locData.getSummaryStatistics(locData.frameCol).getMin();
+
+		@SuppressWarnings("unchecked")
 		List<TrackingHData> [] dataset = new ArrayList[maxFrame - minFrame + 1];
 
 		for (int i = 0; i < maxFrame; i ++) {

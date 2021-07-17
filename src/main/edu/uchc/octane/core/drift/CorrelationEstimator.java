@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.uchc.octane.core.datasource.OctaneDataFile;
-import edu.uchc.octane.core.localizationimage.LocalizationImage;
 import edu.uchc.octane.core.localizationimage.RasterizedLocalizationImage;
 
 public class CorrelationEstimator {
