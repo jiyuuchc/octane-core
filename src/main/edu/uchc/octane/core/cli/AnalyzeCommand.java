@@ -37,11 +37,11 @@ public class AnalyzeCommand {
 
 	static Options options;
 	static long windowSize = 3;
-	static long thresholdIntensity = 300;
-	static long backgroundIntensity = 1600;
+	static long thresholdIntensity = 30;
+	static long backgroundIntensity = 0;
 	static long startingFrame = 0;
 	static long endingFrame = -1;
-	static double pixelSize = 160;
+	static double pixelSize = 65;
 	static boolean multiPeak = false;
 	static boolean asymmetric = false;
 	static boolean useLeastSquare = false;
