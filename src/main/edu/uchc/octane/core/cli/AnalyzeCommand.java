@@ -206,9 +206,7 @@ public class AnalyzeCommand {
 						}
 						if (multiPeak) {
 							results = ((DAOFitting) fitter).getNextResult();
-						} else {
-							results = null;
-						}
+						} 
 					}
 	
 					return true;
@@ -223,8 +221,10 @@ public class AnalyzeCommand {
 				public boolean fit(RectangularImage ROI, int x, int y) {
 					double [] results = fitter.fit(ROI, null);
 					if (results != null) {
+						cnt[frame]++;
 						positions.add(convertParameters(results, frame));
-					}
+					} 
+
 					return true;
 				}
 			});
