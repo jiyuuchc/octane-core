@@ -126,10 +126,15 @@ public class AnalyzeCommand {
 	public static void process(List<String> args) throws JSONException, IOException {
 		System.out.println("Analyze data: " + args.get(0));
 
-		PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
-		headers = Arrays.copyOf(psf.getHeaders(), psf.getHeaders().length + 1);
+		if (useLeastSquare) {
+			PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
+			headers = Arrays.copyOf(psf.getHeaders(), psf.getHeaders().length + 1);
+		} else {
+			LikelihoodModel model =  new PoissonLogLikelihoodSymmetric();
+			headers = Arrays.copyOf(model.getHeaders(), model.getHeaders().length + 1);
+		}
 		headers[headers.length - 1] = "frame";
-
+			
 		positions = new ArrayList<double[]>();
 		MMTaggedTiff stackReader = new MMTaggedTiff(args.get(0), false, false);
 		int frames = stackReader.getSummaryMetadata().getInt("Frames");
