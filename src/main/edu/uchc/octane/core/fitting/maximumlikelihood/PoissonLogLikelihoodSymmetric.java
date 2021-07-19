@@ -17,6 +17,9 @@ public class PoissonLogLikelihoodSymmetric implements LikelihoodModel {
 	PixelImageBase data;
 	final String [] headers = {"x","y","sigma","intensity","offset"};
 
+//	private double objValue;
+//	private double [] lastPoint;
+
 	public PoissonLogLikelihoodSymmetric() {
 	}
 	
@@ -42,6 +45,10 @@ public class PoissonLogLikelihoodSymmetric implements LikelihoodModel {
 
 			@Override
 			public double value(double[] point) {
+//				if (point == lastPoint) {
+//					return objValue;
+//				}
+
 				double x0 = point[0];
 				double y0 = point[1];
 				double s0 = point[2];
@@ -80,6 +87,7 @@ public class PoissonLogLikelihoodSymmetric implements LikelihoodModel {
 				double bg0 = point[4];
 				
 				double [] g = new double[5];
+//				double f = 0;
 
 				for (int k = 0; k < data.getLength(); k++) {
 					double x = (double) data.getXCordinate(k);
@@ -100,8 +108,13 @@ public class PoissonLogLikelihoodSymmetric implements LikelihoodModel {
 					g[3] += dex * dey * dFMu;
 					g[0] += dFMu * dMuX0;
 					g[1] += dFMu * dMuY0;
-					g[2] += dFMu *in0 * (dex * dDeyS0 + dey * dDexS0); 
+					g[2] += dFMu *in0 * (dex * dDeyS0 + dey * dDexS0);
+					
+//					f += data.getValue(k) * FastMath.log(mu) - mu;
 				}
+
+//				lastPoint = point;
+//				objValue = f;
 
 				return g;
 			}

@@ -190,7 +190,7 @@ public class AnalyzeCommand {
 
 		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
 		for (int i = 0; i < pixels.length; i ++) {
-			pixels[i] = iPixels[i]&0xffff - backgroundIntensity ;
+			pixels[i] = iPixels[i]&0xffff - backgroundIntensity;
 		}
 		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
 		cnt[frame] = 0;
@@ -217,7 +217,7 @@ public class AnalyzeCommand {
 					return true;
 				}
 			});
-		} else {
+		} else { // ML fitting
 			finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
 				LikelihoodModel model =  new PoissonLogLikelihoodSymmetric();
 				Fitter fitter = new ConjugateGradient(model);
