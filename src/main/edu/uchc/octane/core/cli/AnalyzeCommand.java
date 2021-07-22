@@ -35,6 +35,7 @@ import edu.uchc.octane.core.utils.MMTaggedTiff;
 import edu.uchc.octane.core.utils.TaggedImage;
 
 public class AnalyzeCommand {
+	static final double cntsPerPhoton = 2.5;
 
 	static Options options;
 	static long windowSize = 3;
@@ -131,7 +132,7 @@ public class AnalyzeCommand {
 			PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
 			headers = Arrays.copyOf(psf.getHeaders(), psf.getHeaders().length + 1);
 		} else {
-			LikelihoodModel model =  new PoissonLogLikelihoodSymmetric();
+			LikelihoodModel model =  new PoissonLogLikelihoodSymmetric(backgroundIntensity, cntsPerPhoton);
 			headers = Arrays.copyOf(model.getHeaders(), model.getHeaders().length + 1);
 		}
 		headers[headers.length - 1] = "frame";
@@ -190,9 +191,9 @@ public class AnalyzeCommand {
 		double [] pixels = new double[iPixels.length];
 
 		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
-		for (int i = 0; i < pixels.length; i ++) {
-			pixels[i] = iPixels[i]&0xffff - backgroundIntensity ;
-		}
+//		for (int i = 0; i < pixels.length; i ++) {
+//			pixels[i] = iPixels[i]&0xffff - backgroundIntensity ;
+//		}
 		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
 		cnt[frame] = 0;
 
@@ -220,7 +221,7 @@ public class AnalyzeCommand {
 			});
 		} else {
 			finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
-				LikelihoodModel model =  new PoissonLogLikelihoodSymmetric();
+				LikelihoodModel model =  new PoissonLogLikelihoodSymmetric(backgroundIntensity, cntsPerPhoton);
 				Fitter fitter = new Simplex(model);
 
 				@Override

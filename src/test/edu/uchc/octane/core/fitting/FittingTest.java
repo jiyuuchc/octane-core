@@ -174,7 +174,7 @@ public class FittingTest {
 		
 		System.out.println("Maximum Likelihood fitting with Conjugate Gradient");
 
-		PoissonLogLikelihoodSymmetric func = new PoissonLogLikelihoodSymmetric();
+		PoissonLogLikelihoodSymmetric func = new PoissonLogLikelihoodSymmetric(0, 1.0);
 		//func.setData(new RectangularDoubleImage(data, IMAGE_SIZE));
 		//double v1 = func.getObjectiveFunction().getObjectiveFunction().value(start);
 		//double v2 = func.getObjectiveFunction().getObjectiveFunction().value(p2);
@@ -209,7 +209,7 @@ public class FittingTest {
 		
 		System.out.println("Maximum Likelihood fitting with Conjugate Gradient");
 
-		PoissonLogLikelihoodSymmetric func = new PoissonLogLikelihoodSymmetric();
+		PoissonLogLikelihoodSymmetric func = new PoissonLogLikelihoodSymmetric(0.0, 1.0);
 		Simplex fitter = new Simplex(func);
 		double[] result = fitter.fit(new RectangularDoubleImage(data, IMAGE_SIZE), start );
 		
