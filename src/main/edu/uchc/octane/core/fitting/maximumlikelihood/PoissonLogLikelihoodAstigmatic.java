@@ -13,6 +13,8 @@ public class PoissonLogLikelihoodAstigmatic implements LikelihoodModel {
 	final static double sqrt2pi = FastMath.sqrt(2 * FastMath.PI);
 	final static double sqrt2 = FastMath.sqrt(2);
 
+	final static double scale = 1.65;
+
 	double sigma0;
 	double p0;
 	double p1;
@@ -76,7 +78,7 @@ public class PoissonLogLikelihoodAstigmatic implements LikelihoodModel {
 					double dex = 0.5 * erf(xm, xp);
 					double dey = 0.5 * erf(ym, yp);
 					double mu = in0 * dex * dey + bg0;
-					f += data.getValue(k) * FastMath.log(mu) - mu;
+					f += data.getValue(k) / scale * FastMath.log(mu) - mu;
 				}
 
 				return f;

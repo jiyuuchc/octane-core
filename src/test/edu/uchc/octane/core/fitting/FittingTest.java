@@ -16,6 +16,7 @@ import edu.uchc.octane.core.fitting.leastsquare.MultiPSF;
 import edu.uchc.octane.core.fitting.maximumlikelihood.ConjugateGradient;
 import edu.uchc.octane.core.fitting.maximumlikelihood.PoissonLogLikelihoodAstigmatic;
 import edu.uchc.octane.core.fitting.maximumlikelihood.PoissonLogLikelihoodSymmetric;
+import edu.uchc.octane.core.fitting.maximumlikelihood.Simplex;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import edu.uchc.octane.core.radialsymmetry.RadialSymmetryFitting;
 
@@ -196,6 +197,26 @@ public class FittingTest {
 		assertEquals(0.3, result_a[2], 0.05);
 	}
 	
+	@Test
+	public void testMaximumLikelihoodSimplex() {
+		double [] start = {5,5.5,1.0,200,5};
+		//double [] start = {6,5,1.0,250,10};
+
+		double[] data = new double [TEST_VALUES.length];
+		for (int i = 0; i < data.length; i ++) {
+			data[i] = FastMath.round(TEST_VALUES[i] * 250 + 10);
+		}
+		
+		System.out.println("Maximum Likelihood fitting with Conjugate Gradient");
+
+		PoissonLogLikelihoodSymmetric func = new PoissonLogLikelihoodSymmetric();
+		Simplex fitter = new Simplex(func);
+		double[] result = fitter.fit(new RectangularDoubleImage(data, IMAGE_SIZE), start );
+		
+		assertEquals(6.0, result[0], 0.02);
+		assertEquals(5.0, result[1], 0.02);
+	}
+
 	@Ignore
 	@Test
 	public void testIsta() {

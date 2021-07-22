@@ -27,6 +27,7 @@ import edu.uchc.octane.core.fitting.leastsquare.PSFFittingFunction;
 import edu.uchc.octane.core.fitting.maximumlikelihood.ConjugateGradient;
 import edu.uchc.octane.core.fitting.maximumlikelihood.LikelihoodModel;
 import edu.uchc.octane.core.fitting.maximumlikelihood.PoissonLogLikelihoodSymmetric;
+import edu.uchc.octane.core.fitting.maximumlikelihood.Simplex;
 import edu.uchc.octane.core.frameanalysis.LocalMaximum;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import edu.uchc.octane.core.pixelimage.RectangularImage;
@@ -220,7 +221,7 @@ public class AnalyzeCommand {
 		} else {
 			finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
 				LikelihoodModel model =  new PoissonLogLikelihoodSymmetric();
-				Fitter fitter = new ConjugateGradient(model);
+				Fitter fitter = new Simplex(model);
 
 				@Override
 				public boolean fit(RectangularImage ROI, int x, int y) {

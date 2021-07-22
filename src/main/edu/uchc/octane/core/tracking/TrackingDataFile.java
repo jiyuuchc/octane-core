@@ -60,7 +60,7 @@ public class TrackingDataFile extends OnePassTracking {
 		@SuppressWarnings("unchecked")
 		List<TrackingHData> [] dataset = new ArrayList[maxFrame - minFrame + 1];
 
-		for (int i = 0; i < maxFrame; i ++) {
+		for (int i = 0; i <= maxFrame - minFrame; i ++) {
 			dataset[i] = new ArrayList<TrackingHData>();
 		}
 		// create dataset, index 0 --> minFrame
