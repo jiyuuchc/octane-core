@@ -36,12 +36,11 @@ import edu.uchc.octane.core.utils.MMTaggedTiff;
 import edu.uchc.octane.core.utils.TaggedImage;
 
 public class AnalyzeCommand {
-	static final double cntsPerPhoton = 2.5;
-
 	static Options options;
 	static long windowSize = 3;
 	static long thresholdIntensity = 30;
 	static long backgroundIntensity = 0;
+	static double cntsPerPhoton = 1.63;
 	static int startingFrame = 0;
 	static int endingFrame = -1;
 	static double pixelSize = 65;
@@ -53,12 +52,13 @@ public class AnalyzeCommand {
 	//static String [] headers;
 
 	public static Options setupOptions() {
-		options = PatternOptionBuilder.parsePattern("hw%t%b%s%e%p%mal");
+		options = PatternOptionBuilder.parsePattern("hw%t%b%c%s%e%p%mal");
 
 		options.getOption("h").setDescription("print this message");
 		options.getOption("w").setDescription("fitting window size");
 		options.getOption("t").setDescription("intensity threshold value");
-		options.getOption("b").setDescription("background intensity");
+		options.getOption("b").setDescription("camera offset");
+		options.getOption("c").setDescription("Counts per photon");
 		options.getOption("s").setDescription("starting frame");
 		options.getOption("e").setDescription("ending frame");
 		options.getOption("p").setDescription("pixel size");
@@ -78,7 +78,8 @@ public class AnalyzeCommand {
 
 	public static void printParameters() {
 		System.out.println("Processing Frame : " + startingFrame + " - " + endingFrame);
-		System.out.println("Background intensity = " + backgroundIntensity);
+		System.out.println("Background offset = " + backgroundIntensity);
+		System.out.println("Cnts per photon = " + cntsPerPhoton);
 		System.out.println("Threshold intensity = " + thresholdIntensity);
 		System.out.println("Fitting window size = " + windowSize);
 		System.out.println("Pixels size = " + pixelSize);
@@ -99,6 +100,7 @@ public class AnalyzeCommand {
 			windowSize = CommandUtils.getParsedLong(cmd, "w", windowSize);
 			thresholdIntensity = CommandUtils.getParsedLong(cmd, "t", thresholdIntensity );
 			backgroundIntensity = CommandUtils.getParsedLong(cmd, "b", backgroundIntensity  );
+			cntsPerPhoton = CommandUtils.getParsedDouble(cmd, "c", cntsPerPhoton);
 			startingFrame = (int) CommandUtils.getParsedLong(cmd, "s", startingFrame);
 			endingFrame = (int) CommandUtils.getParsedLong(cmd, "e", endingFrame);;
 			pixelSize = CommandUtils.getParsedDouble(cmd, "p", pixelSize);
@@ -128,16 +130,6 @@ public class AnalyzeCommand {
 	public static void process(List<String> args) throws JSONException, IOException {
 		System.out.println("Analyze data: " + args.get(0));
 
-//		if (useLeastSquare) {
-//			PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
-//			headers = Arrays.copyOf(psf.getHeaders(), psf.getHeaders().length + 1);
-//		} else {
-//			LikelihoodModel model =  new SymmetricErf();
-//			headers = Arrays.copyOf(model.getHeaders(), model.getHeaders().length + 1);
-//		}
-//		headers[headers.length - 1] = "frame";
-
-		// positions = new ArrayList<double[]>();
 		MMTaggedTiff stackReader = new MMTaggedTiff(args.get(0), false, false);
 		int frames = stackReader.getSummaryMetadata().getInt("Frames");
 		System.out.println("Total frames: " + frames);
@@ -214,10 +206,9 @@ public class AnalyzeCommand {
 		double [] pixels = new double[iPixels.length];
 		for (int i = 0; i < pixels.length; i ++) {
 			pixels[i] = (iPixels[i]&0xffff - backgroundIntensity) / cntsPerPhoton ;
-		}		
+		}
 		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
 		ArrayList<double[]> particles = new ArrayList();
-		// cnt[frame] = 0;
 
 		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
 		finder.processFrame(data, new LocalMaximum.CallBackFunctions() {

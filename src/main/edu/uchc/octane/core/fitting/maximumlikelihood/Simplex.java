@@ -15,6 +15,7 @@ import edu.uchc.octane.core.fitting.Fitter;
 import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
 public class Simplex implements Fitter {
+	final static int MAXITERS = 3000;
 
 	final Logger logger = LoggerFactory.getLogger(Simplex.class);
 
@@ -40,7 +41,7 @@ public class Simplex implements Fitter {
 					func.getObjectiveFunction(),
 					new NelderMeadSimplex(start.length),
 					GoalType.MAXIMIZE,
-					new MaxIter(500),
+					new MaxIter(MAXITERS),
 					MaxEval.unlimited(),
 					new InitialGuess(start) ); 
 		} catch(TooManyIterationsException e) {

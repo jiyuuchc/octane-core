@@ -55,7 +55,7 @@ public class LocalMaximum{
 	private final static int PROCESSED = 1;
 	private final static int COLLECTED = 2;
 
-	RectangularImage data, filteredData;
+	RectangularImage /*data,*/ filteredData;
 	char [] pixelStates;
 
 	class Pixel implements Comparable<Pixel> {
@@ -104,9 +104,9 @@ public class LocalMaximum{
 //		pixelStates[index] |= MASKED;
 //	}
 
-	public void processFrame(RectangularImage data, CallBackFunctions callback) {
+	public int processFrame(RectangularImage data, CallBackFunctions callback) {
 
-		this.data = data;
+		//this.data = data;
 		double[] filtered = ImageFilters.symmetricFilter(
 				ImageFilters.makeGaussianFilter(1.0,7),
 				data.getValueVector(),
@@ -128,6 +128,7 @@ public class LocalMaximum{
 
 		ArrayDeque<Integer> queue = new ArrayDeque<Integer>();
 		ArrayList<Integer> pool = new ArrayList<Integer>();
+		int nMax = 0;
 
 		for (Pixel pixel : pixels) {
 
@@ -165,6 +166,7 @@ public class LocalMaximum{
 			}
 
 			if (isMax) {
+				nMax ++;
 				int x = data.getXCordinate(pixel.idx);
 				int y = data.getYCordinate(pixel.idx);
 				RectangularImage subImage = data.getSubImage(x - ROISize, y - ROISize, ROISize * 2 + 1, ROISize * 2 + 1, true);
@@ -180,5 +182,7 @@ public class LocalMaximum{
 				}
 			}
 		}
+		
+		return nMax;
 	}
 }
