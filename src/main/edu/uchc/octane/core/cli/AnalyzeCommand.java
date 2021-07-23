@@ -24,9 +24,9 @@ import edu.uchc.octane.core.fitting.leastsquare.DAOFitting;
 import edu.uchc.octane.core.fitting.leastsquare.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.leastsquare.LeastSquare;
 import edu.uchc.octane.core.fitting.leastsquare.PSFFittingFunction;
-import edu.uchc.octane.core.fitting.maximumlikelihood.ConjugateGradient;
+//import edu.uchc.octane.core.fitting.maximumlikelihood.ConjugateGradient;
 import edu.uchc.octane.core.fitting.maximumlikelihood.LikelihoodModel;
-import edu.uchc.octane.core.fitting.maximumlikelihood.PoissonLogLikelihoodSymmetric;
+import edu.uchc.octane.core.fitting.maximumlikelihood.SymmetricErf;
 import edu.uchc.octane.core.fitting.maximumlikelihood.Simplex;
 import edu.uchc.octane.core.frameanalysis.LocalMaximum;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
@@ -132,11 +132,11 @@ public class AnalyzeCommand {
 			PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
 			headers = Arrays.copyOf(psf.getHeaders(), psf.getHeaders().length + 1);
 		} else {
-			LikelihoodModel model =  new PoissonLogLikelihoodSymmetric(backgroundIntensity, cntsPerPhoton);
+			LikelihoodModel model =  new SymmetricErf();
 			headers = Arrays.copyOf(model.getHeaders(), model.getHeaders().length + 1);
 		}
 		headers[headers.length - 1] = "frame";
-			
+
 		positions = new ArrayList<double[]>();
 		MMTaggedTiff stackReader = new MMTaggedTiff(args.get(0), false, false);
 		int frames = stackReader.getSummaryMetadata().getInt("Frames");
@@ -172,6 +172,7 @@ public class AnalyzeCommand {
 		stackReader.close();
 
 		double [][] data = new double[headers.length][positions.size()];
+		assert(data != null);
 		for (int i = 0; i < headers.length; i ++) {
 			for (int j = 0; j < positions.size(); j++) {
 				data[i][j] = positions.get(j)[i];
@@ -191,9 +192,9 @@ public class AnalyzeCommand {
 		double [] pixels = new double[iPixels.length];
 
 		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
-//		for (int i = 0; i < pixels.length; i ++) {
-//			pixels[i] = iPixels[i]&0xffff - backgroundIntensity ;
-//		}
+		for (int i = 0; i < pixels.length; i ++) {
+			pixels[i] = iPixels[i]&0xffff - backgroundIntensity ;
+		}
 		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
 		cnt[frame] = 0;
 
@@ -221,7 +222,7 @@ public class AnalyzeCommand {
 			});
 		} else {
 			finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
-				LikelihoodModel model =  new PoissonLogLikelihoodSymmetric(backgroundIntensity, cntsPerPhoton);
+				LikelihoodModel model =  new SymmetricErf();
 				Fitter fitter = new Simplex(model);
 
 				@Override

@@ -8,7 +8,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
-public class PoissonLogLikelihoodAstigmatic implements LikelihoodModel {
+public class AstigmaticErf implements LikelihoodModel {
 
 	final static double sqrt2pi = FastMath.sqrt(2 * FastMath.PI);
 	final static double sqrt2 = FastMath.sqrt(2);
@@ -25,7 +25,7 @@ public class PoissonLogLikelihoodAstigmatic implements LikelihoodModel {
 	// double x0, y0, z0, bg0, in0;
 	PixelImageBase data;
 	
-	public PoissonLogLikelihoodAstigmatic(double sigma0, double p0, double p1, double p2, double gamma) {
+	public AstigmaticErf(double sigma0, double p0, double p1, double p2, double gamma) {
 		this.gamma = gamma;
 		this.sigma0 = sigma0;
 		this.p0 = p0;
@@ -34,21 +34,15 @@ public class PoissonLogLikelihoodAstigmatic implements LikelihoodModel {
 	}
 	
 	final String [] headers = {"x","y","z","intensity","offset"};
+
 	@Override
 	public String [] getHeaders() {
 		return headers;
 	}
 
-	public double [] setData(PixelImageBase data) {
+	@Override
+	public void setData(PixelImageBase data) {
 		this.data = data;
-		double [] guess = new double[5];
-		int idxCenter = data.getLength() / 2;
-		guess[0] = data.getXCordinate(idxCenter);
-		guess[1] = data.getYCordinate(idxCenter);
-		guess[2] = 0;
-		guess[4] = data.getValue(0);
-		guess[3] = (data.getValue(idxCenter) - guess[4]) * 10;
-		return guess;		
 	}
 
     public ObjectiveFunction getObjectiveFunction() {
@@ -152,4 +146,19 @@ public class PoissonLogLikelihoodAstigmatic implements LikelihoodModel {
     private double erf(double z1, double z2) {
     	return erf(z2) - erf(z1);
     }
+
+	@Override
+	public double[] guessInit() {
+		if (data == null) {
+			return null;
+		}
+		double [] guess = new double[5];
+		int idxCenter = data.getLength() / 2;
+		guess[0] = data.getXCordinate(idxCenter);
+		guess[1] = data.getYCordinate(idxCenter);
+		guess[2] = 0;
+		guess[4] = data.getValue(0);
+		guess[3] = (data.getValue(idxCenter) - guess[4]) * 10;
+		return guess;		
+	}
 }

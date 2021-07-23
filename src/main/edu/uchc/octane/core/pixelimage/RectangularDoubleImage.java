@@ -37,6 +37,18 @@ public class RectangularDoubleImage extends RectangularImage {
 	}
 
 	/**
+	 * A rectangular image with supplied pixel data in float array.
+	 * @param data First element corresponds to (0,0)
+	 * @param imageWidth
+	 */
+	public RectangularDoubleImage(float [] data, int imageWidth) { 
+		this(new double[data.length], imageWidth, 0, 0);
+		for (int i =0; i < data.length; i++) {
+			this.data[i] = (double) data[i];
+		}
+	}
+
+	/**
 	 * A rectangular image with offset using supplied pixel data.
 	 * @param data
 	 * @param imageWidth

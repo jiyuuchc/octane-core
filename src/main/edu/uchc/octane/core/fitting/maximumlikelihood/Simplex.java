@@ -30,14 +30,15 @@ public class Simplex implements Fitter {
 
 	@Override
 	public double[] fit(PixelImageBase data, double[] start) {
-		double [] guess = func.setData(data);
+		func.setData(data);
 		if (start == null) {
-			start = guess;
+			start = func.guessInit();
 		}
+		assert(start != null);
 		try {
 			result = optimizer.optimize(
 					func.getObjectiveFunction(),
-					new NelderMeadSimplex(guess.length),
+					new NelderMeadSimplex(start.length),
 					GoalType.MAXIMIZE,
 					new MaxIter(500),
 					MaxEval.unlimited(),

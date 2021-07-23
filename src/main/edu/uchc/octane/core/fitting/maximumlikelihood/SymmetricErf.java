@@ -8,7 +8,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import edu.uchc.octane.core.pixelimage.PixelImageBase;
 
-public class PoissonLogLikelihoodSymmetric implements LikelihoodModel {
+public class SymmetricErf implements LikelihoodModel {
 
 	final static double sqrt2pi = FastMath.sqrt(2 * FastMath.PI);
 	final static double sqrt2 = FastMath.sqrt(2);
@@ -16,23 +16,12 @@ public class PoissonLogLikelihoodSymmetric implements LikelihoodModel {
 	// double x0, y0, z0, bg0, in0;
 	PixelImageBase data;
 	final String [] headers = {"x","y","sigma","intensity","bg"};
-	double offset, cntsPerPhoton;
 
-	public PoissonLogLikelihoodSymmetric(double offset, double cntsPerPhoton) {
-		this.offset = offset;
-		this.cntsPerPhoton = cntsPerPhoton;
+	public SymmetricErf() {
 	}
 	
-	public double [] setData(PixelImageBase data) {
+	public void setData(PixelImageBase data) {
 		this.data = data;
-		double [] guess = new double[5];
-		int idxCenter = data.getLength() / 2;
-		guess[0] = data.getXCordinate(idxCenter);
-		guess[1] = data.getYCordinate(idxCenter);
-		guess[2] = 2.0;
-		guess[4] = data.getValue(0);
-		guess[3] = (data.getValue(idxCenter) - guess[4]) * 10;
-		return guess;
 	}
 
 	@Override
@@ -62,7 +51,7 @@ public class PoissonLogLikelihoodSymmetric implements LikelihoodModel {
 					double dex = 0.5 * erf(xm, xp);
 					double dey = 0.5 * erf(ym, yp);
 					double mu = in0 * dex * dey + bg0;
-					f += (data.getValue(k) - offset) / cntsPerPhoton * FastMath.log(mu) - mu;
+					f += data.getValue(k) * FastMath.log(mu) - mu;
 				}
 
 				return f;
@@ -94,7 +83,7 @@ public class PoissonLogLikelihoodSymmetric implements LikelihoodModel {
 					double dex = 0.5 * erf(xm, xp);
 					double dey = 0.5 * erf(ym, yp);
 					double mu = in0 * dex * dey + bg0;
-					double dFMu = (data.getValue(k) - offset) / cntsPerPhoton / mu - 1;
+					double dFMu = data.getValue(k) / mu - 1;
 					double dMuX0 = - in0*dey/s0/sqrt2pi*(FastMath.exp(-xp*xp)-FastMath.exp(-xm*xm));
 					double dMuY0 = - in0*dex/s0/sqrt2pi*(FastMath.exp(-yp*yp)-FastMath.exp(-ym*ym));
 					double dDeyS0 = (y-y0-0.5)/s0/s0/sqrt2pi*FastMath.exp(-ym*ym) - (y-y0+0.5)/s0/s0/sqrt2pi*FastMath.exp(-yp*yp);
@@ -128,4 +117,19 @@ public class PoissonLogLikelihoodSymmetric implements LikelihoodModel {
     private double erf(double z1, double z2) {
     	return erf(z2) - erf(z1);
     }
+
+	@Override
+	public double[] guessInit() {
+		if (data == null) {
+			return null;
+		}
+		double [] guess = new double[5];
+		int idxCenter = data.getLength() / 2;
+		guess[0] = data.getXCordinate(idxCenter);
+		guess[1] = data.getYCordinate(idxCenter);
+		guess[2] = 2.0;
+		guess[4] = data.getValue(0);
+		guess[3] = (data.getValue(idxCenter) - guess[4]) * 10;
+		return guess;
+	}
 }

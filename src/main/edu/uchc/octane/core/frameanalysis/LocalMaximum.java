@@ -21,9 +21,17 @@ package edu.uchc.octane.core.frameanalysis;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import edu.uchc.octane.core.fitting.Fitter;
+import edu.uchc.octane.core.fitting.leastsquare.DAOFitting;
+import edu.uchc.octane.core.fitting.leastsquare.IntegratedGaussianPSF;
+import edu.uchc.octane.core.fitting.maximumlikelihood.Simplex;
+import edu.uchc.octane.core.fitting.maximumlikelihood.SymmetricErf;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import edu.uchc.octane.core.pixelimage.RectangularImage;
 import edu.uchc.octane.core.utils.ImageFilters;
@@ -32,6 +40,8 @@ import edu.uchc.octane.core.utils.ImageFilters;
 // The valley is defined as pixels whose intensities are lower than the peak by more than the (tolerance).
 
 public class LocalMaximum{
+
+	final Logger logger = LoggerFactory.getLogger(LocalMaximum.class);
 
 	public int ROISize;
 	public double threshold, tolerance;
@@ -70,11 +80,11 @@ public class LocalMaximum{
 		this.ROISize = ROISize; 
 	}
 
-	public boolean isProcessed(int index) {
+	boolean isProcessed(int index) {
 		return ( ( pixelStates[index] & PROCESSED ) != 0);
 	}
 
-	public boolean isCollected(int index) {
+	boolean isCollected(int index) {
 		return ( ( pixelStates[index] & COLLECTED) != 0);
 	}
 
@@ -82,11 +92,11 @@ public class LocalMaximum{
 //		return ( ( pixelStates[index] & MASKED) != 0);
 //	}
 
-	public void process(int index) {
+	void process(int index) {
 		pixelStates[index] |= PROCESSED;
 	}
 
-	public void collect(int index) {
+	void collect(int index) {
 		pixelStates[index] |= COLLECTED;
 	}
 
