@@ -15,6 +15,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
+import org.apache.commons.math3.util.FastMath;
 import org.json.JSONException;
 
 import edu.uchc.octane.core.datasource.OctaneDataFile;
@@ -41,16 +42,15 @@ public class AnalyzeCommand {
 	static long windowSize = 3;
 	static long thresholdIntensity = 30;
 	static long backgroundIntensity = 0;
-	static long startingFrame = 0;
-	static long endingFrame = -1;
+	static int startingFrame = 0;
+	static int endingFrame = -1;
 	static double pixelSize = 65;
 	static boolean multiPeak = false;
 	static boolean asymmetric = false;
 	static boolean useLeastSquare = false;
 
-	static int [] cnt;
-	static List<double[]> positions;
-	static String [] headers;
+	//static List<double[]> positions;
+	//static String [] headers;
 
 	public static Options setupOptions() {
 		options = PatternOptionBuilder.parsePattern("hw%t%b%s%e%p%mal");
@@ -99,8 +99,8 @@ public class AnalyzeCommand {
 			windowSize = CommandUtils.getParsedLong(cmd, "w", windowSize);
 			thresholdIntensity = CommandUtils.getParsedLong(cmd, "t", thresholdIntensity );
 			backgroundIntensity = CommandUtils.getParsedLong(cmd, "b", backgroundIntensity  );
-			startingFrame = CommandUtils.getParsedLong(cmd, "s", startingFrame);
-			endingFrame = CommandUtils.getParsedLong(cmd, "e", endingFrame);;
+			startingFrame = (int) CommandUtils.getParsedLong(cmd, "s", startingFrame);
+			endingFrame = (int) CommandUtils.getParsedLong(cmd, "e", endingFrame);;
 			pixelSize = CommandUtils.getParsedDouble(cmd, "p", pixelSize);
 			multiPeak = cmd.hasOption("m");
 			asymmetric = cmd.hasOption("a");
@@ -128,19 +128,20 @@ public class AnalyzeCommand {
 	public static void process(List<String> args) throws JSONException, IOException {
 		System.out.println("Analyze data: " + args.get(0));
 
-		if (useLeastSquare) {
-			PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
-			headers = Arrays.copyOf(psf.getHeaders(), psf.getHeaders().length + 1);
-		} else {
-			LikelihoodModel model =  new SymmetricErf();
-			headers = Arrays.copyOf(model.getHeaders(), model.getHeaders().length + 1);
-		}
-		headers[headers.length - 1] = "frame";
+//		if (useLeastSquare) {
+//			PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
+//			headers = Arrays.copyOf(psf.getHeaders(), psf.getHeaders().length + 1);
+//		} else {
+//			LikelihoodModel model =  new SymmetricErf();
+//			headers = Arrays.copyOf(model.getHeaders(), model.getHeaders().length + 1);
+//		}
+//		headers[headers.length - 1] = "frame";
 
-		positions = new ArrayList<double[]>();
+		// positions = new ArrayList<double[]>();
 		MMTaggedTiff stackReader = new MMTaggedTiff(args.get(0), false, false);
 		int frames = stackReader.getSummaryMetadata().getInt("Frames");
 		System.out.println("Total frames: " + frames);
+		ArrayList<double[]> [] results = new ArrayList[frames];
 
 		if (startingFrame < 0 ) {
 			startingFrame = 0;
@@ -149,9 +150,9 @@ public class AnalyzeCommand {
 			endingFrame = frames;
 		}
 
-		cnt = new int[frames];
 		printParameters();
-		IntStream.range((int)startingFrame, (int)endingFrame).parallel().forEach( f -> {
+
+		IntStream.range(startingFrame, endingFrame).parallel().forEach( f -> {
 			TaggedImage img;
 			synchronized (stackReader) {
 				img= stackReader.getImage(0 /*channel*/, 0 /*slice*/, f /*frame*/, 0 /*position*/);
@@ -159,25 +160,46 @@ public class AnalyzeCommand {
 
 			if (img != null ) {
 				try {
-					processFrame(img, f);
+					results[f] = processFrame(img);
 				} catch (JSONException e) {
 					assert(false); //shouldn't happen
 				}
-				System.out.println("Processed frame " + f + ", Found " + cnt[f] + " molecules." );
+				System.out.println("Processed frame " + f + ", Found " + results[f].size() + " molecules." );
 			} else {
 				System.out.println("Error reading frame " + f);
 			}
 		});
-
 		stackReader.close();
 
-		double [][] data = new double[headers.length][positions.size()];
-		assert(data != null);
-		for (int i = 0; i < headers.length; i ++) {
-			for (int j = 0; j < positions.size(); j++) {
-				data[i][j] = positions.get(j)[i];
+		int cnt = 0;
+		for (int f = startingFrame; f < endingFrame; f++) {
+			cnt += results[f].size(); 
+		}
+		String [] tmpHeader = (new SymmetricErf()).getHeaders();
+		String [] headers = Arrays.copyOf(tmpHeader, tmpHeader.length + 1);
+		headers[headers.length-1] = "frame";
+		double [][] data = new double[headers.length][cnt];
+
+		int idx = 0;
+		for (int f = startingFrame; f < endingFrame; f++) {
+			for (double[] p : results[f]) {
+				for (int h = 0; h < tmpHeader.length; h ++) {
+					data[h][idx] = p[h];
+				}
+				data[headers.length-1][idx] = f;
+				idx += 1;
 			}
 		}
+		
+		for (int h = 0; h < headers.length; h++) {
+			String s = headers[h];
+			if ( s.equals("x") || s.equals("y") || s.equals("z") || s.startsWith("sigma")) {
+				for (idx = 0 ; idx < cnt; idx ++ ) {
+					data[h][idx]= data[h][idx] * pixelSize;		
+				}
+			}
+		}
+
 		OctaneDataFile raw = new OctaneDataFile(data, headers);
 
 		System.out.println("Saving to file: " + args.get(1));
@@ -187,75 +209,37 @@ public class AnalyzeCommand {
 		fo.close();
 	}
 
-	static void processFrame(TaggedImage img, int frame) throws JSONException {
+	static ArrayList<double[]> processFrame(TaggedImage img) throws JSONException {
 		short [] iPixels = (short[]) img.pix;
 		double [] pixels = new double[iPixels.length];
+		for (int i = 0; i < pixels.length; i ++) {
+			pixels[i] = (iPixels[i]&0xffff - backgroundIntensity) / cntsPerPhoton ;
+		}		
+		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
+		ArrayList<double[]> particles = new ArrayList();
+		// cnt[frame] = 0;
 
 		LocalMaximum finder = new LocalMaximum(thresholdIntensity, 0, (int) windowSize);
-		for (int i = 0; i < pixels.length; i ++) {
-			pixels[i] = iPixels[i]&0xffff - backgroundIntensity ;
-		}
-		RectangularDoubleImage data = new RectangularDoubleImage(pixels, img.tags.getInt("Width"));
-		cnt[frame] = 0;
+		finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
+			LikelihoodModel model =  new SymmetricErf();
+			Fitter fitter = new Simplex(model);
 
-		if (useLeastSquare) {
-			finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
-				PSFFittingFunction psf = asymmetric ? new AsymmetricGaussianPSF() : new IntegratedGaussianPSF();
-				Fitter fitter = multiPeak ? new DAOFitting(psf) :  new LeastSquare(psf);
-	
-				@Override
-				public boolean fit(RectangularImage ROI, int x, int y) {
-	
-					double [] results = fitter.fit(ROI, null);
-					while (results != null ){
-						cnt[frame]++;
-						synchronized(positions) {
-							positions.add(convertParameters(results, frame));
-						}
-						if (multiPeak) {
-							results = ((DAOFitting) fitter).getNextResult();
-						} 
+			@Override
+			public boolean fit(RectangularImage subimg, int x, int y) {
+				double [] result = fitter.fit(subimg, null);
+				if (result != null) {
+					if (result[0] < subimg.x0 || result[0] > subimg.x0 + subimg.width || result[1] < subimg.y0 || result[1] > subimg.y0 + subimg.height) {
+						return true;
 					}
-	
-					return true;
-				}
-			});
-		} else {
-			finder.processFrame(data, new LocalMaximum.CallBackFunctions() {
-				LikelihoodModel model =  new SymmetricErf();
-				Fitter fitter = new Simplex(model);
-
-				@Override
-				public boolean fit(RectangularImage ROI, int x, int y) {
-					double [] results = fitter.fit(ROI, null);
-					if (results != null) {
-						cnt[frame]++;
-						positions.add(convertParameters(results, frame));
-					} 
-
-					return true;
-				}
-			});
-		}
-	}
-
-	static double[] convertParameters(double [] param, int f) {
-		double [] r = new double[headers.length];
-
-		assert(param.length == headers.length - 1);
-
-		// last column is frame number (1-based)
-		r[r.length - 1] = f + 1;
-
-		for (int i = 0; i < param.length; i++) {
-			String s = headers[i];
-			if ( s.equals("x") || s.equals("y") || s.equals("z") || s.startsWith("sigma")) {
-				r[i] = param[i] * pixelSize;
-			} else {
-				r[i] = param[i];
+					if (result[3] < 0) {
+						return true;
+					}
+					result[2] = FastMath.abs(result[2]); // make sigma always positive  
+					particles.add(result);
+				} 
+				return true;
 			}
-		}
-
-		return r;
+		});
+		return particles;
 	}
 }

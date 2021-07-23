@@ -14,8 +14,8 @@ import edu.uchc.octane.core.fitting.leastsquare.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.leastsquare.LeastSquare;
 import edu.uchc.octane.core.fitting.leastsquare.MultiPSF;
 import edu.uchc.octane.core.fitting.maximumlikelihood.ConjugateGradient;
-import edu.uchc.octane.core.fitting.maximumlikelihood.PoissonLogLikelihoodAstigmatic;
-import edu.uchc.octane.core.fitting.maximumlikelihood.PoissonLogLikelihoodSymmetric;
+import edu.uchc.octane.core.fitting.maximumlikelihood.AstigmaticErf;
+import edu.uchc.octane.core.fitting.maximumlikelihood.SymmetricErf;
 import edu.uchc.octane.core.fitting.maximumlikelihood.Simplex;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import edu.uchc.octane.core.radialsymmetry.RadialSymmetryFitting;
@@ -174,7 +174,7 @@ public class FittingTest {
 		
 		System.out.println("Maximum Likelihood fitting with Conjugate Gradient");
 
-		PoissonLogLikelihoodSymmetric func = new PoissonLogLikelihoodSymmetric(0, 1.0);
+		SymmetricErf func = new SymmetricErf();
 		//func.setData(new RectangularDoubleImage(data, IMAGE_SIZE));
 		//double v1 = func.getObjectiveFunction().getObjectiveFunction().value(start);
 		//double v2 = func.getObjectiveFunction().getObjectiveFunction().value(p2);
@@ -188,7 +188,7 @@ public class FittingTest {
 		assertEquals(6.0, result[0], 0.01);
 		assertEquals(5.0, result[1], 0.01);
 		
-		PoissonLogLikelihoodAstigmatic func_a = new PoissonLogLikelihoodAstigmatic(1.4, 1, 0, 0, 0);
+		AstigmaticErf func_a = new AstigmaticErf(1.4, 1, 0, 0, 0);
 		fitter = new ConjugateGradient(func_a);
 		double [] result_a = fitter.fit(new RectangularDoubleImage(data, IMAGE_SIZE), start );
 		
@@ -209,7 +209,7 @@ public class FittingTest {
 		
 		System.out.println("Maximum Likelihood fitting with Conjugate Gradient");
 
-		PoissonLogLikelihoodSymmetric func = new PoissonLogLikelihoodSymmetric(0.0, 1.0);
+		SymmetricErf func = new SymmetricErf();
 		Simplex fitter = new Simplex(func);
 		double[] result = fitter.fit(new RectangularDoubleImage(data, IMAGE_SIZE), start );
 		

@@ -5,6 +5,14 @@
 	<groupId>edu.uchc.octane</groupId>
 	<artifactId>octane-core</artifactId>
 	<version>1.1-SNAPSHOT</version>
+	<name>octane-core</name>
+	<description>Single molecule localization microscopy data analysis tools. It can be used as a library but included some build-in cli as well.</description>
+	<organization>
+		<name>UConn Health</name>
+		<url>http://www.uchc.edu</url>
+	</organization>
+	<url>http://apache.cam.uchc.edu/yu/</url>
+  
 	<dependencies>
 	<dependency>
 		<groupId>junit</groupId>
@@ -101,13 +109,4 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-
-	<name>octane-core</name>
-	<description>Single molecule localization microscopy data analysis tools. It can be used as a library but included some build-in cli as well.
-	</description>
-	<organization>
-		<name>UConn Health</name>
-		<url>http://www.uchc.edu</url>
-	</organization>
-	<url>http://apache.cam.uchc.edu/yu/</url>
 </project>
