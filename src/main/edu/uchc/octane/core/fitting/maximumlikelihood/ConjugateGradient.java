@@ -1,6 +1,7 @@
 package edu.uchc.octane.core.fitting.maximumlikelihood;
 
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
@@ -50,9 +51,8 @@ public class ConjugateGradient implements Fitter {
 					MaxEval.unlimited(),
 					new MaxIter(MAX_ITERATIONS),
 					new InitialGuess(start) );
-		} catch (TooManyEvaluationsException e) {
-    	    logger.error("Evaluations exceded limit.");
-    		logger.error(e.getMessage());
+		} catch (TooManyIterationsException e) {
+    		logger.error(e.getLocalizedMessage());
     		result = null;
 		}
 		return getResult();

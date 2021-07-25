@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.uchc.octane</groupId>
 	<artifactId>octane-core</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.2-SNAPSHOT</version>
 	<name>octane-core</name>
 	<description>Single molecule localization microscopy data analysis tools. It can be used as a library but included some build-in cli as well.</description>
 	<organization>

@@ -26,7 +26,7 @@ public class Simplex implements Fitter {
 
 	public Simplex(LikelihoodModel func) {
 		this.func = func;
-		optimizer = new SimplexOptimizer (1e-8, 1e-8);		
+		optimizer = new SimplexOptimizer (1e-8, 1e-6);		
 	}
 
 	@Override
@@ -45,8 +45,7 @@ public class Simplex implements Fitter {
 					MaxEval.unlimited(),
 					new InitialGuess(start) ); 
 		} catch(TooManyIterationsException e) {
-    	    logger.error("Iterations exceded limit.");
-    		logger.error(e.getMessage());
+    		logger.error(e.getLocalizedMessage());
     		result = null;
     		return null;
 		}

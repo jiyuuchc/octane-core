@@ -142,13 +142,24 @@ public class Newton2DGaussian implements Fitter {
 		if (data == null) {
 			return null;
 		}
+		double x0 = 0;
+		double y0 = 0;
+		double mi = 1e8;
+		double ma = -1;
+		double ss = 0;
+		for (int k = 0; k < data.getLength(); k++) {
+			x0 += data.getXCordinate(k) * data.getValue(k);
+			y0 += data.getYCordinate(k) * data.getValue(k);
+			mi = FastMath.min(mi, data.getValue(k));
+			ma = FastMath.max(ma, data.getValue(k));
+			ss += data.getValue(k);
+		}
 		double [] guess = new double[5];
-		int idxCenter = data.getLength() / 2;
-		guess[0] = data.getXCordinate(idxCenter);
-		guess[1] = data.getYCordinate(idxCenter);
-		guess[2] = 1.5;
-		guess[4] = data.getValue(0);
-		guess[3] = (data.getValue(idxCenter) - guess[4]);
+		guess[0] = x0 / ss;
+		guess[1] = y0 / ss;
+		guess[2] = 1.6;
+		guess[4] = mi;
+		guess[3] = ma-mi;
 		return guess;		
 	}
 

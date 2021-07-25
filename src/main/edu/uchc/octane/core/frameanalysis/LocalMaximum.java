@@ -21,17 +21,11 @@ package edu.uchc.octane.core.frameanalysis;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uchc.octane.core.fitting.Fitter;
-import edu.uchc.octane.core.fitting.leastsquare.DAOFitting;
-import edu.uchc.octane.core.fitting.leastsquare.IntegratedGaussianPSF;
-import edu.uchc.octane.core.fitting.maximumlikelihood.Simplex;
-import edu.uchc.octane.core.fitting.maximumlikelihood.SymmetricErf;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import edu.uchc.octane.core.pixelimage.RectangularImage;
 import edu.uchc.octane.core.utils.ImageFilters;
@@ -41,7 +35,7 @@ import edu.uchc.octane.core.utils.ImageFilters;
 
 public class LocalMaximum{
 
-	final Logger logger = LoggerFactory.getLogger(LocalMaximum.class);
+	final static Logger logger = LoggerFactory.getLogger(LocalMaximum.class);
 
 	public int ROISize;
 	public double threshold, tolerance;
@@ -182,7 +176,8 @@ public class LocalMaximum{
 				}
 			}
 		}
-		
+
+		logger.info("Detected peaks: " + nMax);
 		return nMax;
 	}
 }
