@@ -100,6 +100,35 @@ public class SymmetricErf implements LikelihoodModel {
     	});
     }
 
+    public double[] getCrbFunction(double[] point) {
+		double x0 = point[0];
+		double y0 = point[1];
+		double s0 = point[2];
+		double in0 = point[3]; 
+		double bg0 = point[4];
+
+		double [] g = new double[2];
+
+		for (int k = 0; k < data.getLength(); k++) {
+			double x = (double) data.getXCordinate(k);
+			double y = (double) data.getYCordinate(k);
+			double xp = (x - x0 + 0.5) / sqrt2 / s0;
+			double xm = (x - x0 - 0.5) / sqrt2 / s0;
+			double yp = (y - y0 + 0.5) / sqrt2 / s0;
+			double ym = (y - y0 - 0.5) / sqrt2 / s0;
+			double dex = 0.5 * erf(xm, xp);
+			double dey = 0.5 * erf(ym, yp);
+			double mu = in0 * dex * dey + bg0;
+			double dMuX0 = - in0*dey/s0/sqrt2pi*(FastMath.exp(-xp*xp)-FastMath.exp(-xm*xm));
+			double dMuY0 = - in0*dex/s0/sqrt2pi*(FastMath.exp(-yp*yp)-FastMath.exp(-ym*ym));
+			g[0] += dMuX0 * dMuX0 / mu;
+			g[1] += dMuY0 * dMuY0 / mu;
+		}
+		g[0] = FastMath.sqrt(1.0 / g[0]);
+		g[1] = FastMath.sqrt(1.0 / g[1]);
+		return g;
+	}
+
     private double erf(double z) {
         double t = 1.0 / (1.0 + 0.5 * Math.abs(z));
 

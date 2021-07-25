@@ -14,6 +14,7 @@ import edu.uchc.octane.core.fitting.leastsquare.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.leastsquare.LeastSquare;
 import edu.uchc.octane.core.fitting.leastsquare.MultiPSF;
 import edu.uchc.octane.core.fitting.maximumlikelihood.ConjugateGradient;
+import edu.uchc.octane.core.fitting.maximumlikelihood.Newton2DGaussian;
 import edu.uchc.octane.core.fitting.maximumlikelihood.AstigmaticErf;
 import edu.uchc.octane.core.fitting.maximumlikelihood.SymmetricErf;
 import edu.uchc.octane.core.fitting.maximumlikelihood.Simplex;
@@ -207,12 +208,31 @@ public class FittingTest {
 			data[i] = FastMath.round(TEST_VALUES[i] * 250 + 10);
 		}
 		
-		System.out.println("Maximum Likelihood fitting with Conjugate Gradient");
+		System.out.println("Maximum Likelihood fitting with simplex");
 
 		SymmetricErf func = new SymmetricErf();
 		Simplex fitter = new Simplex(func);
 		double[] result = fitter.fit(new RectangularDoubleImage(data, IMAGE_SIZE), start );
 		
+		assertEquals(6.0, result[0], 0.02);
+		assertEquals(5.0, result[1], 0.02);
+	}
+
+	@Test
+	public void testNewton2DGaussian() {
+		//double [] start = {5,5.5,1.0,200,5};
+		double [] start = {5.0,5.5,1.4,6.5,8};
+
+		double[] data = new double [TEST_VALUES.length];
+		for (int i = 0; i < data.length; i ++) {
+			data[i] = FastMath.round(TEST_VALUES[i] * 100 + 10);
+		}
+		
+		System.out.println("Maximum Likelihood fitting with Newton's");
+		Fitter fitter = new Newton2DGaussian();
+		double [] result = fitter.fit(new RectangularDoubleImage(data, IMAGE_SIZE), start);
+
+		assertNotNull(result);
 		assertEquals(6.0, result[0], 0.02);
 		assertEquals(5.0, result[1], 0.02);
 	}

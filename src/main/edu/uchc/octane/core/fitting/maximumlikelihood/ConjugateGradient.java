@@ -31,7 +31,7 @@ public class ConjugateGradient implements Fitter {
 		this.func = func;
 		optimizer = new NonLinearConjugateGradientOptimizer (
 				NonLinearConjugateGradientOptimizer.Formula.FLETCHER_REEVES,
-				new SimpleValueChecker(1e-8, 1e-8) );		
+				new SimpleValueChecker(1e-8, 1e-6) );		
 	}
 
 	@Override
