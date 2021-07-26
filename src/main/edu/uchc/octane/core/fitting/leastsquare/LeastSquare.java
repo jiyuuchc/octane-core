@@ -3,7 +3,7 @@ package edu.uchc.octane.core.fitting.leastsquare;
 import java.util.Arrays;
 
 import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresFactory;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
@@ -77,8 +77,7 @@ public class LeastSquare implements Fitter{
     			new ArrayRealVector(data.getValueVector()),
     			new ArrayRealVector(psf.convertParametersExternalToInternal(start)),
     			LeastSquaresFactory.evaluationChecker(new SimpleVectorValueChecker(CONVERGENCE_DELTA, CONVERGENCE_DELTA)),
-    			maxIter,
-    			maxIter);
+    			100000, maxIter);
 
     	if ( useWeighting ) {
     		lsp = LeastSquaresFactory.weightDiagonal(lsp, new ArrayRealVector(calcWeights(data)));
@@ -87,7 +86,7 @@ public class LeastSquare implements Fitter{
     	try {
     		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
     		optimum = optimizer.optimize(lsp);
-    	} catch (TooManyEvaluationsException e) {
+    	} catch (TooManyIterationsException e) {
     	    //logger.error("Evaluations exceded limit.");
     		logger.error(e.getLocalizedMessage());
     		return null;
