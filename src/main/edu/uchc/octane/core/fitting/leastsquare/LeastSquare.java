@@ -88,6 +88,7 @@ public class LeastSquare implements Fitter{
     		optimum = optimizer.optimize(lsp);
     	} catch (TooManyIterationsException e) {
     	    //logger.error("Evaluations exceded limit.");
+    		System.out.println("Exception");
     		logger.error(e.getLocalizedMessage());
     		return null;
     	} catch (ConvergenceException e) {
