@@ -45,7 +45,7 @@ public class Simplex implements Fitter {
 					MaxEval.unlimited(),
 					new InitialGuess(start) ); 
 		} catch(TooManyIterationsException e) {
-    		logger.error(e.getLocalizedMessage());
+    		logger.warn(e.getLocalizedMessage());
     		result = null;
     		return null;
 		}

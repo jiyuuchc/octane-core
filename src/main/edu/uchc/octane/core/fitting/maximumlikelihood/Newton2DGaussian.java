@@ -203,7 +203,7 @@ public class Newton2DGaussian implements Fitter {
 			nIters ++;
 		}
 		if (nIters >= maxIters) {
-			logger.error("Iterations exceeded limit: " + maxIters);
+			logger.warn("Iterations exceeded limit: " + maxIters);
 			return null;
 		}
 

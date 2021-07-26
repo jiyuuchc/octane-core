@@ -52,7 +52,7 @@ public class ConjugateGradient implements Fitter {
 					new MaxIter(MAX_ITERATIONS),
 					new InitialGuess(start) );
 		} catch (TooManyIterationsException e) {
-    		logger.error(e.getLocalizedMessage());
+    		logger.warn(e.getLocalizedMessage());
     		result = null;
 		}
 		return getResult();
