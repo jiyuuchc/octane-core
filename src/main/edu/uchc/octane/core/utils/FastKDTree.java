@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.IntUnaryOperator;
 
+import edu.uchc.octane.core.data.HDataCollection;
+
 /* fast KDTree implementation desgined for very large number of points */
 
 public class FastKDTree {

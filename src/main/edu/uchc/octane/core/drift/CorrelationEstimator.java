@@ -11,7 +11,7 @@ import org.jtransforms.fft.FloatFFT_2D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uchc.octane.core.datasource.OctaneDataFile;
+import edu.uchc.octane.core.data.LocalizationData;
 import edu.uchc.octane.core.localizationimage.RasterizedLocalizationImage;
 
 public class CorrelationEstimator {
@@ -24,7 +24,7 @@ public class CorrelationEstimator {
     public PolynomialSplineFunction xFunction;
     public PolynomialSplineFunction yFunction;
     
-    OctaneDataFile odf;
+    LocalizationData odf;
     RasterizedLocalizationImage img;
 
 	public CorrelationEstimator() {
@@ -36,7 +36,7 @@ public class CorrelationEstimator {
 		this.pixelSize = pixelSize;
 	}
 
-	public void estimateAndCorrect(OctaneDataFile data, Rectangle roi, int numOfKeyFrames) {
+	public void estimateAndCorrect(LocalizationData data, Rectangle roi, int numOfKeyFrames) {
 		
 		estimate(data, roi, numOfKeyFrames);
 		correct();
@@ -53,7 +53,7 @@ public class CorrelationEstimator {
 		}
 	}
 
-	public void estimate(OctaneDataFile data, Rectangle roi, int numOfKeyFrames) {
+	public void estimate(LocalizationData data, Rectangle roi, int numOfKeyFrames) {
 		odf = data;
 		img = new RasterizedLocalizationImage(data, pixelSize);
 		img.setRoi(roi);

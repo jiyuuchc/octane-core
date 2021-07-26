@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.apache.commons.math3.util.FastMath;
 
-import edu.uchc.octane.core.datasource.OctaneDataFile;
+import edu.uchc.octane.core.data.HData;
+import edu.uchc.octane.core.data.LocalizationData;
 import edu.uchc.octane.core.localizationimage.LocalizationImage;
-import edu.uchc.octane.core.utils.HData;
 
 public class TrackingDataFile extends OnePassTracking {
 
@@ -45,13 +45,13 @@ public class TrackingDataFile extends OnePassTracking {
 		}
 	}
 
-	public OctaneDataFile processLocalizations(LocalizationImage loc) {
+	public LocalizationData processLocalizations(LocalizationImage loc) {
 	    return processLocalizations(loc, false);
 	}
 	
-	public OctaneDataFile processLocalizations(LocalizationImage loc, boolean doMerge) {
+	public LocalizationData processLocalizations(LocalizationImage loc, boolean doMerge) {
 		locData = loc;
-		OctaneDataFile odf = loc.getDataSource();
+		LocalizationData odf = loc.getData();
 		cols = new int[] {loc.xCol, loc.yCol, loc.zCol};
 
 		int maxFrame = (int) locData.getSummaryStatistics(locData.frameCol).getMax();
@@ -79,7 +79,7 @@ public class TrackingDataFile extends OnePassTracking {
 		        mergeTrack(results.get(i), newData, i);
 		    }
 		    
-		    return new OctaneDataFile(newData, locData.getDataSource().headers);
+		    return new LocalizationData(newData, locData.getData().headers);
 
 		} else {
 		    double [][] origData = odf.data;
@@ -107,15 +107,15 @@ public class TrackingDataFile extends OnePassTracking {
 		    System.arraycopy(odf.headers, 0, newHeaders, 0, odf.headers.length);
 		    newHeaders[newHeaders.length - 1] = "TrackIdx";
 		    
-		    return new OctaneDataFile(newData, newHeaders);
+		    return new LocalizationData(newData, newHeaders);
 		}
 	}
 
-	public OctaneDataFile processLocalizations(OctaneDataFile data) {
+	public LocalizationData processLocalizations(LocalizationData data) {
 	    return processLocalizations(data, false);
 	}
 
-	public OctaneDataFile processLocalizations(OctaneDataFile data, boolean doMerge) {
+	public LocalizationData processLocalizations(LocalizationData data, boolean doMerge) {
 		return processLocalizations(new LocalizationImage(data), doMerge);
 	}
 
@@ -139,8 +139,8 @@ public class TrackingDataFile extends OnePassTracking {
 			target[locData.intensityCol][trackIdx] *= track.size();
 		}
 		//and error, very rough est
-		if (locData.errCol != -1) {
-			target[locData.errCol][trackIdx] /= FastMath.sqrt(track.size());
-		}
+//		if (locData.errCol != -1) {
+//			target[locData.errCol][trackIdx] /= FastMath.sqrt(track.size());
+//		}
 	}
 }

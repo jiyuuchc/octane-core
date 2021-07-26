@@ -8,24 +8,24 @@ import org.apache.commons.math3.util.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uchc.octane.core.datasource.OctaneDataFile;
+import edu.uchc.octane.core.data.HDataCollection;
+import edu.uchc.octane.core.data.LocalizationData;
 import edu.uchc.octane.core.utils.FastKDTree;
-import edu.uchc.octane.core.utils.HDataCollection;
 
 public class LocalizationImage {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
-    final OctaneDataFile odf;
+    final LocalizationData odf;
 
     ArrayList<SummaryStatistics> stats;
     ArrayList<String> headerList;
     ArrayList<double []> dataList;
     
-    public int xCol = 1, yCol = 2, zCol = -1, frameCol = 0, errCol = -1, intensityCol = -1, sigmaCol = -1;
+    public int xCol = -1, yCol = -1, zCol = -1, frameCol = -1, intensityCol = -1;
 
-    FastKDTree tree;
-    
+    FastKDTree tree = null;
+
     //represent data as HDataCollection
     class HDataImp implements HDataCollection {
 
@@ -76,18 +76,12 @@ public class LocalizationImage {
     }
 
     
-    public LocalizationImage(OctaneDataFile odf) {
+    public LocalizationImage(LocalizationData odf) {
         this.odf = odf;
-
-        dataList = new ArrayList<>(Arrays.asList(odf.data));
-        headerList = new ArrayList<>(Arrays.asList(odf.headers));
-
-        stats = new ArrayList<SummaryStatistics>();
-        for (int i = 0; i < this.getNumOfCol(); i++) {
-        	stats.add(null);
-        }
-
-        guessHeaders();
+        dataList = (ArrayList<double[]>)Arrays.asList(odf.data);
+        headerList = (ArrayList<String>) Arrays.asList(odf.headers);
+        stats = (ArrayList<SummaryStatistics>) Arrays.asList(new SummaryStatistics[odf.headers.length]);
+        guessHeaders();    	
     }
 
     @SuppressWarnings("unchecked")
@@ -99,8 +93,10 @@ public class LocalizationImage {
     	headerList = (ArrayList<String>)loc.headerList.clone();
 
     	tree = loc.tree;
-    	
     	guessHeaders();
+    }
+
+    void initialize() {
     }
 
     void guessHeaders() {
@@ -112,15 +108,7 @@ public class LocalizationImage {
                 yCol = col;
             } else if (key.startsWith("z ") || key.equals("z")) {
                 zCol = col;
-            } else if (key.startsWith("uncertain") || key.startsWith("err")) {
-                errCol = col;
-            } else if (key.startsWith("int")) {
-                intensityCol = col;
-            } else if (key.startsWith("frame")) {
-                frameCol = col;
-            } else if (key.startsWith("sigma")) {
-                sigmaCol = col;
-            }
+            } 
         }
     }
 
@@ -155,7 +143,7 @@ public class LocalizationImage {
     }
 
     public int getNumLocalizations() {
-        return getData(frameCol).length;
+        return getData(0).length;
     }
 
     public double getXAt(int idx) {
@@ -220,24 +208,37 @@ public class LocalizationImage {
         return dataList.size();
     }
 
-    public OctaneDataFile getDataSource() {
+    public LocalizationData getData() {
         return odf;
     }
     
-    public void mergeWith(OctaneDataFile newOdf) {
+    public void mergeWith(LocalizationImage loc) {
+    	if (loc == null) {
+    		return;
+    	}
+        if (frameCol != -1) {
+            double [] newFrames = loc.getData(loc.frameCol);
+            if (newFrames == null) {
+            	throw new IllegalArgumentException("No frame data.");
+            }
+            for (int i = 0; i < newFrames.length; i++) {
+                newFrames[i] = newFrames[i] + getSummaryStatistics(frameCol).getMax();
+            }
+        }
+        odf.mergeWith(loc.odf);
+        //reset and remove all auxiliary data
+        dataList = (ArrayList<double[]>)Arrays.asList(odf.data);
+        headerList = (ArrayList<String>) Arrays.asList(odf.headers);
+        stats = (ArrayList<SummaryStatistics>) Arrays.asList(new SummaryStatistics[odf.headers.length]);
+        tree = null;
+    }
+
+    public void mergeWith(LocalizationData newOdf) {
         if (newOdf == null) {
             return;
         }
-        
-        odf.mergeWith(newOdf);
-        
-        //reset and remove all auxiliary data
-        dataList = new ArrayList<>(Arrays.asList(odf.data));
-        headerList = new ArrayList<>(Arrays.asList(odf.headers));
 
-        stats = new ArrayList<SummaryStatistics>(getNumOfCol());
-
-        guessHeaders();
+        mergeWith(new LocalizationImage(newOdf));
     }
     
     public void addAuxData(String header, double[] newColumn) {

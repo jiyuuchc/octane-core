@@ -5,7 +5,7 @@ import static org.junit.Assert.assertArrayEquals;
 import org.apache.commons.math3.util.FastMath;
 import org.junit.Test;
 
-import edu.uchc.octane.core.datasource.OctaneDataFile;
+import edu.uchc.octane.core.data.LocalizationData;
 
 public class LocalizationImageTest {
 
@@ -17,7 +17,7 @@ public class LocalizationImageTest {
                 {4,5,6}
         };
 
-        LocalizationImage img = new LocalizationImage(new OctaneDataFile(data, header));
+        LocalizationImage img = new LocalizationImage(new LocalizationData(data, header));
         double theta = -FastMath.PI / 2; 
         img.rotate(theta, 0, 0);
         

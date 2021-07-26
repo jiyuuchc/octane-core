@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.utils;
+package edu.uchc.octane.core.data;
 
 public interface HData {
 

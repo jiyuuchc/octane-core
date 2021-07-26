@@ -9,7 +9,7 @@ import java.util.ListIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.uchc.octane.core.utils.HData;
+import edu.uchc.octane.core.data.HData;
 
 /**
  * Tracking module to generate trajectories

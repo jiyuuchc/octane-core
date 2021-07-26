@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Ignore;
 
-import edu.uchc.octane.core.datasource.OctaneDataFile;
+import edu.uchc.octane.core.data.LocalizationData;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 
 public class BasdiTest {
@@ -69,7 +69,7 @@ public class BasdiTest {
         double [][] data = {xarray, yarray, farray};
         String [] header = {"x",  "y", "frame"};
         
-        OctaneDataFile odf = new OctaneDataFile(data, header);
+        LocalizationData odf = new LocalizationData(data, header);
         Basdi basdi = new Basdi(10, 1);
         
         basdi.estimate(odf, 10);

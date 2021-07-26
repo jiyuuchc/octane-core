@@ -2,7 +2,7 @@ package edu.uchc.octane.core.tracking;
 
 import org.junit.Test;
 
-import edu.uchc.octane.core.utils.HData;
+import edu.uchc.octane.core.data.HData;
 
 import static org.junit.Assert.*;
 

@@ -1,6 +1,6 @@
 package edu.uchc.octane.core.tracking;
 
-import edu.uchc.octane.core.utils.HData;
+import edu.uchc.octane.core.data.HData;
 
 public class HDataOnArray implements HData {
 

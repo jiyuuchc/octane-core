@@ -64,7 +64,7 @@ public class LocalMaximum{
 	}
 
 	public LocalMaximum(double noise) {
-		this(noise, 0, 3);
+		this(noise, 0, 4);
 	}
 
 	public LocalMaximum(double noise, int threshold, int ROISize) {
@@ -100,7 +100,6 @@ public class LocalMaximum{
 
 	public int processFrame(RectangularImage data, CallBackFunctions callback) {
 
-		//this.data = data;
 		double[] filtered = ImageFilters.symmetricFilter(
 				ImageFilters.makeGaussianFilter(1.0,7),
 				data.getValueVector(),

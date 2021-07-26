@@ -2,8 +2,8 @@ package edu.uchc.octane.core.tracking;
 
 import java.util.List;
 
+import edu.uchc.octane.core.data.HData;
 import edu.uchc.octane.core.tracking.OnePassTracking.Trajectory;
-import edu.uchc.octane.core.utils.HData;
 
 public interface ConnectionOptimizer {
 

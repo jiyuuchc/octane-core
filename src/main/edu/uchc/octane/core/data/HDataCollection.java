@@ -1,4 +1,4 @@
-package edu.uchc.octane.core.utils;
+package edu.uchc.octane.core.data;
 
 /* interface for an immutable collection of high-dimensional real data */
 
