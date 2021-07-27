@@ -14,9 +14,11 @@ import edu.uchc.octane.core.fitting.leastsquare.IntegratedGaussianPSF;
 import edu.uchc.octane.core.fitting.leastsquare.LeastSquare;
 import edu.uchc.octane.core.fitting.leastsquare.MultiPSF;
 import edu.uchc.octane.core.fitting.maximumlikelihood.ConjugateGradient;
+import edu.uchc.octane.core.fitting.maximumlikelihood.LikelihoodModel;
 import edu.uchc.octane.core.fitting.maximumlikelihood.Newton2DGaussian;
 import edu.uchc.octane.core.fitting.maximumlikelihood.AstigmaticErf;
 import edu.uchc.octane.core.fitting.maximumlikelihood.SymmetricErf;
+import edu.uchc.octane.core.fitting.maximumlikelihood.SymmetricGaussian;
 import edu.uchc.octane.core.fitting.maximumlikelihood.Simplex;
 import edu.uchc.octane.core.pixelimage.RectangularDoubleImage;
 import edu.uchc.octane.core.radialsymmetry.RadialSymmetryFitting;
@@ -166,7 +168,7 @@ public class FittingTest {
 	@Test
 	public void testMaximumLikelihoodConjugateGradient() {
 		double [] start = {5,5.5,1.0,200,5};
-		//double [] start = {6,5,1.0,250,10};
+		//double [] start = {6,5,1.5,250,10};
 
 		double[] data = new double [TEST_VALUES.length];
 		for (int i = 0; i < data.length; i ++) {
@@ -175,19 +177,14 @@ public class FittingTest {
 		
 		System.out.println("Maximum Likelihood fitting with Conjugate Gradient");
 
-		SymmetricErf func = new SymmetricErf();
-		//func.setData(new RectangularDoubleImage(data, IMAGE_SIZE));
-		//double v1 = func.getObjectiveFunction().getObjectiveFunction().value(start);
-		//double v2 = func.getObjectiveFunction().getObjectiveFunction().value(p2);
-		//assertTrue(v1 < v2);
-		//double [] g1 = func.getObjectiveFunctionGradient().getObjectiveFunctionGradient().value(start);
-				
+		LikelihoodModel func = new SymmetricErf();
 		
 		ConjugateGradient fitter = new ConjugateGradient (func);
 		double[] result = fitter.fit(new RectangularDoubleImage(data, IMAGE_SIZE), start );
 		
 		assertEquals(6.0, result[0], 0.01);
 		assertEquals(5.0, result[1], 0.01);
+
 		
 		/*
 		AstigmaticErf func_a = new AstigmaticErf(1.4, 1, 0, 0, 0);
@@ -200,6 +197,27 @@ public class FittingTest {
 		*/
 	}
 	
+	@Test
+	public void testConjugateGradientGaussian() {
+		double [] start = {5,5.5,1.0,20,5};
+		//double [] start = {6,5,1.5,250,10};
+
+		double[] data = new double [TEST_VALUES.length];
+		for (int i = 0; i < data.length; i ++) {
+			data[i] = FastMath.round(TEST_VALUES[i] * 250 + 10);
+		}
+		
+		System.out.println("Conjugate Gradient fit Gaussian");
+
+		LikelihoodModel func = new SymmetricGaussian();
+		
+		ConjugateGradient fitter = new ConjugateGradient (func);
+		double[] result = fitter.fit(new RectangularDoubleImage(data, IMAGE_SIZE), start );
+		
+		assertEquals(6.0, result[0], 0.01);
+		assertEquals(5.0, result[1], 0.01);
+	}
+
 	@Test
 	public void testMaximumLikelihoodSimplex() {
 		double [] start = {5,5.5,1.0,200,5};

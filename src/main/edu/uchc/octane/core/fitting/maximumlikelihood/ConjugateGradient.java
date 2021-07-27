@@ -1,6 +1,5 @@
 package edu.uchc.octane.core.fitting.maximumlikelihood;
 
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.exception.TooManyIterationsException;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
@@ -32,7 +31,7 @@ public class ConjugateGradient implements Fitter {
 		this.func = func;
 		optimizer = new NonLinearConjugateGradientOptimizer (
 				NonLinearConjugateGradientOptimizer.Formula.FLETCHER_REEVES,
-				new SimpleValueChecker(1e-8, 1e-6) );		
+				new SimpleValueChecker(1e-6, 1e-6) );		
 	}
 
 	@Override

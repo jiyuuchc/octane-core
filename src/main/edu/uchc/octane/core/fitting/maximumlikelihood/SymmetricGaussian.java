@@ -30,8 +30,8 @@ public class SymmetricGaussian implements LikelihoodModel {
 				for (int k = 0; k < data.getLength(); k ++) {
 					double x = (double) data.getXCordinate(k);
 					double y = (double) data.getYCordinate(k);
-					double dex = FastMath.exp(-(x-x0)*(x-x0)/2/s0/s0)/sqrt2pi/s0;
-					double dey = FastMath.exp(-(y-y0)*(y-y0)/2/s0/s0)/sqrt2pi/s0;
+					double dex = FastMath.exp(-(x-x0)*(x-x0)/2/s0/s0);
+					double dey = FastMath.exp(-(y-y0)*(y-y0)/2/s0/s0);
 					double mu = in0 * dex * dey + bg0;
 					f += data.getValue(k) * FastMath.log(mu) - mu;
 				} 
@@ -57,15 +57,15 @@ public class SymmetricGaussian implements LikelihoodModel {
 				for (int k = 0; k < data.getLength(); k ++) {
 					double x = (double) data.getXCordinate(k);
 					double y = (double) data.getYCordinate(k);
-					double dex = FastMath.exp(-(x-x0)*(x-x0)/2/s0/s0)/sqrt2pi/s0;
-					double dey = FastMath.exp(-(y-y0)*(y-y0)/2/s0/s0)/sqrt2pi/s0;
+					double dex = FastMath.exp(-(x-x0)*(x-x0)/2/s0/s0);
+					double dey = FastMath.exp(-(y-y0)*(y-y0)/2/s0/s0);
 					double lambda = in0 * dex * dey;
 					double kappa = data.getValue(k) / (lambda + bg0) - 1.0;
 					g[4] += kappa;
 					g[3] += kappa * dex * dey;
-					g[0] += kappa * lambda * (x-x0)/s0/s0/sqrt2pi/s0;
-					g[1] += kappa * lambda * (y-x0)/s0/s0/sqrt2pi/s0;
-					g[2] += kappa * lambda/FastMath.PI/s0/s0/s0*(((x-x0)*(x-x0)+(y-y0)*(y-y0))/s0/s0-1.0);
+					g[0] += kappa * lambda * (x-x0)/s0/s0;
+					g[1] += kappa * lambda * (y-y0)/s0/s0;
+					g[2] += kappa * lambda/FastMath.PI/s0/s0/s0*((x-x0)*(x-x0)+(y-y0)*(y-y0));
 				}
 				return g;
 			}
@@ -89,7 +89,7 @@ public class SymmetricGaussian implements LikelihoodModel {
 		guess[1] = data.getYCordinate(idxCenter);
 		guess[2] = 2.0;
 		guess[4] = data.getValue(0);
-		guess[3] = (data.getValue(idxCenter) - guess[4]) * 10;
+		guess[3] = data.getValue(idxCenter) - guess[4];
 		return guess;
 	}
 
