@@ -28,29 +28,29 @@ public class OctaneDataFile implements Serializable {
     public double[][] data;
 
     void validate() {
-    	if (headers.length != data.length) {
-    		throw new IllegalArgumentException("Header and data size mismatch");
-    	}
-    	
-    	for (int i = 1; i < data.length; i++) {
-    		if (data[i].length != data[i-1].length) {
-    			throw new IllegalArgumentException("Not all data columns have the same length");
-    		}
-    	}    	
+        if (headers.length != data.length) {
+            throw new IllegalArgumentException("Header and data size mismatch");
+        }
+
+        for (int i = 1; i < data.length; i++) {
+            if (data[i].length != data[i - 1].length) {
+                throw new IllegalArgumentException("Not all data columns have the same length");
+            }
+        }
     }
-    
+
     public OctaneDataFile(double[][] data, String[] headers) {
 
-    	this.data = data;
+        this.data = data;
         this.headers = headers;
-        
+
         validate();
     }
 
-    //copy constructor
+    // copy constructor
     public OctaneDataFile(OctaneDataFile odf) {
 
-    	headers = odf.headers.clone();
+        headers = odf.headers.clone();
         data = new double[odf.data.length][];
         for (int i = 0; i < data.length; i++) {
             data[i] = odf.data[i].clone();
@@ -58,28 +58,9 @@ public class OctaneDataFile implements Serializable {
 
     }
 
-    //merge ignores header differences
-    public void mergeWith(OctaneDataFile newOdf) {
-    	if (newOdf == null) {
-    		return;
-    	}
-        if (data.length != newOdf.data.length) {
-            throw new IllegalArgumentException("Data dimension doesn't match");
-        }
+    public void exportToCSV(File csvFile) throws IOException {
 
-        double [][] oldData = data.clone();
-        double [][] newData = newOdf.data;
-        for (int i = 0; i < data.length; i ++) {
-            int newlen = oldData[i].length + newData[i].length ;
-            data[i] = new double[newlen];
-            System.arraycopy(oldData[i], 0, data[i], 0, oldData[i].length);
-            System.arraycopy(newData[i], 0, data[i], oldData[i].length, newData[i].length);
-        }    	
-    }
-    
-    public void exportToCSV(File csvFile) throws IOException{
-
-    	logger.info("Writing CSV data...");
+        logger.info("Writing CSV data...");
         BufferedWriter bw = new BufferedWriter(new FileWriter(csvFile));
 
         for (int i = 0; i < data.length; i++) {
@@ -89,8 +70,8 @@ public class OctaneDataFile implements Serializable {
             }
         }
         bw.newLine();
-        
-        for (int i = 0; i < data[0].length; i ++) {
+
+        for (int i = 0; i < data[0].length; i++) {
             for (int j = 0; j < data.length; j++) {
                 bw.write(Double.toString(data[j][i]));
                 if (j != data.length - 1) {
@@ -102,26 +83,26 @@ public class OctaneDataFile implements Serializable {
 
         bw.close();
     }
-    
+
     public static OctaneDataFile readFromFile(String pathname) throws IOException, ClassNotFoundException {
 
-    	ObjectInputStream fi = new ObjectInputStream(new java.io.FileInputStream(pathname));
+        ObjectInputStream fi = new ObjectInputStream(new java.io.FileInputStream(pathname));
         OctaneDataFile odf = (OctaneDataFile) fi.readObject();
-        
+
         fi.close();
-        
+
         try {
-        	odf.validate();
-        } catch (IllegalArgumentException e){
-        	throw new ClassNotFoundException(e.getMessage());
+            odf.validate();
+        } catch (IllegalArgumentException e) {
+            throw new ClassNotFoundException(e.getMessage());
         }
         return odf;
     }
-    
+
     public void writeToFile(String pathname) throws IOException {
-		ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(pathname));
-		fo.writeObject(this);
-		fo.close();    	
+        ObjectOutputStream fo = new ObjectOutputStream(new FileOutputStream(pathname));
+        fo.writeObject(this);
+        fo.close();
     }
 
     public static OctaneDataFile importFromCSV(File csvFile) {
@@ -132,8 +113,8 @@ public class OctaneDataFile implements Serializable {
             ArrayList<double[]> locations = new ArrayList<double[]>();
             String line = br.readLine();
             List<String> h = CSVUtils.parseLine(line);
-            
-            String [] headers = new String[h.size()];
+
+            String[] headers = new String[h.size()];
             h.toArray(headers);
 
             while ((line = br.readLine()) != null) {
@@ -173,36 +154,5 @@ public class OctaneDataFile implements Serializable {
             logger.error(e.getMessage());
             return null;
         }
-
-        // try (CloseableIterator<String[]> it = CsvParser.iterator(csvFile)) {
-        // String [] headers = it.next();
-        // double [] oneLoc;
-        // while (it.hasNext()) {
-        // oneLoc = new double[headers.length];
-        // String [] row = it.next();
-        // for (int i = 0; i < row.length; i ++) {
-        // oneLoc[i] = Double.parseDouble(row[i]);
-        // }
-        // locations.add(oneLoc);
-        //
-        // if (locations.size() % 1000000 == 0) {
-        // logger.info("Read " + locations.size() + " lines.");
-        // }
-        // }
-        //
-        // logger.info("Converting from thunderstorm format.");
-        // double [][] data = new double[headers.length][];
-        // for (int i = 0; i < headers.length; i ++) {
-        // data[i] = new double[locations.size()];
-        // }
-        // for (int i = 0; i < headers.length; i++) {
-        // for (int j = 0; j < locations.size(); j++) {
-        // data[i][j] = locations.get(j)[i];
-        // }
-        // }
-        //
-        // OctaneDataFile dataset = new OctaneDataFile(data, headers);
-        // return dataset;
-        // }
     }
 }

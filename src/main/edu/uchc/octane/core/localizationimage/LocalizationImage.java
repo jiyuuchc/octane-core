@@ -20,13 +20,13 @@ public class LocalizationImage {
 
     ArrayList<SummaryStatistics> stats;
     ArrayList<String> headerList;
-    ArrayList<double []> dataList;
-    
+    ArrayList<double[]> dataList;
+
     public int xCol = 1, yCol = 2, zCol = -1, frameCol = 0, errCol = -1, intensityCol = -1, sigmaCol = -1;
 
     FastKDTree tree;
-    
-    //represent data as HDataCollection
+
+    // represent data as HDataCollection
     class HDataImp implements HDataCollection {
 
         private double[][] data_;
@@ -36,8 +36,8 @@ public class LocalizationImage {
             data_ = new double[getDimension()][];
             data_[0] = getData(xCol);
             data_[1] = getData(yCol);
-            if (! is2DData() ) {
-            	data_[2] = getData(zCol);
+            if (!is2DData()) {
+                data_[2] = getData(zCol);
             }
         }
 
@@ -58,11 +58,11 @@ public class LocalizationImage {
 
         @Override
         public void selectDimension(int d) {
-        	if (d >= 0 && d < data_.length) {
-        		this.d = d;
-        	} else {
-        		throw new IllegalArgumentException("Dimension out of bound"); 
-        	}
+            if (d >= 0 && d < data_.length) {
+                this.d = d;
+            } else {
+                throw new IllegalArgumentException("Dimension out of bound");
+            }
         }
 
         @Override
@@ -72,10 +72,9 @@ public class LocalizationImage {
     }
 
     public HDataCollection getHDataView() {
-    	return new HDataImp();
+        return new HDataImp();
     }
 
-    
     public LocalizationImage(OctaneDataFile odf) {
         this.odf = odf;
 
@@ -84,7 +83,7 @@ public class LocalizationImage {
 
         stats = new ArrayList<SummaryStatistics>();
         for (int i = 0; i < this.getNumOfCol(); i++) {
-        	stats.add(null);
+            stats.add(null);
         }
 
         guessHeaders();
@@ -92,19 +91,19 @@ public class LocalizationImage {
 
     @SuppressWarnings("unchecked")
     public LocalizationImage(LocalizationImage loc) {
-    	odf = loc.odf;
+        odf = loc.odf;
 
-    	dataList = (ArrayList<double[]>)loc.dataList.clone();
-    	stats = (ArrayList<SummaryStatistics>) loc.stats.clone();
-    	headerList = (ArrayList<String>)loc.headerList.clone();
+        dataList = (ArrayList<double[]>) loc.dataList.clone();
+        stats = (ArrayList<SummaryStatistics>) loc.stats.clone();
+        headerList = (ArrayList<String>) loc.headerList.clone();
 
-    	tree = loc.tree;
-    	
-    	guessHeaders();
+        tree = loc.tree;
+
+        guessHeaders();
     }
 
     void guessHeaders() {
-        for (int col = 0; col < headerList.size(); col ++) {
+        for (int col = 0; col < headerList.size(); col++) {
             String key = headerList.get(col).toLowerCase();
             if (key.startsWith("x ") || key.equals("x")) {
                 xCol = col;
@@ -139,15 +138,15 @@ public class LocalizationImage {
     }
 
     public SummaryStatistics getSummaryStatistics(String header) {
-    	return getSummaryStatistics(getColFromHeader(header));
+        return getSummaryStatistics(getColFromHeader(header));
     }
 
     public double[] getData(int col) {
-    	if (col < 0 || col >= getNumOfCol()) {
-    		return null;
-    	} else {
-    		return dataList.get(col);
-    	}
+        if (col < 0 || col >= getNumOfCol()) {
+            return null;
+        } else {
+            return dataList.get(col);
+        }
     }
 
     public double[] getData(String colHeader) {
@@ -171,11 +170,11 @@ public class LocalizationImage {
     }
 
     public boolean is2DData() {
-    	return zCol == -1;
+        return zCol == -1;
     }
 
     public void constructKDtree() {
-    	logger.info("Construct a KDTree - start");
+        logger.info("Construct a KDTree - start");
         tree = new FastKDTree(getHDataView());
         logger.info("Construct a KDTree - finished");
     }
@@ -184,24 +183,24 @@ public class LocalizationImage {
         if (tree == null) {
             constructKDtree();
         }
-        
-        double [] localDensities = getData("density");
 
-        if ( localDensities == null) {
-        	localDensities = new double[getNumLocalizations()];
+        double[] localDensities = getData("density");
+
+        if (localDensities == null) {
+            localDensities = new double[getNumLocalizations()];
             addAuxData("density", localDensities);
         }
 
-    	logger.info("Compute local density - start");
+        logger.info("Compute local density - start");
         for (int i = 0; i < getNumLocalizations(); i++) {
 
             localDensities[i] = tree.radiusSearch(i, distance).size();
             if (i % 50000 == 0) {
-            	logger.info("Processed " + i + "/" + getNumLocalizations() +  " points");
+                logger.info("Processed " + i + "/" + getNumLocalizations() + " points");
             }
         }
         logger.info("Compute local density - finished");
-        
+
     }
 
     public String getHeader(int i) {
@@ -209,7 +208,7 @@ public class LocalizationImage {
     }
 
     public int getColFromHeader(String s) {
-    	return headerList.indexOf(s);
+        return headerList.indexOf(s);
     }
 
     public ArrayList<String> getHeaders() {
@@ -223,33 +222,60 @@ public class LocalizationImage {
     public OctaneDataFile getDataSource() {
         return odf;
     }
-    
+
+    public void mergeWith(LocalizationImage loc) {
+        if (loc == null || loc.odf == null) {
+            return;
+        }
+
+        if (loc.getHeaders().size() != getHeaders().size()) {
+            throw new IllegalArgumentException("Try to merge data with different headers size");
+        }
+        for (int i = 0; i < getHeaders().size(); i ++ ) {
+            if (getHeader(i) != loc.getHeader(i)) {
+                throw new IllegalArgumentException("Try to merge data with inconsistent headers");
+            }
+        }
+
+        double maxF = getSummaryStatistics(frameCol).getMax();
+        double [][] oldData = odf.data.clone();
+        double [][] newData = loc.odf.data;
+        for (int i = 0; i < getHeaders().size(); i ++) {
+            int newlen = oldData[i].length + newData[i].length ;
+            odf.data[i] = new double[newlen];
+            System.arraycopy(oldData[i], 0, odf.data[i], 0, getNumLocalizations());
+            System.arraycopy(newData[i], 0, odf.data[i], oldData[i].length, loc.getNumLocalizations());
+            if (frameCol == i) {
+                for (int j = 0; j < loc.getNumLocalizations(); j++) {
+                    odf.data[i][j + getNumLocalizations()] += maxF;
+                }
+            }
+        }
+
+        // reset and remove all auxiliary data
+        dataList = new ArrayList<>(Arrays.asList(odf.data));
+        headerList = new ArrayList<>(Arrays.asList(odf.headers));
+        stats = new ArrayList<SummaryStatistics>(getNumOfCol());
+    }
+
     public void mergeWith(OctaneDataFile newOdf) {
         if (newOdf == null) {
             return;
         }
-        
-        odf.mergeWith(newOdf);
-        
-        //reset and remove all auxiliary data
-        dataList = new ArrayList<>(Arrays.asList(odf.data));
-        headerList = new ArrayList<>(Arrays.asList(odf.headers));
 
-        stats = new ArrayList<SummaryStatistics>(getNumOfCol());
-
-        guessHeaders();
+        mergeWith(new LocalizationImage(newOdf));
     }
-    
+
     public void addAuxData(String header, double[] newColumn) {
-    	if (newColumn.length != this.getNumLocalizations()) {
-    		throw new IllegalArgumentException("New data column length does match existing ones");
-    	}
+        if (newColumn.length != this.getNumLocalizations()) {
+            throw new IllegalArgumentException("New data column length does match existing ones");
+        }
 
-    	headerList.add(header);
-    	dataList.add(newColumn);
-    	stats.add(null);
+        headerList.add(header);
+        dataList.add(newColumn);
+        stats.add(null);
     }
-    
+
     // in default axis convention:
     // rotation around top left corner (0,0)
     // positive theta values rotate counter-clock-wise
