@@ -97,4 +97,10 @@ public class SymmetricGaussian implements LikelihoodModel {
 	public String[] getHeaders() {
 		return headers;
 	}
+
+    @Override
+    public MultivariateVectorFunction getCrbFunction() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

@@ -161,4 +161,10 @@ public class AstigmaticErf implements LikelihoodModel {
 		guess[3] = (data.getValue(idxCenter) - guess[4]) * 10;
 		return guess;		
 	}
+
+    @Override
+    public MultivariateVectorFunction getCrbFunction() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

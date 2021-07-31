@@ -1,5 +1,6 @@
 package edu.uchc.octane.core.fitting.maximumlikelihood;
 
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunctionGradient;
 
@@ -15,4 +16,5 @@ public interface LikelihoodModel {
 	public double[] guessInit();
 	// returns descriptions of parameters
 	public String [] getHeaders();
+    MultivariateVectorFunction getCrbFunction();
 }
