@@ -35,7 +35,7 @@ public class ConjugateGradient implements Fitter {
 
     public ConjugateGradient(LikelihoodModel func) {
         this.func = func;
-        optimizer = new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.FLETCHER_REEVES,
+        optimizer = new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE,
                 new SimpleValueChecker(1e-6, 1e-6));
         crbFunc = func.getCrbFunction();
         ArrayList<String> listHeaders = new ArrayList();
@@ -45,7 +45,8 @@ public class ConjugateGradient implements Fitter {
             listHeaders.add("x_err");
             listHeaders.add("y_err");
         }
-        headers = (String[]) listHeaders.toArray();
+        headers = new String[listHeaders.size()];
+        listHeaders.toArray(headers);
     }
 
     @Override

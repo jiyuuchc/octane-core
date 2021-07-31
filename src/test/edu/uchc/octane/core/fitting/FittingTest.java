@@ -166,7 +166,7 @@ public class FittingTest {
 	}
 
 	@Test
-	public void testMaximumLikelihoodConjugateGradient() {
+	public void testConjugateGradientErf() {
 		double [] start = {5,5.5,1.0,200,5};
 		//double [] start = {6,5,1.5,250,10};
 
@@ -175,7 +175,7 @@ public class FittingTest {
 			data[i] = FastMath.round(TEST_VALUES[i] * 250 + 10);
 		}
 		
-		System.out.println("Maximum Likelihood fitting with Conjugate Gradient");
+		System.out.println("Fitting ERF ML model with Conjugate Gradient");
 
 		LikelihoodModel func = new SymmetricErf();
 		
@@ -207,7 +207,7 @@ public class FittingTest {
 			data[i] = FastMath.round(TEST_VALUES[i] * 250 + 10);
 		}
 		
-		System.out.println("Conjugate Gradient fit Gaussian");
+		System.out.println("Fitting Gaussian ML model with Conjugate Gradient");
 
 		LikelihoodModel func = new SymmetricGaussian();
 		
@@ -228,7 +228,7 @@ public class FittingTest {
 			data[i] = FastMath.round(TEST_VALUES[i] * 250 + 10);
 		}
 		
-		System.out.println("Maximum Likelihood fitting with simplex");
+		System.out.println("fitting Erf ML model with simplex");
 
 		SymmetricErf func = new SymmetricErf();
 		Simplex fitter = new Simplex(func);
